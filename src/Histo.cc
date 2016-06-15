@@ -5,14 +5,14 @@ typedef std::vector<std::pair<string, std::array<double, 3> > > info_vec;
 typedef info_vec::iterator info_it;
 
 
-Histogramer::Histogramer(int _Npdf, string fname): Npdf(_Npdf) {
-  outfile = new TFile(fname.c_str(), "RECREATE");
+Histogramer::Histogramer(int _Npdf, string histname, string cutname, string outfilename): Npdf(_Npdf) {
+  //  outfile = new TFile(outfilename.c_str(), "RECREATE");
 
-  read_hist();
-  read_cuts();
+  read_hist(histname);
+  read_cuts(cutname);
 
   NFolders = folders.size();
-
+  
   // for(vector<string>::iterator it=folders.begin(); it !=folders.end(); it++) {
   //   std::cout << *it << std::endl;
   // }
@@ -20,39 +20,41 @@ Histogramer::Histogramer(int _Npdf, string fname): Npdf(_Npdf) {
   //   std::cout << (*iter).first << " " << (*iter).second[0] << " " << (*iter).second[1] << " " << (*iter).second[2] << std::endl;
   // }
   
-  for(int i = 0; i < NFolders; i++) {
-    string directory = folders[i];
-    //TDirectory *subDir = 
-    outfile->mkdir( directory.c_str() );
-  }
-  for(info_it iter=Generator_info.begin(); iter != Generator_info.end(); iter++) {
-    std::vector<TH1*> tmpVec;
-    Generator_Histogram[(*iter).first] = tmpVec;
+  // for(int i = 0; i < NFolders; i++) {
+  //   string directory = folders[i];
+  //   outfile->mkdir( directory.c_str() );
+  // }
+  // for(info_it iter=Generator_info.begin(); iter != Generator_info.end(); iter++) {
+  //   std::vector<TH1*> tmpVec;
+  //   Generator_Histogram[(*iter).first] = tmpVec;
 
-    for(int i = 0; i < NFolders; i++) {
-      outfile->cd(folders[i].c_str() );
+  //   for(int i = 0; i < NFolders; i++) {
+  //     outfile->cd(folders[i].c_str() );
 
-      for(int j = 0; j < Npdf; j++) {
-	string name = (*iter).first + "_" + to_string(j);
-	TH1F* hist = new TH1F(name.c_str(), name.c_str(), (*iter).second[0], (*iter).second[1], (*iter).second[2]);
-	Generator_Histogram[(*iter).first].push_back(hist);
-      }
-    }
-  }
+  //     for(int j = 0; j < Npdf; j++) {
+  // 	string name = (*iter).first + "_" + to_string(j);
+  // 	TH1F* hist = new TH1F(name.c_str(), name.c_str(), (*iter).second[0], (*iter).second[1], (*iter).second[2]);
+  // 	Generator_Histogram[(*iter).first].push_back(hist);
+  //     }
+  //   }
+  // }
 
 
 }
 
 Histogramer::~Histogramer() {
-  write_histogram();
-  outfile->Close();
+  // write_histogram();
+  // outfile->Close();
 }
 
 
-void Histogramer::read_hist() {
-  ifstream info_file("Hist_entries.in");
+void Histogramer::read_hist(string filename) {
+  ifstream info_file(filename);
   
-  if(!info_file) return;
+  if(!info_file) {
+    cout << "no read histo!" << endl;
+    return;
+  }
 
   string line;
   string current_area = "";
@@ -75,10 +77,13 @@ void Histogramer::read_hist() {
   }
 }
 
-void Histogramer::read_cuts() {
-  ifstream info_file("Cuts.in");
+void Histogramer::read_cuts(string filename) {
+  ifstream info_file(filename);
   
-  if(!info_file) return;
+  if(!info_file) {
+    cout << "no read cuts!" << endl;
+    return;
+  }
 
   string line;
   while(getline(info_file, line)) {
@@ -93,8 +98,7 @@ void Histogramer::read_cuts() {
 	name.erase(0,3);
 	folders.push_back(name);
       }
-      cuts.push_back(name);
-      cut_range.push_back(std::make_pair(min,max));
+      cuts[name] = std::make_pair(min,max);
     }
   }
 }
@@ -131,15 +135,13 @@ int Histogramer::get_nbins(int hist) {
     return Generator_info[hist].second[0];
 }
 
-
-int main() {
-  Histogramer test(4,"blah.root");
-  std::cout << test.get_Nhists() << std::endl;
-  int num = test.get_Nhists();
-  for( int i=0; i<num; i++) {
-    std::cout << "start " << test.get_start(i) << std::endl;
-    std::cout << "width " << test.get_width(i) << std::endl;
-    std::cout << "nbins " << test.get_nbins(i) << std::endl;
-  }
-  
+map<string,pair<int,int>>* Histogramer::get_cuts() {
+  return &cuts;
 }
+
+
+// int main() {
+//   Histogramer* test = new Histogramer(4,"PartDet/Hist_entries.in", "PartDet/Cuts.in","blah.root");
+//   delete test;
+  
+// }

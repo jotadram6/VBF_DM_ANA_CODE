@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <map>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,6 +31,7 @@
 #include <TLorentzVector.h>
 #include <TEnv.h>
 #include "Particle.h"
+#include "Histo.h"
 
 
 using namespace std;
@@ -40,75 +42,76 @@ class Analyzer {
   Analyzer(string, string);
   void clear_values();
   void preprocess(int);
+  int fillCuts(map<string,pair<int,int>>*);
+  void printCuts();
   int nentries;
 
   
  private:
   void getInputs();
   void setupJob(string);
-
+  void initializePileupInfo(string, string);  
+  void read_info(string);
+  void setupGeneral(TTree*, string);
 
   void SmearLepton(Lepton*, CUTS, PartStats*);
-  void SmearJet(PartStats*);
-  bool JetMatchesLepton(Lepton*, TLorentzVector, double, double, CUTS);
+  void SmearJet();
 
-  void read_info(string);
-  
+  bool JetMatchesLepton(Lepton*, TLorentzVector, double, CUTS);
+  TLorentzVector* matchLeptonToGen(TLorentzVector*, Lepton*, CUTS);
+  TLorentzVector* matchTauToGen(TLorentzVector*, double);
+
+  void ExtractNumberOfTauNu();  
   void ExtractNumberOfGoodGen(int, int, CUTS, PartStats*);
   void ExtractNumberOfGoodReco(Lepton*, CUTS, CUTS, PartStats*);
   void ExtractNumberOfGoodRecoJets(CUTS, PartStats*);
-  
+
+  void passRecoLeptonMetTopologyCuts(Lepton*, CUTS,CUTS, PartStats*);
+  void passLeptonComboTopologyCut(Lepton*, Lepton*, CUTS,CUTS,CUTS, PartStats*);
+  void passDiJetTopologyCuts(PartStats*);
+
+  void SusyTopologyCuts();
+  bool passTriggerCuts(string);
+
+  double CalculateLeptonMetMt(TLorentzVector);
+  double DiParticleMass(TLorentzVector, TLorentzVector, string);
+  bool passDiParticleApprox(TLorentzVector, TLorentzVector, string);
+  bool isZdecay(TLorentzVector, Lepton*);
+
   bool isOverlaping(TLorentzVector, Lepton*, CUTS, double);
   bool passProng(string, int);
   bool isInTheCracks(float);
   bool passedLooseJetID(int);
-
-  void initializePileupInfo(string, string);
-
-  void setupGeneral(TTree*, string);
 
   double CalculatePZeta(TLorentzVector, TLorentzVector);
   double CalculatePZetaVis(TLorentzVector, TLorentzVector);
   double normPhi(double);
   double absnormPhi(double);
 
-
-  TLorentzVector* matchLeptonToGen(TLorentzVector*, Lepton*, CUTS, PartStats*);
-  TLorentzVector* matchTauToGen(TLorentzVector*, double);
-  void ExtractNumberOfTauNu();
-
-  bool passSusyTopologyCuts(TLorentzVector, TLorentzVector, PartStats*);
-  bool passTriggerCuts(string);
-
-  void passRecoLeptonMetTopologyCuts(Lepton*, CUTS,CUTS, PartStats*);
-  void passLeptonComboTopologyCut(Lepton*, Lepton*, CUTS,CUTS,CUTS, PartStats*);
-  void passDiJetTopologyCuts(PartStats*);
-  
-  double CalculateLeptonMetMt(TLorentzVector);
-  double DiParticleMass(TLorentzVector, TLorentzVector, string);
-  bool passDiParticleApprox(TLorentzVector, TLorentzVector, string);
-
-  bool isZdecay(TLorentzVector, Lepton*);
-
   void updateMet();
   double getPileupWeight(float);
-  
+
 
   Generated* _Gen;
   Electron* _Electron;
   Muon* _Muon;
   Taus* _Tau;
   Jet* _Jet;
+  Histogramer* histo;
 
   unordered_map<string, PartStats> distats;
+  unordered_map<string, pair<int,int> > prevTrig;
+  std::array<std::vector<int>, static_cast<int>(CUTS::enumSize)> goodParts;
   
   TFile* f;
   TTree* BOOM;
 
+  vector<int> cuts_per, cuts_cumul;
+
   TLorentzVector theMETVector;
   double deltaMEx, deltaMEy, sumpxForMht, sumpyForMht, sumptForHt, phiForMht;
   double againstElectron, againstMuon, maxIso, minIso;
-  int nGen, nElectron, nMuon, nTau, leadIndex;
+  int leadIndex;
   bool isData, CalculatePUSystematics;
 
   vector<double>* Trigger_decision = 0;
@@ -122,9 +125,6 @@ class Analyzer {
   TH1F *hPUmc = new TH1F("hPUmc", "hPUmc", 100, 0, 100);
   TH1F *hPUdata = new TH1F("hPUdata", "hPUdata", 100, 0, 100);
   double pu_weight;
-  
-  unordered_map<string, pair<int,int> > prevTrig;
-  
   
   std::unordered_map<string, CUTS> cut_num = { {"NGenTau", CUTS::eGTau}, {"NGenTop", CUTS::eGTop}, {"NGenElectron", CUTS::eGElec}, \
     {"NGenMuon", CUTS::eGMuon}, {"NGenZ", CUTS::eGZ}, {"NGenW", CUTS::eGW}, {"NGenHiggs", CUTS::eGHiggs}, \
@@ -143,7 +143,7 @@ class Analyzer {
     {"NElectron2Tau1Combinations", CUTS::eElec2Tau1}, {"NElectron2Tau2Combinations", CUTS::eElec2Tau2},
     {"NSusyCombinations", CUTS::eSusyCom} };
 
-  std::array<std::vector<int>, static_cast<int>(CUTS::enumSize)> goodParts;
+
 };
 
 #endif

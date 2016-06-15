@@ -5,6 +5,12 @@
 SmearTheJet 0
 JetEnergyScaleOffset 1.0
 
+MuonMatchingDeltaR  0.3
+ElectronMatchingDeltaR  0.3
+TauMatchingDeltaR  0.3
+
+
+
 ########################################
                Jet1
 #######################################
