@@ -1,0 +1,68 @@
+/////////////////////////////////
+            Smear
+/////////////////////////////////
+
+SmearTheParticle 0
+PtScaleOffset 1.
+PtSigmaOffset 1.
+EtaScaleOffset 1.
+EtaSigmaOffset 1.
+PhiScaleOffset 1.
+PhiSigmaOffset 1.
+EnergyScaleOffset 1.
+EnergySigmaOffset 1.
+
+MatchToGen 1
+GenMatchingDeltaR 0.5
+UseMotherID 1
+MotherID 13.
+
+////////////////////////////////
+             Muon1
+///////////////////////////////
+
+//----RECO CUTS----//
+
+EtaCut 2.1
+PtCut 30.0 9999.9
+
+DoDiscrByTightID 1
+DoDiscrBySoftID 0
+
+DoDiscrByIsolation 1
+IsoSumPtMaxCutValue 0.0 0.2
+
+//----MET TOPOLOGY CUTS----//
+
+DoDiscrIfIsZdecay 0
+
+DoDiscrByMetDphi 1
+MetDphiCut 0. 1.
+
+DoDiscrByMetMt 0
+MetMtCut 10. 100.
+
+////////////////////////////////
+             Muon2
+///////////////////////////////
+
+//----RECO CUTS----//
+
+EtaCut 2.1
+PtCut 30.0 9999.9
+
+DoDiscrByTightID 1
+DoDiscrBySoftID 0
+
+DoDiscrByIsolation 1
+IsoSumPtMaxCutValue 0.0 0.2
+
+//----MET TOPOLOGY CUTS----//
+
+DoDiscrIfIsZdecay 0
+
+DoDiscrByMetDphi 1
+MetDphiCut 0. 1.
+
+DoDiscrByMetMt 0
+MetMtCut 10. 100.

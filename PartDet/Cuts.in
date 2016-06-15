@@ -1,0 +1,52 @@
+NGenTau		1  -1
+NGenTop		0  -1
+NGenElectron 	0  -1
+***NGenMuon	0  -1
+NGenZ		0  -1
+NGenW		0  -1
+NGenHiggs	0  -1
+
+NRecoVertex
+NRecoMuon1
+NRecoMuon2
+NRecoElectron1
+NRecoElectron2
+NRecoTau1
+NRecoTau2
+NRecoJet1
+NRecoJet2
+NRecoCentralJet
+NRecoBJet
+NRecoTriggers1           ///only 0 or 1
+NRecoTriggers2           ///only 0 or 1
+NRecoFirstLeadingJet     ///only 0 or 1
+NRecoSecondLeadingJet    ///only 0 or 1
+
+NRecoMuon1MetTopology 
+NRecoMuon2MetTopology 
+NRecoElectron1MetTopology 
+NRecoElectron2MetTopology 
+NRecoTau1MetTopology 
+NRecoTau2MetTopology 
+
+NDiMuonCombinations
+NDiElectronCombinations
+NDiTauCombinations
+NDiJetCombinations
+
+NMuon1Tau1Combinations 
+NMuon1Tau2Combinations 
+NMuon2Tau1Combinations 
+NMuon2Tau2Combinations 
+NElectron1Tau1Combinations 
+NElectron1Tau2Combinations 
+NElectron2Tau1Combinations 
+NElectron2Tau2Combinations 
+
+NSusyCombinations     ///only 0 or 1
+
+
+
+
+
+
