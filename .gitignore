@@ -2,3 +2,6 @@ obj/*
 *root
 TODO
 valuedepend.txt
+*~
+src/*~
+PartDet/*~
