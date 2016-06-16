@@ -33,7 +33,7 @@ SOURCES = $(wildcard src/*.cc)
 OBJECTS = $(SOURCES:$(SRCDIR)/%.cc=$(OBJDIR)/%.o)
 #------------------------------------------------------------------------------
 
-Analyzer: obj/Analyzer.o obj/Particle.o obj/main.o obj/Histo.o
+Analyzer: obj/Analyzer.o obj/Particle.o obj/main.o obj/Histo.o obj/DataBinner.o
 	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 #$(EXE) : $(OBJECTS)
@@ -41,6 +41,9 @@ Analyzer: obj/Analyzer.o obj/Particle.o obj/main.o obj/Histo.o
 
 obj/main.o: src/main.cc
 	$(CXX) $(CXXFLAGS) -c $< -o $@ 
+
+Histo: obj/Histo.o obj/DataBinner.o
+	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cc $(SRCDIR)/%.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@ 

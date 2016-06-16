@@ -40,10 +40,12 @@ class Analyzer {
 
  public:
   Analyzer(string, string);
+  ~Analyzer();
   void clear_values();
   void preprocess(int);
-  int fillCuts(map<string,pair<int,int>>*);
+  int fillCuts();
   void printCuts();
+  void writeout();
   int nentries;
 
   

@@ -31,6 +31,8 @@
 #include <TLorentzVector.h>
 #include <TEnv.h>
 #include "Cut_enum.h"
+#include "DataBinner.h"
+#include "tokenizer.hpp"
 
 using namespace std;
 
@@ -43,25 +45,30 @@ class Histogramer {
   int Npdf;
   
   vector<int> get_folders();
-  int get_Nhists();
-  double get_start(int);
-  double get_width(int);
-  int get_nbins(int);
-  map<string,pair<int,int>>* get_cuts();
+  
+  unordered_map<string,pair<int,int>>* get_cuts();
+  vector<string>* get_order();
+  vector<string>* get_groups();
+  void addVal(string, string, double, int);
   
  private:
   TFile * outfile;
-  map<string, pair<int,int>> cuts;
-  vector<string> folders;
+  unordered_map<string, pair<int,int>> cuts;
+  vector<string> cut_order;
+  vector<pair<string,int>> folders;
 
   std::map<string, std::vector<TH1*> > Generator_Histogram;
   vector<pair<string, std::array<double, 3> > > Generator_info;
+
+  unordered_map<string, DataBinner*> data;
+  vector<string> data_order;
 
   int index(int, int);
   void write_histogram();
   void read_hist(string);
   void read_cuts(string);
   void fill_histogram(TObject*);
+  
 
   std::unordered_map<string, CUTS> cut_num = { {"NGenTau", CUTS::eGTau}, {"NGenTop", CUTS::eGTop}, {"NGenElectron", CUTS::eGElec}, \
 					       {"NGenMuon", CUTS::eGMuon}, {"NGenZ", CUTS::eGZ}, {"NGenW", CUTS::eGW}, {"NGenHiggs", CUTS::eGHiggs}, \

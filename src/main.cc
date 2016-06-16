@@ -29,4 +29,5 @@ int main (int argc, char* argv[]) {
     testing->preprocess(i);
   }
   testing->printCuts();
+  testing->writeout();
 }

@@ -105,10 +105,11 @@ void Analyzer::preprocess(int event) {
   if(event % 1000 == 0) {
     cout << "Event #" << event << endl;
   }
-  fillCuts(histo->get_cuts());
 }
 
-int Analyzer::fillCuts(map<string,pair<int,int> >* cut_info) {
+int Analyzer::fillCuts() {
+  unordered_map<string,pair<int,int> >* cut_info = histo->get_cuts();
+  vector<string>* cut_order = histo->get_order();
 
   string cut;
   int min, max;
@@ -116,12 +117,11 @@ int Analyzer::fillCuts(map<string,pair<int,int> >* cut_info) {
   int nparticles, i=0;
   int maxCut=0;
 
-  for(map<string,pair<int,int> >::iterator it=cut_info->begin(); it != cut_info->end(); it++, i++) {
-    if(isData && it->first.find("Gen") != string::npos) continue;
-
-    cut = it->first;
-    min= it->second.first;
-    max= it->second.second;
+  for(vector<string>::iterator it=cut_order->begin(); it != cut_order->end(); it++, i++) {
+    if(isData && it->find("Gen") != string::npos) continue;
+    cut = *it;
+    min= cut_info->at(cut).first;
+    max= cut_info->at(cut).second;
     nparticles = goodParts[ival(cut_num[cut])].size();
     if( (nparticles >= min) && (nparticles <= max || max == -1)) {
       cuts_per[i]++;
@@ -133,7 +133,7 @@ int Analyzer::fillCuts(map<string,pair<int,int> >* cut_info) {
 }
 
 void Analyzer::printCuts() {
-  map<string,pair<int,int> >* cut_info = histo->get_cuts();
+  vector<string>* cut_order = histo->get_order();
   int i =0;
 
   cout.setf(ios::floatfield,ios::fixed);
@@ -143,11 +143,11 @@ void Analyzer::printCuts() {
   cout << "Total events: " << nentries << "\n";
   cout << "         Name                     Indiv.      Cumulative\n";
   cout << "---------------------------------------------------------------------------\n";
-  for(map<string,pair<int,int> >::iterator it=cut_info->begin(); it != cut_info->end(); it++, i++) {
-    cout << setw(28) << it->first << " ";
-    if(isData && it->first.find("Gen")) cout << "Skipped" << endl;
-    else cout << setw(6) << cuts_per.at(i) << " (" << setw(8) << ((float)cuts_per.at(i)) / nentries << ") "
-	      << setw(6) << cuts_cumul.at(i) << "( " << setw(8) << ((float)cuts_cumul.at(i)) / nentries << ") " << endl;
+  for(vector<string>::iterator it=cut_order->begin(); it != cut_order->end(); it++, i++) {
+    cout << setw(28) << *it << " ";
+    if(isData && it->find("Gen") != string::npos) cout << "Skipped" << endl;
+    else cout << setw(8) << cuts_per.at(i) << " (" << setw(8) << ((float)cuts_per.at(i)) / nentries << ") "
+	      << setw(8) << cuts_cumul.at(i) << "( " << setw(8) << ((float)cuts_cumul.at(i)) / nentries << ") " << endl;
   }
   cout << "---------------------------------------------------------------------------\n";  
 }
@@ -212,6 +212,18 @@ Analyzer::Analyzer(string infile, string outfile) {
   _Tau = new Taus(BOOM, FILESPACE + "Tau_info.in");
   _Jet = new Jet(BOOM, FILESPACE + "Jet_info.in");
 
+}
+
+void Analyzer::writeout() {
+  delete histo;
+}
+
+Analyzer::~Analyzer() {
+  delete _Gen;
+  delete _Electron;
+  delete _Muon;
+  delete _Tau;
+  delete _Jet;
 }
 
 void Analyzer::setupJob(string filename) {
@@ -1164,226 +1176,224 @@ double Analyzer::absnormPhi(double phi) {
  
 
 
-// void fill_histogram() {
-//   for(folders) {
-//     if(folder > maxcut) break;
-//     for(groups) {
-//       fill_Folder(group);
-//     }
-//   }
+void fill_histogram() {
+  int maxCut = fillCuts();
+  vector<string>* groups = histo->get_groups();
 
-// void fill_Folder(string group, int groupSize) {
+  for(vector<string>::iterator it = groups->begin(); it!=groups.end(); it++) {
+    fill_Folder(group);
+  }
+  }
 
-//   if(group == "FillGenTau") {
-//     for(int i = 0; i < goodParts[ival(eGTau)].size(); i++) {
-//       for(int j = 0; j < groupSize; j++) {
-// 	switch(j) {
+void fill_Folder(string group, int groupSize) {
+  
+  if(group == "FillGenTau") {
+    for(int i = 0; i < goodParts[ival(eGTau)].size(); i++) {
+      histo.addVal(Gen->energy->at(i), group, );   //GenTauEnergy
+	case 1 : Fill(Gen->pt->at(i), group, groupSize);   //GenTauPt
+	case 2 : Fill(Gen->eta->at(i),group, groupSize);   //GenTauEta
+	case 3 : Fill(Gen->phi->at(i),group, groupSize);   //GenTauPhi
+	}
+      }
+    }
+  } else if(group == "FillGenMuon") {
+    for(int i = 0; i < goodParts[ival(eGMuon)].size(); i++) {
+      for(int j = 0; j < group_list.size(); j++) {
+	switch(j) {
 
-// 	case 0 : Fill(Gen->energy->at(i), group, groupSize);   //GenTauEnergy
-// 	case 1 : Fill(Gen->pt->at(i), group, groupSize);   //GenTauPt
-// 	case 2 : Fill(Gen->eta->at(i),group, groupSize);   //GenTauEta
-// 	case 3 : Fill(Gen->phi->at(i),group, groupSize);   //GenTauPhi
-// 	}
-//       }
-//     }
-//   } else if(group == "FillGenMuon") {
-//     for(int i = 0; i < goodParts[ival(eGMuon)].size(); i++) {
-//       for(int j = 0; j < group_list.size(); j++) {
-// 	switch(j) {
+	case 0: Fill(Gen->energy->at(i));   //GenMuonEnergy
+        case 1: Fill(Gen_pt->at(i));   //GenMuonPt
+        case 2: Fill(Gen_eta->at(i));   //GenMuonEta
+        case 3: Fill(Gen_phi->at(i));   //GenMuonPhi
 
-// 	case 0: Fill(Gen->energy->at(i));   //GenMuonEnergy
-//         case 1: Fill(Gen_pt->at(i));   //GenMuonPt
-//         case 2: Fill(Gen_eta->at(i));   //GenMuonEta
-//         case 3: Fill(Gen_phi->at(i));   //GenMuonPhi
+	}
+      }
+    }
+  } else if(group == "FillRecoTau") {
+    double leadingpt = 0;
+    double leadingeta = 0;
 
-// 	}
-//       }
-//     }
-//   } else if(group == "FillRecoTau") {
-//     double leadingpt = 0;
-//     double leadingeta = 0;
+    for(int i = 0; i < goodParts[ival(eRTau1)].size(); i++) {
+      if(Tau->smearP.at(i).Pt() >= leadingtaupt) {
+	leadingtaupt = Tau->smearP.at(i).Pt();
+	leadingtaueta = Tau->smearP.at(i).Eta();
+      }
 
-//     for(int i = 0; i < goodParts[ival(eRTau1)].size(); i++) {
-//       if(Tau->smearP.at(i).Pt() >= leadingtaupt) {
-// 	leadingtaupt = Tau->smearP.at(i).Pt();
-// 	leadingtaueta = Tau->smearP.at(i).Eta();
-//       }
-
-//       for(int j = 0; j < group_list.size(); j++) {
-// 	switch(j) {
+      for(int j = 0; j < group_list.size(); j++) {
+	switch(j) {
     
-// 	case 0: Fill(Tau->smearP.at(i).Energy());   //RecoTauEnergy
-// 	case 1: Fill(Tau->smearP.at(i).Pt());   //RecoTau1Pt
-// 	case 2: Fill(Tau->smearP.at(i).Eta());   //RecoTauEta
-// 	case 3: Fill(Tau->smearP.at(j));   //RecoTauPhi
-//         case 4: Fill(Tau_>nProngs->at(i));   //RecoTauNumTracks
-// 	case 5: Fill(Tau->charge->at(i));   //RecoTauCharge
-//         case 6: Fill(Tau->leadChargedCandPt->at(i));   //RecoTauSeedTracks
+	case 0: Fill(Tau->smearP.at(i).Energy());   //RecoTauEnergy
+	case 1: Fill(Tau->smearP.at(i).Pt());   //RecoTau1Pt
+	case 2: Fill(Tau->smearP.at(i).Eta());   //RecoTauEta
+	case 3: Fill(Tau->smearP.at(j));   //RecoTauPhi
+        case 4: Fill(Tau_>nProngs->at(i));   //RecoTauNumTracks
+	case 5: Fill(Tau->charge->at(i));   //RecoTauCharge
+        case 6: Fill(Tau->leadChargedCandPt->at(i));   //RecoTauSeedTracks
 
-// 	}
-//       }
-//     }
-//     Fill(goodParts[ival(ePos)].size());   //NumRecoTau
-//     if(goodParts[ival(ePos)].size() > 0) {   
-//       Fill(leadingtaupt);   //LeadingRecoTauPt
-//       Fill(leadingtaueta);   //LeadingRecoTauEta
-//     }
-//   } else if(group == "FillRecoMuon") {
-//     double leadingpt = 0;
-//     double leadingeta = 0;
+	}
+      }
+    }
+    Fill(goodParts[ival(ePos)].size());   //NumRecoTau
+    if(goodParts[ival(ePos)].size() > 0) {   
+      Fill(leadingtaupt);   //LeadingRecoTauPt
+      Fill(leadingtaueta);   //LeadingRecoTauEta
+    }
+  } else if(group == "FillRecoMuon") {
+    double leadingpt = 0;
+    double leadingeta = 0;
 
-//     for(int i = 0; i < goodParts[ival(eRMuon1)].size(); i++) {
-//       if(Muon->smearP.at(j).Pt() >= leadingmuonpt) {
-// 	leadingmuonpt = Muon->smearP.at(j).Pt();
-// 	leadingmuoneta = Muon->smearP.at(j).Eta();
-//       }
+    for(int i = 0; i < goodParts[ival(eRMuon1)].size(); i++) {
+      if(Muon->smearP.at(j).Pt() >= leadingmuonpt) {
+	leadingmuonpt = Muon->smearP.at(j).Pt();
+	leadingmuoneta = Muon->smearP.at(j).Eta();
+      }
 
-//       for(int j = 0; j < group_list.size(); j++) {
-// 	switch(j) {
+      for(int j = 0; j < group_list.size(); j++) {
+	switch(j) {
 
-// 	case 0: _hMuon1Energy->Fill(Muon->smearP.at(j).Energy());
-// 	case 1: _hMuon1Pt->Fill(Muon->smearP.at(j).Pt());
-// 	case 2: _hMuon1Eta->Fill(Muon->smearP.at(j).Eta());
-// 	case 3: _hMuon1Phi->Fill(Muon->smearP.at(j).Phi());
-//         case 4: _hMuon1MetMt->Fill(CalculateLeptonMetMt(Muon->smearP.at(j)));
+	case 0: _hMuon1Energy->Fill(Muon->smearP.at(j).Energy());
+	case 1: _hMuon1Pt->Fill(Muon->smearP.at(j).Pt());
+	case 2: _hMuon1Eta->Fill(Muon->smearP.at(j).Eta());
+	case 3: _hMuon1Phi->Fill(Muon->smearP.at(j).Phi());
+        case 4: _hMuon1MetMt->Fill(CalculateLeptonMetMt(Muon->smearP.at(j)));
 	
-// 	}
-//       }
-//     }
-//     _hNMuon1->Fill(nMuons);
-//     if(nMuons > 0) {
-//       _hFirstLeadingMuon1Pt->Fill(leadingmuonpt);
-//       _hFirstLeadingMuon1Eta->Fill(leadingmuoneta);
-//     }
+	}
+      }
+    }
+    _hNMuon1->Fill(nMuons);
+    if(nMuons > 0) {
+      _hFirstLeadingMuon1Pt->Fill(leadingmuonpt);
+      _hFirstLeadingMuon1Eta->Fill(leadingmuoneta);
+    }
 
-//   } else if(group == "FillMuonTau") {
-//     for(int i = 0; i < goodParts[ival(eRMuon1)].size(); i++) {
-//       for(int j = 0; j < goodParts[ival(eRTau1)].size(); j++) {
-// 	if (!passMuon1Tau1TopologyCuts(i, j)) continue;
-// 	for(int k = 0; k < group_list.size(); k++) {
-// 	  switch(j) {
+  } else if(group == "FillMuonTau") {
+    for(int i = 0; i < goodParts[ival(eRMuon1)].size(); i++) {
+      for(int j = 0; j < goodParts[ival(eRTau1)].size(); j++) {
+	if (!passMuon1Tau1TopologyCuts(i, j)) continue;
+	for(int k = 0; k < group_list.size(); k++) {
+	  switch(j) {
 
-//             if ((theLeadingJetIndex >= 0) && (theSecondLeadingJetIndex >= 0)) {
-//               TheLeadDiJetVect = Jet->smearP.at(theLeadingJetIndex) + Jet->smearP.at(theSecondLeadingJetIndex);
-// 	      Fill(absnormPhi(Tau->smearP.at(tj).Phi() - TheLeadDiJetVect.Phi())));   //MuonTau_TauDiJetDeltaPhi
-// 	      Fill(absnormPhi(Muon->smearP.at(mj).Phi() - TheLeadDiJetVect.Phi())));   //Muon1Tau1_Muon1DiJetDeltaPhi
-//               UseVectorSumOfVisProductsAndMetMassReco = "1";
-//               _UseCollinerApproxMassReco = _UseCollinerApproxMuon1Tau1MassReco;
-// 	      Fill(DiParticleMass(TheLeadDiJetVect, Muon->smearP.at(mj)+Tau->smearP.at(tj) ));   //Muon1Tau1DiJetReconstructableMass
-//             }
-//             Fill(isZmm(Muon->smearP.at(mj)).first);   //Muon1Tau1_Muon1IsZmm
-// 	    Fill(Muon->smearP.at(mj).Pt(),Tau->smearP.at(tj).Pt());   //Muon1PtVsTau1Pt
-// 	    Fill(Tau->smearP.at(tj).DeltaR(Muon->smearP.at(mj)));   //Muon1Tau1DeltaR
-// 	    Fill((Tau->smearP.at(tj).Pt() - Muon->smearP.at(mj).Pt()) / (Tau->smearP.at(tj).Pt() + Muon->smearP.at(mj).Pt()));   //Muon1Tau1DeltaPtDivSumPt
-// 	    Fill((Tau->smearP.at(tj).Pt() - Muon->smearP.at(mj).Pt()));   //Muon1Tau1DeltaPt
-// 	    Fill(cos(absnormPhi(Muon->smearP.at(mj).Phi() - Tau->smearP.at(tj).Phi())));   //Muon1Tau1CosDphi
-// 	    Fill(absnormPhi(Muon->smearP.at(mj).Phi() - theMETVector.Phi()));   //Muon1Tau1_Muon1MetDeltaPhi
-// 	    Fill(absnormPhi(Muon->smearP.at(mj).Phi() - theMETVector.Phi()), cos(absnormPhi(Muon->smearP.at(mj).Phi() - Tau->smearP.at(tj).Phi())));   //Muon1MetDeltaPhiVsMuon1Tau1CosDphi
-// 	    Fill(absnormPhi(Tau->smearP.at(tj).Phi() - theMETVector.Phi()));   //Muon1Tau1_Tau1MetDeltaPhi
-// 	    _UseVectorSumOfVisProductsAndMetMassReco = _UseVectorSumOfMuon1Tau1ProductsAndMetMassReco;
-//             _UseCollinerApproxMassReco = _UseCollinerApproxMuon1Tau1MassReco;
-// 	    if(CalculateTheDiTau4Momentum(Tau->smearP.at(tj),Muon->smearP.at(mj)).first) {
-// 	      Fill(DiParticleMass(Tau->smearP.at(tj),Muon->smearP.at(mj)));   //Muon1Tau1ReconstructableMass
-// 	    } else {
-// 	      Fill(DiParticleMass(Tau->smearP.at(tj),Muon->smearP.at(mj)));   //Muon1Tau1NotReconstructableMass
-// 	    }
-// 	    double PZeta = CalculatePZeta(Tau->smearP.at(tj),Muon->smearP.at(mj));
-// 	    double PZetaVis = CalculatePZetaVis(Tau->smearP.at(tj),Muon->smearP.at(mj));
-// 	    Fill(CalculateLeptonMetMt(Muon->smearP.at(mj)));   //Muon1Tau1_Muon1MetMt
-// 	    Fill(CalculateLeptonMetMt(Tau->smearP.at(tj)));   //Muon1Tau1_Tau1MetMt
-//             Fill(Muon_charge->at(mj) * Tau_charge->at(tj));   //Muon1Tau1OSLS
-// 	    Fill(PZeta);   //Muon1Tau1PZeta
-// 	    Fill(PZetaVis);   //Muon1Tau1PZetaVis
-// 	    Fill(PZetaVis,PZeta);   //Muon1Tau1Zeta2D
-// 	    Fill((_Muon1Tau1PZetaCutCoefficient * PZeta) + (_Muon1Tau1PZetaVisCutCoefficient * PZetaVis));   //Muon1Tau1Zeta1D
-// 	  }
-// 	}
-//       }
-//     }
-//   } else if(group == "FillDiTau") {
-//     for(int i = 0; i < goodParts[ival(eRTau1)].size(); i++) {
-//       for(int j = i+1; j < goodParts[ival(eRTau2)].size(); j++) {
-// 	if (!passDiTauTopologyCuts(i,j)) continue;
-// 	for(int k = 0; k < group_list.size(); k++) {
-// 	  switch(j) {
+            if ((theLeadingJetIndex >= 0) && (theSecondLeadingJetIndex >= 0)) {
+              TheLeadDiJetVect = Jet->smearP.at(theLeadingJetIndex) + Jet->smearP.at(theSecondLeadingJetIndex);
+	      Fill(absnormPhi(Tau->smearP.at(tj).Phi() - TheLeadDiJetVect.Phi())));   //MuonTau_TauDiJetDeltaPhi
+	      Fill(absnormPhi(Muon->smearP.at(mj).Phi() - TheLeadDiJetVect.Phi())));   //Muon1Tau1_Muon1DiJetDeltaPhi
+              UseVectorSumOfVisProductsAndMetMassReco = "1";
+              _UseCollinerApproxMassReco = _UseCollinerApproxMuon1Tau1MassReco;
+	      Fill(DiParticleMass(TheLeadDiJetVect, Muon->smearP.at(mj)+Tau->smearP.at(tj) ));   //Muon1Tau1DiJetReconstructableMass
+            }
+            Fill(isZmm(Muon->smearP.at(mj)).first);   //Muon1Tau1_Muon1IsZmm
+	    Fill(Muon->smearP.at(mj).Pt(),Tau->smearP.at(tj).Pt());   //Muon1PtVsTau1Pt
+	    Fill(Tau->smearP.at(tj).DeltaR(Muon->smearP.at(mj)));   //Muon1Tau1DeltaR
+	    Fill((Tau->smearP.at(tj).Pt() - Muon->smearP.at(mj).Pt()) / (Tau->smearP.at(tj).Pt() + Muon->smearP.at(mj).Pt()));   //Muon1Tau1DeltaPtDivSumPt
+	    Fill((Tau->smearP.at(tj).Pt() - Muon->smearP.at(mj).Pt()));   //Muon1Tau1DeltaPt
+	    Fill(cos(absnormPhi(Muon->smearP.at(mj).Phi() - Tau->smearP.at(tj).Phi())));   //Muon1Tau1CosDphi
+	    Fill(absnormPhi(Muon->smearP.at(mj).Phi() - theMETVector.Phi()));   //Muon1Tau1_Muon1MetDeltaPhi
+	    Fill(absnormPhi(Muon->smearP.at(mj).Phi() - theMETVector.Phi()), cos(absnormPhi(Muon->smearP.at(mj).Phi() - Tau->smearP.at(tj).Phi())));   //Muon1MetDeltaPhiVsMuon1Tau1CosDphi
+	    Fill(absnormPhi(Tau->smearP.at(tj).Phi() - theMETVector.Phi()));   //Muon1Tau1_Tau1MetDeltaPhi
+	    _UseVectorSumOfVisProductsAndMetMassReco = _UseVectorSumOfMuon1Tau1ProductsAndMetMassReco;
+            _UseCollinerApproxMassReco = _UseCollinerApproxMuon1Tau1MassReco;
+	    if(CalculateTheDiTau4Momentum(Tau->smearP.at(tj),Muon->smearP.at(mj)).first) {
+	      Fill(DiParticleMass(Tau->smearP.at(tj),Muon->smearP.at(mj)));   //Muon1Tau1ReconstructableMass
+	    } else {
+	      Fill(DiParticleMass(Tau->smearP.at(tj),Muon->smearP.at(mj)));   //Muon1Tau1NotReconstructableMass
+	    }
+	    double PZeta = CalculatePZeta(Tau->smearP.at(tj),Muon->smearP.at(mj));
+	    double PZetaVis = CalculatePZetaVis(Tau->smearP.at(tj),Muon->smearP.at(mj));
+	    Fill(CalculateLeptonMetMt(Muon->smearP.at(mj)));   //Muon1Tau1_Muon1MetMt
+	    Fill(CalculateLeptonMetMt(Tau->smearP.at(tj)));   //Muon1Tau1_Tau1MetMt
+            Fill(Muon_charge->at(mj) * Tau_charge->at(tj));   //Muon1Tau1OSLS
+	    Fill(PZeta);   //Muon1Tau1PZeta
+	    Fill(PZetaVis);   //Muon1Tau1PZetaVis
+	    Fill(PZetaVis,PZeta);   //Muon1Tau1Zeta2D
+	    Fill((_Muon1Tau1PZetaCutCoefficient * PZeta) + (_Muon1Tau1PZetaVisCutCoefficient * PZetaVis));   //Muon1Tau1Zeta1D
+	  }
+	}
+      }
+    }
+  } else if(group == "FillDiTau") {
+    for(int i = 0; i < goodParts[ival(eRTau1)].size(); i++) {
+      for(int j = i+1; j < goodParts[ival(eRTau2)].size(); j++) {
+	if (!passDiTauTopologyCuts(i,j)) continue;
+	for(int k = 0; k < group_list.size(); k++) {
+	  switch(j) {
 	    
-//             if ((theLeadingJetIndex >= 0) && (theSecondLeadingJetIndex >= 0)) {
-//               TheLeadDiJetVect = Jet->smearP.at(theLeadingJetIndex) + Jet->smearP.at(theSecondLeadingJetIndex);
-// 	      _hTau1Tau2_Tau1DiJetDeltaPhi->Fill(absnormPhi(Tau->smearP.at(j).Phi() - TheLeadDiJetVect.Phi())));
-// 	      _hTau1Tau2_Tau2DiJetDeltaPhi->Fill(absnormPhi(Tau->smearP.at(jj).Phi() - TheLeadDiJetVect.Phi())));
-//               _UseVectorSumOfVisProductsAndMetMassReco = "1";
-//               _UseCollinerApproxMassReco = _UseCollinerApproxDiTauMassReco;
-// 	      _hDiTauDiJetReconstructableMass->Fill(DiParticleMass(TheLeadDiJetVect, Tau->smearP.at(j) + Tau->smearP.at(jj)) );
-//             }
-// 	    _hTau1PtVsTau2Pt->Fill(Tau->smearP.at(j).Pt(),Tau->smearP.at(jj).Pt());
-// 	    _hTau1Tau2DeltaR->Fill(Tau->smearP.at(j).DeltaR(Tau->smearP.at(jj)));
-// 	    _hTau1Tau2DeltaPtDivSumPt->Fill((Tau->smearP.at(j).Pt() - Tau->smearP.at(jj).Pt()) / (Tau->smearP.at(j).Pt() + Tau->smearP.at(jj).Pt()));
-// 	    _hTau1Tau2DeltaPt->Fill((Tau->smearP.at(j).Pt() - Tau->smearP.at(jj).Pt()));
-//             _hTau1Tau2OSLS->Fill(Tau_charge->at(j) * Tau_charge->at(jj));
-// 	    _hTau1Tau2CosDphi->Fill(cos(absnormPhi(Tau->smearP.at(j).Phi() - Tau->smearP.at(jj).Phi()))));
-// 	    _hDiTau_Tau1MetDeltaPhi->Fill(absnormPhi(Tau->smearP.at(j).Phi() -  theMETVector.Phi())));
-// 	    _hDiTau_Tau2MetDeltaPhi->Fill(absnormPhi(Tau->smearP.at(jj).Phi() -  theMETVector.Phi())));
-// 	    _hTau1MetDeltaPhiVsTau1Tau2CosDphi->Fill(absnormPhi(Tau->smearP.at(j).Phi() -  theMETVector.Phi())), cos(absnormPhi(Tau->smearP.at(j).Phi() - Tau->smearP.at(jj).Phi()))));
-//             _UseVectorSumOfVisProductsAndMetMassReco = _UseVectorSumOfDiTauProductsAndMetMassReco;
-//             _UseCollinerApproxMassReco = _UseCollinerApproxDiTauMassReco;
-// 	    if(CalculateTheDiTau4Momentum(Tau->smearP.at(j),Tau->smearP.at(jj)).first) {
-// 	      _hDiTauReconstructableMass->Fill(DiParticleMass(Tau->smearP.at(j),Tau->smearP.at(jj)));
-// 	    } else {
-// 	      _hDiTauNotReconstructableMass->Fill(DiParticleMass(Tau->smearP.at(j),Tau->smearP.at(jj)));
-// 	    }
-// 	    _hDiTau_Tau1MetMt->Fill(CalculateLeptonMetMt(Tau->smearP.at(j)));
-// 	    _hDiTau_Tau2MetMt->Fill(CalculateLeptonMetMt(Tau->smearP.at(jj)));
-// 	    _hDiTauPZeta->Fill(CalculatePZeta(Tau->smearP.at(j),Tau->smearP.at(jj)));
-// 	    _hDiTauPZetaVis->Fill(CalculatePZetaVis(Tau->smearP.at(j),Tau->smearP.at(jj)));
-// 	    _hDiTauZeta2D->Fill(CalculatePZetaVis(Tau->smearP.at(j),Tau->smearP.at(jj)),CalculatePZeta(Tau->smearP.at(j),Tau->smearP.at(jj)));
-// 	    _hDiTauZeta1D->Fill((_DiTauPZetaCutCoefficient * CalculatePZeta(Tau->smearP.at(j),Tau->smearP.at(jj))) + (_DiTauPZetaVisCutCoefficient * CalculatePZetaVis(Tau->smearP.at(j),Tau->smearP.at(jj))));
-// 	  }
-// 	}
-//       }
-//     }
-//   } else if(group == "FillDiMuon") {
-//     for(int i = 0; i < goodParts[ival(eRMuon1)].size(); i++) {
-//       for(int j = i+1; j < goodParts[ival(eRMuon2)].size(); j++) {
-// 	if (!passDiMuonTopologyCuts(i,j)) continue;
-// 	for(int k = 0; k < group_list.size(); k++) {
-// 	  switch(j) {
+            if ((theLeadingJetIndex >= 0) && (theSecondLeadingJetIndex >= 0)) {
+              TheLeadDiJetVect = Jet->smearP.at(theLeadingJetIndex) + Jet->smearP.at(theSecondLeadingJetIndex);
+	      _hTau1Tau2_Tau1DiJetDeltaPhi->Fill(absnormPhi(Tau->smearP.at(j).Phi() - TheLeadDiJetVect.Phi())));
+	      _hTau1Tau2_Tau2DiJetDeltaPhi->Fill(absnormPhi(Tau->smearP.at(jj).Phi() - TheLeadDiJetVect.Phi())));
+              _UseVectorSumOfVisProductsAndMetMassReco = "1";
+              _UseCollinerApproxMassReco = _UseCollinerApproxDiTauMassReco;
+	      _hDiTauDiJetReconstructableMass->Fill(DiParticleMass(TheLeadDiJetVect, Tau->smearP.at(j) + Tau->smearP.at(jj)) );
+            }
+	    _hTau1PtVsTau2Pt->Fill(Tau->smearP.at(j).Pt(),Tau->smearP.at(jj).Pt());
+	    _hTau1Tau2DeltaR->Fill(Tau->smearP.at(j).DeltaR(Tau->smearP.at(jj)));
+	    _hTau1Tau2DeltaPtDivSumPt->Fill((Tau->smearP.at(j).Pt() - Tau->smearP.at(jj).Pt()) / (Tau->smearP.at(j).Pt() + Tau->smearP.at(jj).Pt()));
+	    _hTau1Tau2DeltaPt->Fill((Tau->smearP.at(j).Pt() - Tau->smearP.at(jj).Pt()));
+            _hTau1Tau2OSLS->Fill(Tau_charge->at(j) * Tau_charge->at(jj));
+	    _hTau1Tau2CosDphi->Fill(cos(absnormPhi(Tau->smearP.at(j).Phi() - Tau->smearP.at(jj).Phi()))));
+	    _hDiTau_Tau1MetDeltaPhi->Fill(absnormPhi(Tau->smearP.at(j).Phi() -  theMETVector.Phi())));
+	    _hDiTau_Tau2MetDeltaPhi->Fill(absnormPhi(Tau->smearP.at(jj).Phi() -  theMETVector.Phi())));
+	    _hTau1MetDeltaPhiVsTau1Tau2CosDphi->Fill(absnormPhi(Tau->smearP.at(j).Phi() -  theMETVector.Phi())), cos(absnormPhi(Tau->smearP.at(j).Phi() - Tau->smearP.at(jj).Phi()))));
+            _UseVectorSumOfVisProductsAndMetMassReco = _UseVectorSumOfDiTauProductsAndMetMassReco;
+            _UseCollinerApproxMassReco = _UseCollinerApproxDiTauMassReco;
+	    if(CalculateTheDiTau4Momentum(Tau->smearP.at(j),Tau->smearP.at(jj)).first) {
+	      _hDiTauReconstructableMass->Fill(DiParticleMass(Tau->smearP.at(j),Tau->smearP.at(jj)));
+	    } else {
+	      _hDiTauNotReconstructableMass->Fill(DiParticleMass(Tau->smearP.at(j),Tau->smearP.at(jj)));
+	    }
+	    _hDiTau_Tau1MetMt->Fill(CalculateLeptonMetMt(Tau->smearP.at(j)));
+	    _hDiTau_Tau2MetMt->Fill(CalculateLeptonMetMt(Tau->smearP.at(jj)));
+	    _hDiTauPZeta->Fill(CalculatePZeta(Tau->smearP.at(j),Tau->smearP.at(jj)));
+	    _hDiTauPZetaVis->Fill(CalculatePZetaVis(Tau->smearP.at(j),Tau->smearP.at(jj)));
+	    _hDiTauZeta2D->Fill(CalculatePZetaVis(Tau->smearP.at(j),Tau->smearP.at(jj)),CalculatePZeta(Tau->smearP.at(j),Tau->smearP.at(jj)));
+	    _hDiTauZeta1D->Fill((_DiTauPZetaCutCoefficient * CalculatePZeta(Tau->smearP.at(j),Tau->smearP.at(jj))) + (_DiTauPZetaVisCutCoefficient * CalculatePZetaVis(Tau->smearP.at(j),Tau->smearP.at(jj))));
+	  }
+	}
+      }
+    }
+  } else if(group == "FillDiMuon") {
+    for(int i = 0; i < goodParts[ival(eRMuon1)].size(); i++) {
+      for(int j = i+1; j < goodParts[ival(eRMuon2)].size(); j++) {
+	if (!passDiMuonTopologyCuts(i,j)) continue;
+	for(int k = 0; k < group_list.size(); k++) {
+	  switch(j) {
 
-// 	    if ((theLeadingJetIndex >= 0) && (theSecondLeadingJetIndex >= 0)) {
-// 	      TheLeadDiJetVect = Jet->smearP.at(theLeadingJetIndex) + Jet->smearP.at(theSecondLeadingJetIndex);
-// 	      _hMuon1Muon2_Muon1DiJetDeltaPhi->Fill(absnormPhi(Muon->smearP.at(j).Phi() - TheLeadDiJetVect.Phi()));
-// 	      _hMuon1Muon2_Muon2DiJetDeltaPhi->Fill(absnormPhi(Muon->smearP.at(jj).Phi() - TheLeadDiJetVect.Phi())));
-// 	    }
-// 	    _hMuon1Muon2_Muon1IsZmm->Fill(isZmm(Muon->smearP.at(j)).first);
-// 	    _hMuon1Muon2_Muon2IsZmm->Fill(isZmm(Muon->smearP.at(jj)).first);
-// 	    _hMuon1PtVsMuon2Pt->Fill(Muon->smearP.at(j).Pt(),Muon->smearP.at(jj).Pt());
-// 	    _hMuon1Muon2DeltaR->Fill(Muon->smearP.at(j).DeltaR(Muon->smearP.at(jj)));
-// 	    _hMuon1Muon2DeltaPtDivSumPt->Fill((Muon->smearP.at(j).Pt() - Muon->smearP.at(jj).Pt()) / (Muon->smearP.at(j).Pt() + Muon->smearP.at(jj).Pt()));
-// 	    _hMuon1Muon2DeltaPt->Fill((Muon->smearP.at(j).Pt() - Muon->smearP.at(jj).Pt()));
-// 	    _hMuon1Muon2CosDphi->Fill(cos(absnormPhi(Muon->smearP.at(j).Phi() - Muon->smearP.at(jj).Phi()))));
-// 	    _hDiMuon_Muon1MetDeltaPhi->Fill(absnormPhi(Muon->smearP.at(j).Phi() - theMETVector.Phi())));
-// 	    _hDiMuon_Muon2MetDeltaPhi->Fill(absnormPhi(Muon->smearP.at(jj).Phi() - theMETVector.Phi())));
-// 	    _hMuon1MetDeltaPhiVsMuon1Muon2CosDphi->Fill(absnormPhi(Muon->smearP.at(j).Phi() - theMETVector.Phi())), cos(absnormPhi(Muon->smearP.at(j).Phi() - Muon->smearP.at(jj).Phi()))));
-// 	    _UseVectorSumOfVisProductsAndMetMassReco = _UseVectorSumOfDiMuonProductsAndMetMassReco;
-// 	    _UseCollinerApproxMassReco = _UseCollinerApproxDiMuonMassReco;
-// 	    if(CalculateTheDiTau4Momentum(Muon->smearP.at(j),Muon->smearP.at(jj)).first) {
-// 	      _hDiMuonReconstructableMass->Fill(DiParticle(Muon->smearP.at(j),Muon->smearP.at(jj)));
-// 	    } else {
-// 	      _hDiMuonNotReconstructableMass->Fill(DiParticleMass(Muon->smearP.at(j),Muon->smearP.at(jj)));
-// 	    }
-// 	    _hDiMuon_Muon1MetMt->Fill(CalculateLeptonMetMt(Muon->smearP.at(j)));
-// 	    _hDiMuon_Muon2MetMt->Fill(CalculateLeptonMetMt(Muon->smearP.at(jj)));
-// 	    _hMuon1Muon2OSLS->Fill(Muon_charge->at(j) * Muon_charge->at(jj));
-// 	    _hDiMuonPZeta->Fill(CalculatePZeta(Muon->smearP.at(j),Muon->smearP.at(jj)));
-// 	    _hDiMuonPZetaVis->Fill(CalculatePZetaVis(Muon->smearP.at(j),Muon->smearP.at(jj)));
-// 	    _hDiMuonZeta2D->Fill(CalculatePZetaVis(Muon->smearP.at(j),Muon->smearP.at(jj)),CalculatePZeta(Muon->smearP.at(j),Muon->smearP.at(jj)));
-// 	    _hDiMuonZeta1D->Fill((_DiMuonPZetaCutCoefficient * CalculatePZeta(Muon->smearP.at(j),Muon->smearP.at(jj))) + (_DiMuonPZetaVisCutCoefficient * CalculatePZetaVis(Muon->smearP.at(j),Muon->smearP.at(jj))));
-// 	  }
-// 	}
-//       }
-//     }
-//   } else if(
+	    if ((theLeadingJetIndex >= 0) && (theSecondLeadingJetIndex >= 0)) {
+	      TheLeadDiJetVect = Jet->smearP.at(theLeadingJetIndex) + Jet->smearP.at(theSecondLeadingJetIndex);
+	      _hMuon1Muon2_Muon1DiJetDeltaPhi->Fill(absnormPhi(Muon->smearP.at(j).Phi() - TheLeadDiJetVect.Phi()));
+	      _hMuon1Muon2_Muon2DiJetDeltaPhi->Fill(absnormPhi(Muon->smearP.at(jj).Phi() - TheLeadDiJetVect.Phi())));
+	    }
+	    _hMuon1Muon2_Muon1IsZmm->Fill(isZmm(Muon->smearP.at(j)).first);
+	    _hMuon1Muon2_Muon2IsZmm->Fill(isZmm(Muon->smearP.at(jj)).first);
+	    _hMuon1PtVsMuon2Pt->Fill(Muon->smearP.at(j).Pt(),Muon->smearP.at(jj).Pt());
+	    _hMuon1Muon2DeltaR->Fill(Muon->smearP.at(j).DeltaR(Muon->smearP.at(jj)));
+	    _hMuon1Muon2DeltaPtDivSumPt->Fill((Muon->smearP.at(j).Pt() - Muon->smearP.at(jj).Pt()) / (Muon->smearP.at(j).Pt() + Muon->smearP.at(jj).Pt()));
+	    _hMuon1Muon2DeltaPt->Fill((Muon->smearP.at(j).Pt() - Muon->smearP.at(jj).Pt()));
+	    _hMuon1Muon2CosDphi->Fill(cos(absnormPhi(Muon->smearP.at(j).Phi() - Muon->smearP.at(jj).Phi()))));
+	    _hDiMuon_Muon1MetDeltaPhi->Fill(absnormPhi(Muon->smearP.at(j).Phi() - theMETVector.Phi())));
+	    _hDiMuon_Muon2MetDeltaPhi->Fill(absnormPhi(Muon->smearP.at(jj).Phi() - theMETVector.Phi())));
+	    _hMuon1MetDeltaPhiVsMuon1Muon2CosDphi->Fill(absnormPhi(Muon->smearP.at(j).Phi() - theMETVector.Phi())), cos(absnormPhi(Muon->smearP.at(j).Phi() - Muon->smearP.at(jj).Phi()))));
+	    _UseVectorSumOfVisProductsAndMetMassReco = _UseVectorSumOfDiMuonProductsAndMetMassReco;
+	    _UseCollinerApproxMassReco = _UseCollinerApproxDiMuonMassReco;
+	    if(CalculateTheDiTau4Momentum(Muon->smearP.at(j),Muon->smearP.at(jj)).first) {
+	      _hDiMuonReconstructableMass->Fill(DiParticle(Muon->smearP.at(j),Muon->smearP.at(jj)));
+	    } else {
+	      _hDiMuonNotReconstructableMass->Fill(DiParticleMass(Muon->smearP.at(j),Muon->smearP.at(jj)));
+	    }
+	    _hDiMuon_Muon1MetMt->Fill(CalculateLeptonMetMt(Muon->smearP.at(j)));
+	    _hDiMuon_Muon2MetMt->Fill(CalculateLeptonMetMt(Muon->smearP.at(jj)));
+	    _hMuon1Muon2OSLS->Fill(Muon_charge->at(j) * Muon_charge->at(jj));
+	    _hDiMuonPZeta->Fill(CalculatePZeta(Muon->smearP.at(j),Muon->smearP.at(jj)));
+	    _hDiMuonPZetaVis->Fill(CalculatePZetaVis(Muon->smearP.at(j),Muon->smearP.at(jj)));
+	    _hDiMuonZeta2D->Fill(CalculatePZetaVis(Muon->smearP.at(j),Muon->smearP.at(jj)),CalculatePZeta(Muon->smearP.at(j),Muon->smearP.at(jj)));
+	    _hDiMuonZeta1D->Fill((_DiMuonPZetaCutCoefficient * CalculatePZeta(Muon->smearP.at(j),Muon->smearP.at(jj))) + (_DiMuonPZetaVisCutCoefficient * CalculatePZetaVis(Muon->smearP.at(j),Muon->smearP.at(jj))));
+	  }
+	}
+      }
+    }
+  } else if(
 	
-// }
+}
 
 void Analyzer::initializePileupInfo(string MCHisto, string DataHisto) {
   // Filenames must be c_strings below. Here is the conversion from strings to c_strings
