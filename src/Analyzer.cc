@@ -102,9 +102,9 @@ void Analyzer::preprocess(int event) {
   ///////////////fix up dijet stuff
   passDiJetTopologyCuts(&distats["DiJet"]);
 
-  if(event % 1000 == 0) {
-    cout << "Event #" << event << endl;
-  }
+  // if(event % 50000 == 0) {
+  //   cout << "Event #" << event << endl;
+  // }
 }
 
 int Analyzer::fillCuts() {
@@ -211,6 +211,8 @@ Analyzer::Analyzer(string infile, string outfile) {
   _Muon = new Muon(BOOM, FILESPACE + "Muon_info.in");
   _Tau = new Taus(BOOM, FILESPACE + "Tau_info.in");
   _Jet = new Jet(BOOM, FILESPACE + "Jet_info.in");
+  
+  cout << "finished setup" << endl;
 
 }
 
@@ -330,7 +332,6 @@ void Analyzer::SmearLepton(Lepton* lepton, CUTS eGenPos, PartStats* stats) {
     TLorentzVector final;
     final.SetPtEtaPhiE(smearedPt, smearedEta, smearedPhi, smearedEnergy);
     lepton->smearP.push_back(final);
-    cout << "smeared";
     deltaMEx += tmpSmear.Px() - final.Px();
     deltaMEy += tmpSmear.Py() - final.Py();
     delete genVec;
@@ -689,11 +690,7 @@ void Analyzer::SusyTopologyCuts() {
     if(abs(dphi2) < stats->pmap["Dphi2Cut"].first || abs(dphi2) > stats->pmap["Dphi2Cut"].second) return;
   }
 
-  ////// index = 1st * total + 2nd
-  ////// 1st = index / totaljets    has to be integer division
-  ////   2nd = index % 2nd
-  int index = goodParts[ival(CUTS::eR1stJet)].at(0) * _Jet->smearP.size()+goodParts[ival(CUTS::eR2ndJet)].at(0);
-  goodParts[ival(CUTS::eSusyCom)].push_back(index);
+  goodParts[ival(CUTS::eSusyCom)].push_back(0);
 }
 
 
@@ -927,21 +924,9 @@ double Analyzer::absnormPhi(double phi) {
 
 
 
-
-
-
 // void BSM3GAnalyzer::fillHistograms(string group, vector<int> group_list) {
-
-
-	  
-
-
-
 //   for(unsigned int NpdfID = 0; NpdfID < pdfWeightVector.size();  NpdfID++){
-
 //     double weight = isrgluon_weight * pdfWeightVector.at(NpdfID);
-
-    
 //       _hNPVertices[i][NpdfID]->Fill(bestVertices,weight);
 //     }
 
@@ -1032,44 +1017,6 @@ double Analyzer::absnormPhi(double phi) {
 //     }
 
 
-//     // ------Reco Jet Histograms
-//     if (_FillRecoJetHists == "1") {
-
-//       // ------Reco B-Jet Histograms
-//       int NbJets = 0;
-//       for(int j = 0; j < Jet_pt->size(); j++) {
-// 	if (!passRecoBJetCuts(j)) continue;
-//         _hBJetEnergy[i][NpdfID]->Fill(smearedJetMomentumVector.at(j).Energy(),weight);
-// 	_hBJetPt[i][NpdfID]->Fill(smearedJetMomentumVector.at(j).Pt(),weight);
-// 	_hBJetEta[i][NpdfID]->Fill(smearedJetMomentumVector.at(j).Eta(),weight);
-// 	_hBJetPhi[i][NpdfID]->Fill(smearedJetMomentumVector.at(j).Phi(),weight);
-//         NbJets++;
-//       }
-//       _hNBJet[i][NpdfID]->Fill(NbJets,weight);
-
-//       // ------Jet1 Histograms
-//       int nJets = 0;
-//       for(int j = 0; j < Jet_pt->size(); j++) {
-// 	if (!passRecoJet1Cuts(j)) continue;
-//         _hJet1Energy[i][NpdfID]->Fill(smearedJetMomentumVector.at(j).Energy(),weight);
-// 	_hJet1Pt[i][NpdfID]->Fill(smearedJetMomentumVector.at(j).Pt(),weight);
-// 	_hJet1Eta[i][NpdfID]->Fill(smearedJetMomentumVector.at(j).Eta(),weight);
-// 	_hJet1Phi[i][NpdfID]->Fill(smearedJetMomentumVector.at(j).Phi(),weight);
-// 	nJets++;
-//       }
-//       _hNJet1[i][NpdfID]->Fill(nJets,weight);
-
-//       // ------Jet2 Histograms
-//       nJets = 0;
-//       for(int j = 0; j < Jet_pt->size(); j++) {
-// 	if (!passRecoJet2Cuts(j)) continue;
-//         _hJet2Energy[i][NpdfID]->Fill(smearedJetMomentumVector.at(j).Energy(),weight);
-// 	_hJet2Pt[i][NpdfID]->Fill(smearedJetMomentumVector.at(j).Pt(),weight);
-// 	_hJet2Eta[i][NpdfID]->Fill(smearedJetMomentumVector.at(j).Eta(),weight);
-// 	_hJet2Phi[i][NpdfID]->Fill(smearedJetMomentumVector.at(j).Phi(),weight);
-// 	nJets++;
-//       }
-//       _hNJet2[i][NpdfID]->Fill(nJets,weight);
 
 //       // ------Central Jet Histograms
 //       int nCJets = 0;
@@ -1078,322 +1025,215 @@ double Analyzer::absnormPhi(double phi) {
 // 	_hCentralJetPt[i][NpdfID]->Fill(smearedJetMomentumVector.at(j).Pt(),weight);
 // 	_hCentralJetEta[i][NpdfID]->Fill(smearedJetMomentumVector.at(j).Eta(),weight);
 // 	nCJets++;
-//       }
+
 //       _hNCentralJet[i][NpdfID]->Fill(nCJets,weight);
 
-//       // ------DiJet Histograms and histograms of highest mass dijet pair
-//       double leaddijetmass = 0;
-//       double leaddijetpt = 0;
-//       double leaddijetdeltaR = 0;
-//       double leaddijetdeltaEta = 0;
-//       double etaproduct = -100;
-//       for(int j = 0; j < Jet_pt->size(); j++) {
-//         for(int jj = 0; jj < Jet_pt->size(); jj++) {
-//           if ((passRecoJet1Cuts(j)) && 
-//               (passRecoJet2Cuts(jj)) && 
-// 	      (passDiJetTopologyCuts(j,jj)) &&
-//               (jj > j)) {
-//             if(CalculateTheDiJet4Momentum(smearedJetMomentumVector.at(j),smearedJetMomentumVector.at(jj)).second.M() > leaddijetmass) {leaddijetmass = CalculateTheDiJet4Momentum(smearedJetMomentumVector.at(j),smearedJetMomentumVector.at(jj)).second.M();etaproduct = smearedJetMomentumVector.at(j).Eta() * smearedJetMomentumVector.at(jj).Eta();}
-//             if(CalculateTheDiJet4Momentum(smearedJetMomentumVector.at(j),smearedJetMomentumVector.at(jj)).second.Pt() > leaddijetpt) {leaddijetpt = CalculateTheDiJet4Momentum(smearedJetMomentumVector.at(j),smearedJetMomentumVector.at(jj)).second.Pt();}
-//             if(fabs(smearedJetMomentumVector.at(j).Eta() - smearedJetMomentumVector.at(jj).Eta()) > leaddijetdeltaEta) {leaddijetdeltaEta = fabs(smearedJetMomentumVector.at(j).Eta() - smearedJetMomentumVector.at(jj).Eta());}
-//             if(smearedJetMomentumVector.at(j).DeltaR(smearedJetMomentumVector.at(jj)) > leaddijetdeltaR) {leaddijetdeltaR = smearedJetMomentumVector.at(j).DeltaR(smearedJetMomentumVector.at(jj));}
-//             _hDiJetMass[i][NpdfID]->Fill(CalculateTheDiJet4Momentum(smearedJetMomentumVector.at(j),smearedJetMomentumVector.at(jj)).second.M(),weight);
-//             _hDiJetPt[i][NpdfID]->Fill(CalculateTheDiJet4Momentum(smearedJetMomentumVector.at(j),smearedJetMomentumVector.at(jj)).second.Pt(),weight);
-//             _hDiJetDeltaEta[i][NpdfID]->Fill(fabs(smearedJetMomentumVector.at(j).Eta() - smearedJetMomentumVector.at(jj).Eta()),weight);
-//             _hDiJetDeltaPhi[i][NpdfID]->Fill(fabs(normalizedPhi(smearedJetMomentumVector.at(j).Phi() - smearedJetMomentumVector.at(jj).Phi())),weight);
-//             _hDiJetDeltaR[i][NpdfID]->Fill(smearedJetMomentumVector.at(j).DeltaR(smearedJetMomentumVector.at(jj)),weight);
-//           }
-//         }
-//       }
-//       _hLeadDiJetMass[i][NpdfID]->Fill(leaddijetmass,weight);
-//       _hLeadDiJetPt[i][NpdfID]->Fill(leaddijetpt,weight);
-//       _hLeadDiJetDeltaEta[i][NpdfID]->Fill(leaddijetdeltaEta,weight);
-//       _hLeadDiJetDeltaR[i][NpdfID]->Fill(leaddijetdeltaR,weight);
-//       if((etaproduct < 0) && (leaddijetmass != 0)) {etaproduct = -1;}
-//       if((etaproduct > 0) && (leaddijetmass != 0)) {etaproduct = +1;}
-//       _hLeadDiJetEtaProduct[i][NpdfID]->Fill(etaproduct,weight);
+  
+  // if(group == "FillGenTau") {
+  //   for(int i = 0; i < goodParts[ival(eGTau)].size(); i++) {
+  //     histo.addVal(Gen->energy->at(i), group, );   //GenTauEnergy
+  //     histo.addVal(Gen->pt->at(i), group, );   //GenTauPt
+  //     histo.addVal(Gen->eta->at(i),group, );   //GenTauEta
+  //     histo.addVal(Gen->phi->at(i),group, );   //GenTauPhi
+  //   }
 
-//       // ------Leading+SubLeading jet Histograms; "Susy" histograms --> r1, r2, Alpha, etc.
-//       for(int j = 0; j < Jet_pt->size(); j++) {
-//         for(int jj = 0; jj < Jet_pt->size(); jj++) {
-//           if ((j == theLeadingJetIndex) && (jj == theSecondLeadingJetIndex)) {
-//             if( (passRecoFirstLeadingJetCuts(j)) && (passRecoSecondLeadingJetCuts(jj)) && (passSusyTopologyCuts(j,jj)) ) {
-//               TheLeadDiJetVect = CalculateTheDiJet4Momentum(smearedJetMomentumVector.at(j),smearedJetMomentumVector.at(jj)).second;
-//               _hLeadingJetsMass[i][NpdfID]->Fill(TheLeadDiJetVect.M(),weight);
-//               _hLeadingJetsPt[i][NpdfID]->Fill(TheLeadDiJetVect.Pt(),weight);
-//               _hLeadingJetsDeltaEta[i][NpdfID]->Fill(fabs(smearedJetMomentumVector.at(j).Eta() - smearedJetMomentumVector.at(jj).Eta()),weight);
-//               double dphiDijets = abs(normalizedPhi(smearedJetMomentumVector.at(j).Phi() - smearedJetMomentumVector.at(jj).Phi()));
-//               _hLeadSublDijetDphi[i][NpdfID]->Fill(dphiDijets,weight); 
-//               _hMetVsDiJetDeltaPhiLeadSubl[i][NpdfID]->Fill(theMETVector.Pt(),dphiDijets, weight);
-//               _hDeltaEtaVsDeltaPhiLeadSubl[i][NpdfID]->Fill(fabs(smearedJetMomentumVector.at(j).Eta() - smearedJetMomentumVector.at(jj).Eta()), dphiDijets, weight);
-//               _hLeadingJetsDeltaR[i][NpdfID]->Fill(smearedJetMomentumVector.at(j).DeltaR(smearedJetMomentumVector.at(jj)),weight);
-//               double dphi1MHT = normalizedPhi(smearedJetMomentumVector.at(j).Phi() - phiForMht);
-//               double dphi2MHT = normalizedPhi(smearedJetMomentumVector.at(jj).Phi() - phiForMht);
-//               double dphi1 = normalizedPhi(smearedJetMomentumVector.at(j).Phi() - theMETVector.Phi());
-//               double dphi2 = normalizedPhi(smearedJetMomentumVector.at(jj).Phi() - theMETVector.Phi());
-//               double r1;
-//               double r2;
-//               double alpha;
-//               r1 = sqrt( pow(dphi1,2.0) + pow((TMath::Pi() - dphi2),2.0) );
-//               r2 = sqrt( pow(dphi2,2.0) + pow((TMath::Pi() - dphi1),2.0) );
-//               double px = smearedJetMomentumVector.at(j).Px() + smearedJetMomentumVector.at(jj).Px();
-//               double py = smearedJetMomentumVector.at(j).Py() + smearedJetMomentumVector.at(jj).Py();
-//               double pz = smearedJetMomentumVector.at(j).Pz() + smearedJetMomentumVector.at(jj).Pz();
-//               double e = smearedJetMomentumVector.at(j).Energy() + smearedJetMomentumVector.at(jj).Energy();
-//               TLorentzVector Susy_LorentzVect;
-//               Susy_LorentzVect.SetPxPyPzE(px, py, pz, e);
-//               if(Susy_LorentzVect.M() > 0) {alpha = smearedJetMomentumVector.at(jj).Pt() / Susy_LorentzVect.M();}
-//               else {alpha = 999999999.0;}
-//               _hR1[i][NpdfID]->Fill(r1,weight);
-//               _hR2[i][NpdfID]->Fill(r2,weight);
-//               _hDphi1MHT[i][NpdfID]->Fill(dphi1MHT,weight);
-//               _hDphi2MHT[i][NpdfID]->Fill(dphi2MHT,weight);
-//               _hDphi1[i][NpdfID]->Fill(dphi1,weight);
-//               _hDphi2[i][NpdfID]->Fill(dphi2,weight);
-//               _hDphi1VsDphi2[i][NpdfID]->Fill(dphi1,dphi2,weight);
-//               _hAlpha[i][NpdfID]->Fill(alpha,weight);
-//             }
-//           }
-//         }
-//       }
-//       _hFirstLeadingJetPt[i][NpdfID]->Fill(leadingjetpt,weight);
-//       _hSecondLeadingJetPt[i][NpdfID]->Fill(secondleadingjetpt,weight);
-//       _hFirstLeadingJetEta[i][NpdfID]->Fill(leadingjeteta,weight);
-//       _hSecondLeadingJetEta[i][NpdfID]->Fill(secondleadingjeteta,weight);
-//     }
+  // } else if(group == "FillGenMuon") {
+  //   for(int i = 0; i < goodParts[ival(eGMuon)].size(); i++) {
 
-//     // ------Topology Histograms
-//     if (_FillTopologyHists == "1") {
-//       _hMHT[i][NpdfID]->Fill(sqrt((sumpxForMht * sumpxForMht) + (sumpyForMht * sumpyForMht)),weight);
-//       _hHT[i][NpdfID]->Fill(sumptForHt,weight);
-//       _hMeff[i][NpdfID]->Fill(sumptForHt + sqrt((sumpxForMht * sumpxForMht) + (sumpyForMht * sumpyForMht)),weight);
-//       _hMet[i][NpdfID]->Fill(theMETVector.Pt(),weight);
-//       if ((theLeadingJetIndex >= 0) && (theSecondLeadingJetIndex >= 0)) {
-//         TheLeadDiJetVect = CalculateTheDiJet4Momentum(smearedJetMomentumVector.at(theLeadingJetIndex),smearedJetMomentumVector.at(theSecondLeadingJetIndex)).second;
-//         _hMetDiJetDeltaPhi[i][NpdfID]->Fill(abs(normalizedPhi(theMETVector.Phi() - TheLeadDiJetVect.Phi())),weight);
-//       }
+  // 	switch(j) {
 
- 
+  // 	case 0: Fill(Gen->energy->at(i));   //GenMuonEnergy
+  //       case 1: Fill(Gen_pt->at(i));   //GenMuonPt
+  //       case 2: Fill(Gen_eta->at(i));   //GenMuonEta
+  //       case 3: Fill(Gen_phi->at(i));   //GenMuonPhi
+
+  // 	}
+  //     }
+  //   }
+
+  //     if(Muon->smearP.at(j).Pt() >= leadingmuonpt) {
+  // 	leadingmuonpt = Muon->smearP.at(j).Pt();
+  // 	leadingmuoneta = Muon->smearP.at(j).Eta();
+  //   if(nMuons > 0) {
+  //     _hFirstLeadingMuon1Pt->Fill(leadingmuonpt);
+  //     _hFirstLeadingMuon1Eta->Fill(leadingmuoneta);
+  //   }
+  //////////num with pt/eta/phi/e 
 
 
-void fill_histogram() {
+void Analyzer::fill_histogram() {
   int maxCut = fillCuts();
   vector<string>* groups = histo->get_groups();
 
-  for(vector<string>::iterator it = groups->begin(); it!=groups.end(); it++) {
-    fill_Folder(group);
+  for(vector<string>::iterator it = groups->begin(); it!=groups->end(); it++) {
+    fill_Folder(*it, maxCut);
   }
-  }
-
-void fill_Folder(string group, int groupSize) {
-  
-  if(group == "FillGenTau") {
-    for(int i = 0; i < goodParts[ival(eGTau)].size(); i++) {
-      histo.addVal(Gen->energy->at(i), group, );   //GenTauEnergy
-	case 1 : Fill(Gen->pt->at(i), group, groupSize);   //GenTauPt
-	case 2 : Fill(Gen->eta->at(i),group, groupSize);   //GenTauEta
-	case 3 : Fill(Gen->phi->at(i),group, groupSize);   //GenTauPhi
-	}
-      }
-    }
-  } else if(group == "FillGenMuon") {
-    for(int i = 0; i < goodParts[ival(eGMuon)].size(); i++) {
-      for(int j = 0; j < group_list.size(); j++) {
-	switch(j) {
-
-	case 0: Fill(Gen->energy->at(i));   //GenMuonEnergy
-        case 1: Fill(Gen_pt->at(i));   //GenMuonPt
-        case 2: Fill(Gen_eta->at(i));   //GenMuonEta
-        case 3: Fill(Gen_phi->at(i));   //GenMuonPhi
-
-	}
-      }
-    }
-  } else if(group == "FillRecoTau") {
-    double leadingpt = 0;
-    double leadingeta = 0;
-
-    for(int i = 0; i < goodParts[ival(eRTau1)].size(); i++) {
-      if(Tau->smearP.at(i).Pt() >= leadingtaupt) {
-	leadingtaupt = Tau->smearP.at(i).Pt();
-	leadingtaueta = Tau->smearP.at(i).Eta();
-      }
-
-      for(int j = 0; j < group_list.size(); j++) {
-	switch(j) {
-    
-	case 0: Fill(Tau->smearP.at(i).Energy());   //RecoTauEnergy
-	case 1: Fill(Tau->smearP.at(i).Pt());   //RecoTau1Pt
-	case 2: Fill(Tau->smearP.at(i).Eta());   //RecoTauEta
-	case 3: Fill(Tau->smearP.at(j));   //RecoTauPhi
-        case 4: Fill(Tau_>nProngs->at(i));   //RecoTauNumTracks
-	case 5: Fill(Tau->charge->at(i));   //RecoTauCharge
-        case 6: Fill(Tau->leadChargedCandPt->at(i));   //RecoTauSeedTracks
-
-	}
-      }
-    }
-    Fill(goodParts[ival(ePos)].size());   //NumRecoTau
-    if(goodParts[ival(ePos)].size() > 0) {   
-      Fill(leadingtaupt);   //LeadingRecoTauPt
-      Fill(leadingtaueta);   //LeadingRecoTauEta
-    }
-  } else if(group == "FillRecoMuon") {
-    double leadingpt = 0;
-    double leadingeta = 0;
-
-    for(int i = 0; i < goodParts[ival(eRMuon1)].size(); i++) {
-      if(Muon->smearP.at(j).Pt() >= leadingmuonpt) {
-	leadingmuonpt = Muon->smearP.at(j).Pt();
-	leadingmuoneta = Muon->smearP.at(j).Eta();
-      }
-
-      for(int j = 0; j < group_list.size(); j++) {
-	switch(j) {
-
-	case 0: _hMuon1Energy->Fill(Muon->smearP.at(j).Energy());
-	case 1: _hMuon1Pt->Fill(Muon->smearP.at(j).Pt());
-	case 2: _hMuon1Eta->Fill(Muon->smearP.at(j).Eta());
-	case 3: _hMuon1Phi->Fill(Muon->smearP.at(j).Phi());
-        case 4: _hMuon1MetMt->Fill(CalculateLeptonMetMt(Muon->smearP.at(j)));
-	
-	}
-      }
-    }
-    _hNMuon1->Fill(nMuons);
-    if(nMuons > 0) {
-      _hFirstLeadingMuon1Pt->Fill(leadingmuonpt);
-      _hFirstLeadingMuon1Eta->Fill(leadingmuoneta);
-    }
-
-  } else if(group == "FillMuonTau") {
-    for(int i = 0; i < goodParts[ival(eRMuon1)].size(); i++) {
-      for(int j = 0; j < goodParts[ival(eRTau1)].size(); j++) {
-	if (!passMuon1Tau1TopologyCuts(i, j)) continue;
-	for(int k = 0; k < group_list.size(); k++) {
-	  switch(j) {
-
-            if ((theLeadingJetIndex >= 0) && (theSecondLeadingJetIndex >= 0)) {
-              TheLeadDiJetVect = Jet->smearP.at(theLeadingJetIndex) + Jet->smearP.at(theSecondLeadingJetIndex);
-	      Fill(absnormPhi(Tau->smearP.at(tj).Phi() - TheLeadDiJetVect.Phi())));   //MuonTau_TauDiJetDeltaPhi
-	      Fill(absnormPhi(Muon->smearP.at(mj).Phi() - TheLeadDiJetVect.Phi())));   //Muon1Tau1_Muon1DiJetDeltaPhi
-              UseVectorSumOfVisProductsAndMetMassReco = "1";
-              _UseCollinerApproxMassReco = _UseCollinerApproxMuon1Tau1MassReco;
-	      Fill(DiParticleMass(TheLeadDiJetVect, Muon->smearP.at(mj)+Tau->smearP.at(tj) ));   //Muon1Tau1DiJetReconstructableMass
-            }
-            Fill(isZmm(Muon->smearP.at(mj)).first);   //Muon1Tau1_Muon1IsZmm
-	    Fill(Muon->smearP.at(mj).Pt(),Tau->smearP.at(tj).Pt());   //Muon1PtVsTau1Pt
-	    Fill(Tau->smearP.at(tj).DeltaR(Muon->smearP.at(mj)));   //Muon1Tau1DeltaR
-	    Fill((Tau->smearP.at(tj).Pt() - Muon->smearP.at(mj).Pt()) / (Tau->smearP.at(tj).Pt() + Muon->smearP.at(mj).Pt()));   //Muon1Tau1DeltaPtDivSumPt
-	    Fill((Tau->smearP.at(tj).Pt() - Muon->smearP.at(mj).Pt()));   //Muon1Tau1DeltaPt
-	    Fill(cos(absnormPhi(Muon->smearP.at(mj).Phi() - Tau->smearP.at(tj).Phi())));   //Muon1Tau1CosDphi
-	    Fill(absnormPhi(Muon->smearP.at(mj).Phi() - theMETVector.Phi()));   //Muon1Tau1_Muon1MetDeltaPhi
-	    Fill(absnormPhi(Muon->smearP.at(mj).Phi() - theMETVector.Phi()), cos(absnormPhi(Muon->smearP.at(mj).Phi() - Tau->smearP.at(tj).Phi())));   //Muon1MetDeltaPhiVsMuon1Tau1CosDphi
-	    Fill(absnormPhi(Tau->smearP.at(tj).Phi() - theMETVector.Phi()));   //Muon1Tau1_Tau1MetDeltaPhi
-	    _UseVectorSumOfVisProductsAndMetMassReco = _UseVectorSumOfMuon1Tau1ProductsAndMetMassReco;
-            _UseCollinerApproxMassReco = _UseCollinerApproxMuon1Tau1MassReco;
-	    if(CalculateTheDiTau4Momentum(Tau->smearP.at(tj),Muon->smearP.at(mj)).first) {
-	      Fill(DiParticleMass(Tau->smearP.at(tj),Muon->smearP.at(mj)));   //Muon1Tau1ReconstructableMass
-	    } else {
-	      Fill(DiParticleMass(Tau->smearP.at(tj),Muon->smearP.at(mj)));   //Muon1Tau1NotReconstructableMass
-	    }
-	    double PZeta = CalculatePZeta(Tau->smearP.at(tj),Muon->smearP.at(mj));
-	    double PZetaVis = CalculatePZetaVis(Tau->smearP.at(tj),Muon->smearP.at(mj));
-	    Fill(CalculateLeptonMetMt(Muon->smearP.at(mj)));   //Muon1Tau1_Muon1MetMt
-	    Fill(CalculateLeptonMetMt(Tau->smearP.at(tj)));   //Muon1Tau1_Tau1MetMt
-            Fill(Muon_charge->at(mj) * Tau_charge->at(tj));   //Muon1Tau1OSLS
-	    Fill(PZeta);   //Muon1Tau1PZeta
-	    Fill(PZetaVis);   //Muon1Tau1PZetaVis
-	    Fill(PZetaVis,PZeta);   //Muon1Tau1Zeta2D
-	    Fill((_Muon1Tau1PZetaCutCoefficient * PZeta) + (_Muon1Tau1PZetaVisCutCoefficient * PZetaVis));   //Muon1Tau1Zeta1D
-	  }
-	}
-      }
-    }
-  } else if(group == "FillDiTau") {
-    for(int i = 0; i < goodParts[ival(eRTau1)].size(); i++) {
-      for(int j = i+1; j < goodParts[ival(eRTau2)].size(); j++) {
-	if (!passDiTauTopologyCuts(i,j)) continue;
-	for(int k = 0; k < group_list.size(); k++) {
-	  switch(j) {
-	    
-            if ((theLeadingJetIndex >= 0) && (theSecondLeadingJetIndex >= 0)) {
-              TheLeadDiJetVect = Jet->smearP.at(theLeadingJetIndex) + Jet->smearP.at(theSecondLeadingJetIndex);
-	      _hTau1Tau2_Tau1DiJetDeltaPhi->Fill(absnormPhi(Tau->smearP.at(j).Phi() - TheLeadDiJetVect.Phi())));
-	      _hTau1Tau2_Tau2DiJetDeltaPhi->Fill(absnormPhi(Tau->smearP.at(jj).Phi() - TheLeadDiJetVect.Phi())));
-              _UseVectorSumOfVisProductsAndMetMassReco = "1";
-              _UseCollinerApproxMassReco = _UseCollinerApproxDiTauMassReco;
-	      _hDiTauDiJetReconstructableMass->Fill(DiParticleMass(TheLeadDiJetVect, Tau->smearP.at(j) + Tau->smearP.at(jj)) );
-            }
-	    _hTau1PtVsTau2Pt->Fill(Tau->smearP.at(j).Pt(),Tau->smearP.at(jj).Pt());
-	    _hTau1Tau2DeltaR->Fill(Tau->smearP.at(j).DeltaR(Tau->smearP.at(jj)));
-	    _hTau1Tau2DeltaPtDivSumPt->Fill((Tau->smearP.at(j).Pt() - Tau->smearP.at(jj).Pt()) / (Tau->smearP.at(j).Pt() + Tau->smearP.at(jj).Pt()));
-	    _hTau1Tau2DeltaPt->Fill((Tau->smearP.at(j).Pt() - Tau->smearP.at(jj).Pt()));
-            _hTau1Tau2OSLS->Fill(Tau_charge->at(j) * Tau_charge->at(jj));
-	    _hTau1Tau2CosDphi->Fill(cos(absnormPhi(Tau->smearP.at(j).Phi() - Tau->smearP.at(jj).Phi()))));
-	    _hDiTau_Tau1MetDeltaPhi->Fill(absnormPhi(Tau->smearP.at(j).Phi() -  theMETVector.Phi())));
-	    _hDiTau_Tau2MetDeltaPhi->Fill(absnormPhi(Tau->smearP.at(jj).Phi() -  theMETVector.Phi())));
-	    _hTau1MetDeltaPhiVsTau1Tau2CosDphi->Fill(absnormPhi(Tau->smearP.at(j).Phi() -  theMETVector.Phi())), cos(absnormPhi(Tau->smearP.at(j).Phi() - Tau->smearP.at(jj).Phi()))));
-            _UseVectorSumOfVisProductsAndMetMassReco = _UseVectorSumOfDiTauProductsAndMetMassReco;
-            _UseCollinerApproxMassReco = _UseCollinerApproxDiTauMassReco;
-	    if(CalculateTheDiTau4Momentum(Tau->smearP.at(j),Tau->smearP.at(jj)).first) {
-	      _hDiTauReconstructableMass->Fill(DiParticleMass(Tau->smearP.at(j),Tau->smearP.at(jj)));
-	    } else {
-	      _hDiTauNotReconstructableMass->Fill(DiParticleMass(Tau->smearP.at(j),Tau->smearP.at(jj)));
-	    }
-	    _hDiTau_Tau1MetMt->Fill(CalculateLeptonMetMt(Tau->smearP.at(j)));
-	    _hDiTau_Tau2MetMt->Fill(CalculateLeptonMetMt(Tau->smearP.at(jj)));
-	    _hDiTauPZeta->Fill(CalculatePZeta(Tau->smearP.at(j),Tau->smearP.at(jj)));
-	    _hDiTauPZetaVis->Fill(CalculatePZetaVis(Tau->smearP.at(j),Tau->smearP.at(jj)));
-	    _hDiTauZeta2D->Fill(CalculatePZetaVis(Tau->smearP.at(j),Tau->smearP.at(jj)),CalculatePZeta(Tau->smearP.at(j),Tau->smearP.at(jj)));
-	    _hDiTauZeta1D->Fill((_DiTauPZetaCutCoefficient * CalculatePZeta(Tau->smearP.at(j),Tau->smearP.at(jj))) + (_DiTauPZetaVisCutCoefficient * CalculatePZetaVis(Tau->smearP.at(j),Tau->smearP.at(jj))));
-	  }
-	}
-      }
-    }
-  } else if(group == "FillDiMuon") {
-    for(int i = 0; i < goodParts[ival(eRMuon1)].size(); i++) {
-      for(int j = i+1; j < goodParts[ival(eRMuon2)].size(); j++) {
-	if (!passDiMuonTopologyCuts(i,j)) continue;
-	for(int k = 0; k < group_list.size(); k++) {
-	  switch(j) {
-
-	    if ((theLeadingJetIndex >= 0) && (theSecondLeadingJetIndex >= 0)) {
-	      TheLeadDiJetVect = Jet->smearP.at(theLeadingJetIndex) + Jet->smearP.at(theSecondLeadingJetIndex);
-	      _hMuon1Muon2_Muon1DiJetDeltaPhi->Fill(absnormPhi(Muon->smearP.at(j).Phi() - TheLeadDiJetVect.Phi()));
-	      _hMuon1Muon2_Muon2DiJetDeltaPhi->Fill(absnormPhi(Muon->smearP.at(jj).Phi() - TheLeadDiJetVect.Phi())));
-	    }
-	    _hMuon1Muon2_Muon1IsZmm->Fill(isZmm(Muon->smearP.at(j)).first);
-	    _hMuon1Muon2_Muon2IsZmm->Fill(isZmm(Muon->smearP.at(jj)).first);
-	    _hMuon1PtVsMuon2Pt->Fill(Muon->smearP.at(j).Pt(),Muon->smearP.at(jj).Pt());
-	    _hMuon1Muon2DeltaR->Fill(Muon->smearP.at(j).DeltaR(Muon->smearP.at(jj)));
-	    _hMuon1Muon2DeltaPtDivSumPt->Fill((Muon->smearP.at(j).Pt() - Muon->smearP.at(jj).Pt()) / (Muon->smearP.at(j).Pt() + Muon->smearP.at(jj).Pt()));
-	    _hMuon1Muon2DeltaPt->Fill((Muon->smearP.at(j).Pt() - Muon->smearP.at(jj).Pt()));
-	    _hMuon1Muon2CosDphi->Fill(cos(absnormPhi(Muon->smearP.at(j).Phi() - Muon->smearP.at(jj).Phi()))));
-	    _hDiMuon_Muon1MetDeltaPhi->Fill(absnormPhi(Muon->smearP.at(j).Phi() - theMETVector.Phi())));
-	    _hDiMuon_Muon2MetDeltaPhi->Fill(absnormPhi(Muon->smearP.at(jj).Phi() - theMETVector.Phi())));
-	    _hMuon1MetDeltaPhiVsMuon1Muon2CosDphi->Fill(absnormPhi(Muon->smearP.at(j).Phi() - theMETVector.Phi())), cos(absnormPhi(Muon->smearP.at(j).Phi() - Muon->smearP.at(jj).Phi()))));
-	    _UseVectorSumOfVisProductsAndMetMassReco = _UseVectorSumOfDiMuonProductsAndMetMassReco;
-	    _UseCollinerApproxMassReco = _UseCollinerApproxDiMuonMassReco;
-	    if(CalculateTheDiTau4Momentum(Muon->smearP.at(j),Muon->smearP.at(jj)).first) {
-	      _hDiMuonReconstructableMass->Fill(DiParticle(Muon->smearP.at(j),Muon->smearP.at(jj)));
-	    } else {
-	      _hDiMuonNotReconstructableMass->Fill(DiParticleMass(Muon->smearP.at(j),Muon->smearP.at(jj)));
-	    }
-	    _hDiMuon_Muon1MetMt->Fill(CalculateLeptonMetMt(Muon->smearP.at(j)));
-	    _hDiMuon_Muon2MetMt->Fill(CalculateLeptonMetMt(Muon->smearP.at(jj)));
-	    _hMuon1Muon2OSLS->Fill(Muon_charge->at(j) * Muon_charge->at(jj));
-	    _hDiMuonPZeta->Fill(CalculatePZeta(Muon->smearP.at(j),Muon->smearP.at(jj)));
-	    _hDiMuonPZetaVis->Fill(CalculatePZetaVis(Muon->smearP.at(j),Muon->smearP.at(jj)));
-	    _hDiMuonZeta2D->Fill(CalculatePZetaVis(Muon->smearP.at(j),Muon->smearP.at(jj)),CalculatePZeta(Muon->smearP.at(j),Muon->smearP.at(jj)));
-	    _hDiMuonZeta1D->Fill((_DiMuonPZetaCutCoefficient * CalculatePZeta(Muon->smearP.at(j),Muon->smearP.at(jj))) + (_DiMuonPZetaVisCutCoefficient * CalculatePZetaVis(Muon->smearP.at(j),Muon->smearP.at(jj))));
-	  }
-	}
-      }
-    }
-  } else if(
-	
 }
+
+
+void Analyzer::fill_Folder(string group, int max) {
+
+  if(group == "FillTauJet1" || group == "FillTauJet2" || group == "FillMuon1" || group == "FillMuon2" || group == "FillJet1" || group == "FillJet2" || group == "FillBJet") {
+    Particle* part;
+    if(group == "FillTauJet1" || group == "FillTauJet2") part=_Tau;
+    else if(group == "FillMuon1" || group == "FillMuon2") part=_Muon;
+    else part = _Jet;
+    CUTS ePos = fill_num[group];
+
+    for(vec_iter it=goodParts[ival(ePos)].begin(); it!=goodParts[ival(ePos)].end(); it++) {
+      histo->addVal(part->smearP.at(*it).Energy(), group,max, "Energy");
+      histo->addVal(part->smearP.at(*it).Pt(), group,max, "Pt");
+      histo->addVal(part->smearP.at(*it).Eta(), group,max, "Eta");
+      histo->addVal(part->smearP.at(*it).Phi(), group,max, "Phi");
+      if(dynamic_cast<Taus*>(part) != NULL) {
+	histo->addVal(_Tau->nProngs->at(*it), group,max, "NumSignalTracks");
+  	histo->addVal(_Tau->charge->at(*it), group,max, "Charge");
+	histo->addVal(_Tau->leadChargedCandPt->at(*it), group,max, "SeedTracks");
+      } else if(dynamic_cast<Muon*>(part)) {
+	histo->addVal(CalculateLeptonMetMt(_Muon->smearP.at(*it)), group,max, "MetMt");  
+      }
+    }
+
+    histo->addVal(goodParts[ival(ePos)].size(), group,max, "N");
+
+  } else if(group == "FillSusyCuts") {
+
+    histo->addVal(sqrt((sumpxForMht * sumpxForMht) + (sumpyForMht * sumpyForMht)),group,max, "MHT");
+    histo->addVal(sumptForHt,group,max, "HT");  
+    histo->addVal(sumptForHt + sqrt((sumpxForMht * sumpxForMht) + (sumpyForMht * sumpyForMht)),group,max, "Meff");
+    histo->addVal(theMETVector.Pt(), group,max, "Met");
+    if(goodParts[ival(CUTS::eR1stJet)].size() * goodParts[ival(CUTS::eR2ndJet)].size() != 0) {
+      TLorentzVector DiJet = _Jet->smearP.at(goodParts[ival(CUTS::eR1stJet)].at(0)) + _Jet->smearP.at(goodParts[ival(CUTS::eR2ndJet)].at(0));
+      histo->addVal(absnormPhi(theMETVector.Phi() - DiJet.Phi()), group,max, "MetDiJetDeltaPhi");
+    }
+  
+
+
+  } else if(group == "FillLeadingJet" && goodParts[ival(CUTS::eSusyCom)].size() != 0) {
+    TLorentzVector first = _Jet->smearP.at(goodParts[ival(CUTS::eR1stJet)].at(0));
+    TLorentzVector second = _Jet->smearP.at(goodParts[ival(CUTS::eR2ndJet)].at(0));
+
+    histo->addVal(first.Pt(),group,max, "FirstPt");
+    histo->addVal(second.Pt(),group,max, "SecondPt");
+    histo->addVal(first.Eta(),group,max, "FirstEta");
+    histo->addVal(second.Eta(),group,max, "SecondEta");
+    
+    TLorentzVector LeadDiJet = first + second;
+    
+    histo->addVal(LeadDiJet.M(), group,max, "Mass"); 
+    histo->addVal(LeadDiJet.Pt(), group,max, "Pt");  
+    histo->addVal(fabs(first.Eta() - second.Eta()), group,max, "DeltaEta"); 
+    histo->addVal(first.DeltaR(second),group,max, "DeltaR");  
+
+    double dphiDijets = absnormPhi(second.Phi() - second.Phi());
+    double dphi1 = normPhi(first.Phi() - theMETVector.Phi());
+    double dphi2 = normPhi(second.Phi() - theMETVector.Phi());
+    double alpha = (LeadDiJet.M() > 0) ? second.Pt() / LeadDiJet.M() : 999999999.0;
+
+    histo->addVal(dphiDijets,group,max, "LeadSublDijetDphi"); 
+    //////histo->addVal(theMETVector.Pt(),dphiDijets, group,max, "");   //MetVsDiJetDeltaPhiLeadSubl
+    /////histo->addVal(fabs(first.Eta() - second.Eta()), dphiDijets, group,max, "");   //DeltaEtaVsDeltaPhiLeadSubl
+
+    histo->addVal(sqrt( pow(dphi1,2.0) + pow((TMath::Pi() - dphi2),2.0) ), group,max, "R1");
+    histo->addVal(sqrt( pow(dphi2,2.0) + pow((TMath::Pi() - dphi1),2.0)), group,max, "R2");
+    histo->addVal(normPhi(first.Phi() - phiForMht), group,max, "Dphi1MHT"); 
+    histo->addVal(normPhi(second.Phi() - phiForMht), group,max, "Dphi2MHT");
+    histo->addVal(dphi1,group,max, "Dphi1");
+    histo->addVal(dphi2,group,max, "Dphi2");
+    ///histo->addVal(dphi1,dphi2,group,max, "");   //Dphi1VsDphi2
+    histo->addVal(alpha,group,max, "Alpha");
+
+
+    //dijet info
+  } else if(group == "FillDiJet") {
+    double leaddijetmass = 0;
+    double leaddijetpt = 0;
+    double leaddijetdeltaR = 0;
+    double leaddijetdeltaEta = 0;
+    double etaproduct = -100;
+    for(vec_iter it=goodParts[ival(CUTS::eDiJet)].begin(); it!=goodParts[ival(CUTS::eDiJet)].end(); it++) {
+      int p1 = (*it) / _Jet->smearP.size();
+      int p2 = (*it) % _Jet->smearP.size();
+      TLorentzVector jet1 = _Jet->smearP.at(p1);
+      TLorentzVector jet2 = _Jet->smearP.at(p2);
+      TLorentzVector DiJet = jet1 + jet2;
+	  
+      if(DiJet.M() > leaddijetmass) {
+	leaddijetmass = DiJet.M();
+	etaproduct = (jet1.Eta() * jet2.Eta() > 0) ? 1 : -1;
+      }
+      leaddijetpt = (DiJet.Pt() > leaddijetpt) ? DiJet.Pt() : leaddijetpt;
+      leaddijetdeltaEta = (fabs(jet1.Eta() - jet2.Eta()) > leaddijetdeltaEta) ? fabs(jet1.Eta() - jet2.Eta()) : leaddijetdeltaEta;
+      leaddijetdeltaR = (jet1.DeltaR(jet2) > leaddijetdeltaR) ? jet1.DeltaR(jet2) : leaddijetdeltaR;
+
+      histo->addVal(DiJet.M(), group,max, "Mass");
+      histo->addVal(DiJet.Pt(), group,max, "Pt");
+      histo->addVal(fabs(jet1.Eta() - jet2.Eta()), group,max, "DetlaEta");
+      histo->addVal(absnormPhi(jet1.Phi() - jet2.Phi()), group,max, "DeltaPhi");
+      histo->addVal(jet1.DeltaR(jet2), group,max, "DeltaR");
+    }
+  
+    histo->addVal(leaddijetmass, group,max, "LeadMass");
+    histo->addVal(leaddijetpt, group,max, "LeadPt");  
+    histo->addVal(leaddijetdeltaEta, group,max, "LeadDeltaEta");
+    histo->addVal(leaddijetdeltaR, group,max, "LeadDeltaR");
+    histo->addVal(etaproduct, group,max, "LeadEtaProduct");
+
+
+    ////diparticle stuff
+  } else if(group == "FillDiMuon" || group == "FillDiTau" || group == "Muon1Tau1" || group == "Muon1Tau2" || group == "Muon2Tau1" || group == "Muon2Tau2") {  ///mumu/mutau/tautau
+    Lepton* lep1 = NULL;
+    Lepton* lep2 = NULL;
+    CUTS ePos = fill_num[group];
+    if(ePos == CUTS::eMuon1Tau1 || ePos == CUTS::eMuon1Tau2 || ePos == CUTS::eMuon2Tau1 || ePos == CUTS::eMuon2Tau2) {
+      lep1 = _Muon; lep2 = _Tau;
+    } else if(ePos == CUTS::eElec1Tau1 || ePos == CUTS::eElec1Tau2 || ePos == CUTS::eElec2Tau1 || ePos == CUTS::eElec2Tau2) {
+      lep1 = _Electron; lep2 = _Tau;
+    } else if(ePos == CUTS::eDiMuon) {
+      lep1 = _Muon; lep2 = _Muon;
+    } else if(ePos == CUTS::eDiTau) { lep1 = _Tau; lep2 = _Tau; 
+    } else if (ePos == CUTS::eDiElec) { lep1 = _Electron; lep2 = _Electron; }
+
+    
+    for(vec_iter it=goodParts[ival(ePos)].begin(); it!=goodParts[ival(ePos)].end(); it++) {
+
+      int p1= (*it) / _Gen->pt->size();
+      int p2= (*it) % _Gen->pt->size();
+
+      //    histo->addVal(Muon->smearP.at(mj).Pt(),Tau->smearP.at(tj).Pt());   //Muon1PtVsTau1Pt######################
+      histo->addVal(lep1->smearP.at(p1).DeltaR(lep2->smearP.at(p2)), group,max, "DeltaR"); 
+      histo->addVal((lep1->smearP.at(p1).Pt() - lep1->smearP.at(p2).Pt()) / (lep1->smearP.at(p1).Pt() + lep2->smearP.at(p2).Pt()), group,max, "DeltaPtDivSumPt");   //Muon1Tau1DeltaPtDivSumPt
+      histo->addVal(lep1->smearP.at(p1).Pt() - lep2->smearP.at(p2).Pt(), group,max, "DeltaPt");
+      histo->addVal(cos(absnormPhi(lep2->smearP.at(p2).Phi() - lep1->smearP.at(p1).Phi())), group,max, "CosDphi");
+      histo->addVal(absnormPhi(lep2->smearP.at(p2).Phi() - theMETVector.Phi()), group,max, "Part1MetDeltaPhi");
+      ///      histo->addVal(absnormPhi(lep2->smearP.at(p2).Phi() - theMETVector.Phi()), cos(absnormPhi(lep2->smearP.at(p2).Phi() - lep1->smearP.at(p1).Phi())));   //Muon1MetDeltaPhiVsMuon1Tau1CosDphi
+      histo->addVal(absnormPhi(lep1->smearP.at(p1).Phi() - theMETVector.Phi()), group,max, "Part2MetDeltaPhi");
+      // if(CalculateTheDiTau4Momentum(lep1->smearP.at(p1),lep2->smearP.at(p2)).first) {
+      // 	histo->addVal(DiParticleMass(lep1->smearP.at(p1),lep2->smearP.at(p2)), group,max, "ReconstructableMass");
+      // } else {
+      // 	histo->addVal(DiParticleMass(lep1->smearP.at(p1),lep2->smearP.at(p2)), group,max, "NotReconstructableMass");
+      // }
+      double PZeta = CalculatePZeta(lep1->smearP.at(p1),lep2->smearP.at(p2));
+      double PZetaVis = CalculatePZetaVis(lep1->smearP.at(p1),lep2->smearP.at(p2));
+      histo->addVal(CalculateLeptonMetMt(lep2->smearP.at(p2)), group,max, "Part1MetMt");
+      histo->addVal(CalculateLeptonMetMt(lep1->smearP.at(p1)), group,max, "Part2MetMt"); 
+      histo->addVal(lep2->charge->at(p2) * lep1->charge->at(p1), group,max, "OSLS");  
+      histo->addVal(PZeta, group,max, "PZeta"); 
+      histo->addVal(PZetaVis, group,max, "PZetaVis");  
+      // histo->addVal(PZetaVis,PZeta, group,max, "Zeta2D");   //Muon1Tau1Zeta2D
+      ///histo->addVal((_Muon1Tau1PZetaCutCoefficient * PZeta) + (_Muon1Tau1PZetaVisCutCoefficient * PZetaVis));   //Muon
+
+      if ((goodParts[ival(CUTS::eR1stJet)].size() != 0) && (goodParts[ival(CUTS::eR2ndJet)].size() != 0)) {
+	TLorentzVector TheLeadDiJetVect = _Jet->smearP.at(goodParts[ival(CUTS::eR2ndJet)].at(0)) + _Jet->smearP.at(goodParts[ival(CUTS::eR2ndJet)].size());
+	histo->addVal(absnormPhi(lep1->smearP.at(p1).Phi() - TheLeadDiJetVect.Phi()), group,max, "Part1DiJetDeltaPhi");
+	histo->addVal(absnormPhi(lep2->smearP.at(p2).Phi() - TheLeadDiJetVect.Phi()), group,max, "Part2DiJetDeltaPhi");
+	////////#####histo->addVal(DiParticleMass(TheLeadDiJetVect, Muon->smearP.at(mj)+Tau->smearP.at(tj) ));   //Muon1Tau1DiJetReconstructableMass
+      }
+      // Fill(isZmm(Muon->smearP.at(mj)).first);   //Muon1Tau1_Muon1IsZmm
+    }
+  }
+}
+
 
 void Analyzer::initializePileupInfo(string MCHisto, string DataHisto) {
   // Filenames must be c_strings below. Here is the conversion from strings to c_strings

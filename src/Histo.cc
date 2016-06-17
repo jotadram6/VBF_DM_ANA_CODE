@@ -80,18 +80,45 @@ void Histogramer::read_hist(string filename) {
 	DataBinner* dbtemp = new DataBinner();
 	data[group] = dbtemp;
 	data_order.push_back(group); 
+	cout << endl << group << endl;
       }
     } else if(!accept) continue;
     else if(stemp.size() == 4) {
       std::array<double, 3> tmpVals {stod(stemp[1]), stod(stemp[2]), stod(stemp[3])};
       info_el tmpPair(stemp[0], tmpVals);
       Generator_info.push_back(tmpPair);
-      data[group]->Add_Hist(stemp[0],stod(stemp[1]), stod(stemp[2]), stod(stemp[3]), NFolders);
+      string name = extractHistname(group, stemp[0]);
+      data[group]->Add_Hist(name,stod(stemp[1]), stod(stemp[2]), stod(stemp[3]), NFolders);
     }
   }
 
   info_file.close(); 
 }
+
+string Histogramer::extractHistname(string group, string histo) {
+  regex reg ("((Tau|Muon|Electron)+(1|2)+)");
+  smatch m;
+
+  string stringkey = group.erase(0,4);
+  regex first (stringkey+"(_)?");
+  histo = regex_replace(histo,first, "");
+  if(stringkey.find("Di") != string::npos) {
+    stringkey=stringkey+"1"+stringkey+"2";
+  }
+
+  int i=1;
+  while(regex_search(stringkey,m,reg)) {
+    regex key(m[0].str());
+    histo = regex_replace(histo,key,"Part"+to_string(i));
+    stringkey = m.suffix().str();
+    i++;
+  }
+  cout << histo << endl;
+  return histo;
+}
+  
+
+
 
 void Histogramer::read_cuts(string filename) {
   typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
@@ -148,9 +175,7 @@ void Histogramer::write_histogram() {
 
 
 
-int Histogramer::get_nbins(int hist) {
-    return Generator_info[hist].second[0];
-}
+
 
 unordered_map<string,pair<int,int>>* Histogramer::get_cuts() {
   return &cuts;
@@ -165,13 +190,13 @@ vector<string>* Histogramer::get_groups() {
 }
 
 
-void Histogramer::addVal(string groupn, string histn, double value, int maxcut) {
+void Histogramer::addVal(double value, string group, int maxcut, string histn) {
   int maxFolder=0;
   for(int i = 0; i < NFolders; i++) {
     if(maxFolder > folders[i].second) maxFolder = folders[i].second;
     else break;
   }
-  data[groupn]->AddPoint(histn, maxFolder, value);
+  data[group]->AddPoint(histn, maxFolder, value);
 }
 
 // int main() {

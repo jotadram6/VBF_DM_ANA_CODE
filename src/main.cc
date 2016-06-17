@@ -27,7 +27,8 @@ int main (int argc, char* argv[]) {
   for(int i=0; i < testing->nentries; i++) {
     testing->clear_values();
     testing->preprocess(i);
+    testing->fill_histogram();
   }
   testing->printCuts();
-  testing->writeout();
+  //  testing->writeout();
 }

@@ -33,6 +33,7 @@
 #include "Cut_enum.h"
 #include "DataBinner.h"
 #include "tokenizer.hpp"
+#include <regex>
 
 using namespace std;
 
@@ -49,13 +50,14 @@ class Histogramer {
   unordered_map<string,pair<int,int>>* get_cuts();
   vector<string>* get_order();
   vector<string>* get_groups();
-  void addVal(string, string, double, int);
+  void addVal(double, string, int, string);
   
  private:
   TFile * outfile;
   unordered_map<string, pair<int,int>> cuts;
   vector<string> cut_order;
   vector<pair<string,int>> folders;
+  string extractHistname(string, string);
 
   std::map<string, std::vector<TH1*> > Generator_Histogram;
   vector<pair<string, std::array<double, 3> > > Generator_info;

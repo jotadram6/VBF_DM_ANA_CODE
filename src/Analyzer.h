@@ -47,9 +47,11 @@ class Analyzer {
   void printCuts();
   void writeout();
   int nentries;
-
+  void fill_histogram();
   
  private:
+  void fill_Folder(string, int);
+
   void getInputs();
   void setupJob(string);
   void initializePileupInfo(string, string);  
@@ -127,6 +129,8 @@ class Analyzer {
   TH1F *hPUmc = new TH1F("hPUmc", "hPUmc", 100, 0, 100);
   TH1F *hPUdata = new TH1F("hPUdata", "hPUdata", 100, 0, 100);
   double pu_weight;
+
+  unordered_map<string, CUTS> fill_num = { {"FillVertices", CUTS::eRVertex}, {"FillTauJet1", CUTS::eRTau1}, {"FillTauJet2", CUTS::eRTau2}, {"FillMuon1", CUTS::eRMuon1}, {"FillMuon2", CUTS::eRMuon2}, {"FillJet1", CUTS::eRJet1}, {"FillJet2", CUTS::eRJet2}, {"FillBJet", CUTS::eRBJet}, {"FillCentralJet", CUTS::eRCenJet}, {"FillSusyCuts", CUTS::eSusyCom}, {"FillDiMuon", CUTS::eDiMuon}, {"FillDiTau", CUTS::eDiTau}, {"FillMuon1Tau1", CUTS::eMuon1Tau1}, {"FillMuon1Tau2", CUTS::eMuon1Tau2}, {"FillMuon2Tau1", CUTS::eMuon2Tau1}, {"FillMuon2Tau2", CUTS::eMuon2Tau2} };
   
   std::unordered_map<string, CUTS> cut_num = { {"NGenTau", CUTS::eGTau}, {"NGenTop", CUTS::eGTop}, {"NGenElectron", CUTS::eGElec}, \
     {"NGenMuon", CUTS::eGMuon}, {"NGenZ", CUTS::eGZ}, {"NGenW", CUTS::eGW}, {"NGenHiggs", CUTS::eGHiggs}, \
