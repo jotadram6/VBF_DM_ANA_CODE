@@ -22,13 +22,12 @@ int main (int argc, char* argv[]) {
 
 
 
-  Analyzer* testing = new Analyzer(argv[1], argv[2]);
+  Analyzer testing(argv[1], argv[2]);
 
-  for(int i=0; i < testing->nentries; i++) {
-    testing->clear_values();
-    testing->preprocess(i);
-    testing->fill_histogram();
+  for(int i=0; i < testing.nentries; i++) {
+    testing.clear_values();
+    testing.preprocess(i);
+    testing.fill_histogram();
   }
-  testing->printCuts();
-  //  testing->writeout();
+  testing.printCuts();
 }

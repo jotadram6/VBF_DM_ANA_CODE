@@ -23,7 +23,7 @@ GenZprimeMass    100 0. 10000.
 GenZprimeStatusCode     100 0. 100.
 GenTauStatusCode     100 0. 100.
 
-FillTauJet1 0
+FillTauJet1 1
 
 NTauJet1         20 0. 20.
 TauJet1Energy 2000 0. 5000.
@@ -60,7 +60,7 @@ FirstLeadingMuon1Eta 144 -7.2 +7.2
 Muon1Phi 36 -3.15 +3.15
 Muon1MetMt 100 0 500
 
-FillMuon2 1
+FillMuon2 0
 
 NMuon2 20 0. 20.
 Muon2Energy 2000 0. 5000.

@@ -45,7 +45,9 @@ struct PartStats {
 class Particle {
 
  public:
+  Particle();
   Particle(TTree*, string, string);
+  Particle& operator =(Particle&);
   virtual ~Particle() {};
   void getPartStats(string);
 
@@ -66,7 +68,9 @@ class Particle {
 class Generated : public Particle {
 
 public:
+  Generated();
   Generated(TTree*, string);
+  Generated& operator =(Generated&);
 
   vector<double>  *pdg_id = 0;
   vector<double>  *motherpdg_id = 0;

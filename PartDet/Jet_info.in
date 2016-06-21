@@ -2,7 +2,7 @@
 	        Smear
 #######################################
 
-SmearTheJet 0
+SmearTheJet 1
 JetEnergyScaleOffset 1.0
 
 MuonMatchingDeltaR  0.3
@@ -20,18 +20,18 @@ PtCut 10.0
 
 ApplyLooseID 0
 
-RemoveOverlapWithMuon1 0
-RemoveOverlapWithMuon2 0
+RemoveOverlapWithMuon1s 0
+RemoveOverlapWithMuon2s 0
 Muon1MatchingDeltaR  0.3
 Muon2MatchingDeltaR  0.3
 
-RemoveOverlapWithElectron1 0
-RemoveOverlapWithElectron2 0
+RemoveOverlapWithElectron1s 0
+RemoveOverlapWithElectron2s 0
 Electron1MatchingDeltaR  0.3
 Electron2MatchingDeltaR  0.3
 
-RemoveOverlapWithTau1 0
-RemoveOverlapWithTau2 0
+RemoveOverlapWithTau1s 0
+RemoveOverlapWithTau2s 0
 Tau1MatchingDeltaR  0.3
 Tau2MatchingDeltaR 0.3
 
@@ -43,18 +43,18 @@ EtaCut 0. 5.0
 PtCut 10.0
 ApplyLooseID 0
 
-RemoveOverlapWithMuon1 0
-RemoveOverlapWithMuon2 0
+RemoveOverlapWithMuon1s 0
+RemoveOverlapWithMuon2s 0
 Muon1MatchingDeltaR  0.3
 Muon2MatchingDeltaR  0.3
 
-RemoveOverlapWithElectron1 0
-RemoveOverlapWithElectron2 0
+RemoveOverlapWithElectron1s 0
+RemoveOverlapWithElectron2s 0
 Electron1MatchingDeltaR  0.3
 Electron2MatchingDeltaR  0.3
 
-RemoveOverlapWithTau1 0
-RemoveOverlapWithTau2 0
+RemoveOverlapWithTau1s 0
+RemoveOverlapWithTau2s 0
 Tau1MatchingDeltaR  0.3
 Tau2MatchingDeltaR 0.3
 

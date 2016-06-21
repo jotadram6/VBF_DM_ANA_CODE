@@ -1,6 +1,8 @@
 #ifndef Analyzer_h
 #define Analyzer_h
 
+
+
 // system include files
 #include <memory>
 
@@ -33,7 +35,7 @@
 #include "Particle.h"
 #include "Histo.h"
 
-
+//#define const
 using namespace std;
 
 class Analyzer {
@@ -58,58 +60,59 @@ class Analyzer {
   void read_info(string);
   void setupGeneral(TTree*, string);
 
-  void SmearLepton(Lepton*, CUTS, PartStats*);
-  void SmearJet();
+  void SmearLepton(Lepton&, CUTS, const PartStats&);
+  void SmearJet(const PartStats&);
 
-  bool JetMatchesLepton(Lepton*, TLorentzVector, double, CUTS);
-  TLorentzVector* matchLeptonToGen(TLorentzVector*, Lepton*, CUTS);
-  TLorentzVector* matchTauToGen(TLorentzVector*, double);
+  bool JetMatchesLepton(Lepton&, const TLorentzVector&, double, CUTS);
+  TLorentzVector* matchLeptonToGen(const TLorentzVector&, const PartStats&, CUTS);
+  TLorentzVector* matchTauToGen(const TLorentzVector&, double);
 
   void ExtractNumberOfTauNu();  
-  void ExtractNumberOfGoodGen(int, int, CUTS, PartStats*);
-  void ExtractNumberOfGoodReco(Lepton*, CUTS, CUTS, PartStats*);
-  void ExtractNumberOfGoodRecoJets(CUTS, PartStats*);
+  void ExtractNumberOfGoodGen(int, int, CUTS, const PartStats&);
+  void ExtractNumberOfGoodReco(Lepton&, CUTS, CUTS, const PartStats&);
+  void ExtractNumberOfGoodRecoJets(CUTS, const PartStats&);
 
-  void passRecoLeptonMetTopologyCuts(Lepton*, CUTS,CUTS, PartStats*);
-  void passLeptonComboTopologyCut(Lepton*, Lepton*, CUTS,CUTS,CUTS, PartStats*);
-  void passDiJetTopologyCuts(PartStats*);
+  void passRecoLeptonMetTopologyCuts(Lepton&, CUTS,CUTS, const PartStats&);
+  void passLeptonComboTopologyCut(Lepton&, Lepton&, CUTS,CUTS,CUTS, const PartStats&);
+  void passDiJetTopologyCuts(const PartStats&);
 
   void SusyTopologyCuts();
   bool passTriggerCuts(string);
 
-  double CalculateLeptonMetMt(TLorentzVector);
-  double DiParticleMass(TLorentzVector, TLorentzVector, string);
-  bool passDiParticleApprox(TLorentzVector, TLorentzVector, string);
-  bool isZdecay(TLorentzVector, Lepton*);
+  double CalculateLeptonMetMt(const TLorentzVector&);
+  double DiParticleMass(const TLorentzVector&, const TLorentzVector&, string);
+  bool passDiParticleApprox(const TLorentzVector&, const TLorentzVector&, string);
+  bool isZdecay(const TLorentzVector&, Lepton&);
 
-  bool isOverlaping(TLorentzVector, Lepton*, CUTS, double);
+  bool isOverlaping(const TLorentzVector&, Lepton&, CUTS, double);
   bool passProng(string, int);
   bool isInTheCracks(float);
   bool passedLooseJetID(int);
 
-  double CalculatePZeta(TLorentzVector, TLorentzVector);
-  double CalculatePZetaVis(TLorentzVector, TLorentzVector);
+  double CalculatePZeta(const TLorentzVector&, const TLorentzVector&);
+  double CalculatePZetaVis(const TLorentzVector&, const TLorentzVector&);
   double normPhi(double);
   double absnormPhi(double);
 
   void updateMet();
   double getPileupWeight(float);
 
+  TFile* f;
+  TTree* BOOM;
+  TH1F *hPUmc;
+  TH1F *hPUdata;
 
   Generated* _Gen;
   Electron* _Electron;
   Muon* _Muon;
   Taus* _Tau;
   Jet* _Jet;
-  Histogramer* histo;
+  Histogramer histo;
 
   unordered_map<string, PartStats> distats;
   unordered_map<string, pair<int,int> > prevTrig;
   std::array<std::vector<int>, static_cast<int>(CUTS::enumSize)> goodParts;
   
-  TFile* f;
-  TTree* BOOM;
-
   vector<int> cuts_per, cuts_cumul;
 
   TLorentzVector theMETVector;
@@ -126,8 +129,7 @@ class Analyzer {
   double Met_py = 0;
   double Met_pz = 0;
   
-  TH1F *hPUmc = new TH1F("hPUmc", "hPUmc", 100, 0, 100);
-  TH1F *hPUdata = new TH1F("hPUdata", "hPUdata", 100, 0, 100);
+
   double pu_weight;
 
   unordered_map<string, CUTS> fill_num = { {"FillVertices", CUTS::eRVertex}, {"FillTauJet1", CUTS::eRTau1}, {"FillTauJet2", CUTS::eRTau2}, {"FillMuon1", CUTS::eRMuon1}, {"FillMuon2", CUTS::eRMuon2}, {"FillJet1", CUTS::eRJet1}, {"FillJet2", CUTS::eRJet2}, {"FillBJet", CUTS::eRBJet}, {"FillCentralJet", CUTS::eRCenJet}, {"FillSusyCuts", CUTS::eSusyCom}, {"FillDiMuon", CUTS::eDiMuon}, {"FillDiTau", CUTS::eDiTau}, {"FillMuon1Tau1", CUTS::eMuon1Tau1}, {"FillMuon1Tau2", CUTS::eMuon1Tau2}, {"FillMuon2Tau1", CUTS::eMuon2Tau1}, {"FillMuon2Tau2", CUTS::eMuon2Tau2} };

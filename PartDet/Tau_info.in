@@ -27,7 +27,7 @@ PtCut 10.0 9999.9
 DoDiscrByLeadTrack 0
 LeadTrackThreshold 5.0
 
-DoDiscrByIsolation 1
+DoDiscrByIsolation 0
 DiscrByMinIsolation ZERO
 DiscrByMaxIsolation byTightCombinedIsolationDeltaBetaCorr3Hits
 DiscrByProngType 1or2or3hps
@@ -54,10 +54,10 @@ Electron2MatchingDeltaR 0.3
 
 ///---MET TOPOLOGY CUTS---//
 
-DoDiscrByMetDphi 1
+DiscrByMetDphi 1
 MetDphiCut 0. 1.
 
-DoDiscrByMetMt 0
+DiscrByMetMt 0
 MetMtCut 10. 100.
 
 /////////////////////////////
@@ -72,7 +72,7 @@ PtCut 10.0 9999.9
 DoDiscrByLeadTrack 0
 LeadTrackThreshold 5.0
 
-DoDiscrByIsolation 1
+DoDiscrByIsolation 0
 DiscrByMinIsolation ZERO
 DiscrByMaxIsolation byTightCombinedIsolationDeltaBetaCorr3Hits
 DiscrByProngType 1or2or3hps
@@ -99,9 +99,9 @@ Electron2MatchingDeltaR 0.3
 
 //-----MET TOPOLOGY CUTS-----//
 
-DoDiscrByMetDphi 1
+DiscrByMetDphi 1
 MetDphiCut 0. 1.
 
-DoDiscrByMetMt 0
+DiscrByMetMt 0
 MetMtCut 10. 100.
 

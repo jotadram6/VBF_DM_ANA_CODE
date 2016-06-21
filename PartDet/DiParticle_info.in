@@ -5,7 +5,7 @@
 DiscrByDeltaR  1
 DeltaRCut      0.3 
 
-DiscrByOSLSType  1
+DiscrByOSLSType  No
 DiscrByCosDphi	 0
 CosDphiCut 	 -1.00   -0.95
 
@@ -30,7 +30,7 @@ DeltaPtCutValue 	   30.0   1000.0
 DiscrByDeltaR  1
 DeltaRCut      0.3 
 
-DiscrByOSLSType  1
+DiscrByOSLSType  No
 DiscrByCosDphi	 0
 CosDphiCut 	 -1.00   -0.95
 
@@ -55,7 +55,7 @@ DeltaPtCutValue 	   30.0   1000.0
 DiscrByDeltaR  1
 DeltaRCut      0.3 
 
-DiscrByOSLSType  1
+DiscrByOSLSType  No
 DiscrByCosDphi	 0
 CosDphiCut 	 -1.00   -0.95
 

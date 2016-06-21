@@ -1,6 +1,5 @@
 #include "Particle.h"
 
-//template<typename T>
 Particle::Particle(TTree* BOOM, string GenName, string filename) {
   getPartStats(filename);
 
@@ -27,6 +26,8 @@ Generated::Generated(TTree* BOOM, string filename) : Particle(BOOM, "Gen", filen
   BOOM->SetBranchAddress("Gen_status", &status);
   BOOM->SetBranchAddress("Gen_BmotherIndex", &BmotherIndex);
 }
+
+
 
 Jet::Jet(TTree* BOOM, string filename) : Particle(BOOM, "Jet", filename) {
   BOOM->SetBranchStatus("Jet_neutralHadEnergyFraction", 1);
@@ -121,49 +122,74 @@ Muon::Muon(TTree* BOOM, string filename) : Lepton(BOOM, "Muon", filename) {
 ///////fix against stuff
 Taus::Taus(TTree* BOOM, string filename) : Lepton(BOOM, "Tau", filename) {
   ////Electron discrimination
-  if(pstats["Tau1"].bmap["DoDiscrAgainstElectron"] || pstats["Tau1"].bmap["SelectTausThatAreElectrons"]) {
+  if((pstats["Tau1"].bmap["DoDiscrAgainstElectron"] || pstats["Tau1"].bmap["SelectTausThatAreElectrons"]) &&
+     (pstats["Tau2"].bmap["DoDiscrAgainstElectron"] || pstats["Tau2"].bmap["SelectTausThatAreElectrons"]) &&
+     (pstats["Tau1"].smap["DiscrAgainstElectron"] == pstats["Tau2"].smap["DiscrAgainstElectron"]) ) {
     BOOM->SetBranchStatus(("Tau_"+pstats["Tau1"].smap["DiscrAgainstElectron"]).c_str(), 1);    
     BOOM->SetBranchAddress(("Tau_"+pstats["Tau1"].smap["DiscrAgainstElectron"]).c_str(), &againstElectron.first);
-  }
-  if(pstats["Tau2"].bmap["DoDiscrAgainstElectron"] || pstats["Tau2"].bmap["SelectTausThatAreElectrons"]) {
-    if(pstats["Tau1"].smap["DiscrAgainstElectron"] != pstats["Tau2"].smap["DiscrAgainstElectron"]) {
+    againstElectron.second = againstElectron.first;
+  } else {
+    if(pstats["Tau1"].bmap["DoDiscrAgainstElectron"] || pstats["Tau1"].bmap["SelectTausThatAreElectrons"]) {
+      BOOM->SetBranchStatus(("Tau_"+pstats["Tau1"].smap["DiscrAgainstElectron"]).c_str(), 1);    
+      BOOM->SetBranchAddress(("Tau_"+pstats["Tau1"].smap["DiscrAgainstElectron"]).c_str(), &againstElectron.first);
+    }
+    if(pstats["Tau2"].bmap["DoDiscrAgainstElectron"] || pstats["Tau2"].bmap["SelectTausThatAreElectrons"]) {
       BOOM->SetBranchStatus(("Tau_"+pstats["Tau1"].smap["DiscrAgainstElectron"]).c_str(), 1);    
       BOOM->SetBranchAddress(("Tau_"+pstats["Tau1"].smap["DiscrAgainstElectron"]).c_str(), &againstElectron.second);
-    } else againstElectron.second = againstElectron.first;
+    }
   }
-
   ////Muon discrimination
-  if(pstats["Tau1"].bmap["DoDiscrAgainstMuon"] || pstats["Tau1"].bmap["SelectTausThatAreMuons"]) {
+  if((pstats["Tau1"].bmap["DoDiscrAgainstMuon"] || pstats["Tau1"].bmap["SelectTausThatAreMuons"]) &&
+     (pstats["Tau2"].bmap["DoDiscrAgainstMuon"] || pstats["Tau2"].bmap["SelectTausThatAreMuons"]) &&
+     (pstats["Tau1"].smap["DiscrAgainstMuon"] == pstats["Tau2"].smap["DiscrAgainstMuon"]) ) {
     BOOM->SetBranchStatus(("Tau_"+pstats["Tau1"].smap["DiscrAgainstMuon"]).c_str(), 1);    
     BOOM->SetBranchAddress(("Tau_"+pstats["Tau1"].smap["DiscrAgainstMuon"]).c_str(), &againstMuon.first);
-  }
-  if(pstats["Tau2"].bmap["DoDiscrAgainstMuon"] || pstats["Tau2"].bmap["SelectTausThatAreMuons"]) {
-    if(pstats["Tau1"].smap["DiscrAgainstMuon"] != pstats["Tau2"].smap["DiscrAgainstMuon"]) {
+    againstMuon.second = againstMuon.first;
+  } else {
+    if(pstats["Tau1"].bmap["DoDiscrAgainstMuon"] || pstats["Tau1"].bmap["SelectTausThatAreMuons"]) {
+      BOOM->SetBranchStatus(("Tau_"+pstats["Tau1"].smap["DiscrAgainstMuon"]).c_str(), 1);    
+      BOOM->SetBranchAddress(("Tau_"+pstats["Tau1"].smap["DiscrAgainstMuon"]).c_str(), &againstMuon.first);
+    }
+    if(pstats["Tau2"].bmap["DoDiscrAgainstMuon"] || pstats["Tau2"].bmap["SelectTausThatAreMuons"]) {
       BOOM->SetBranchStatus(("Tau_"+pstats["Tau1"].smap["DiscrAgainstMuon"]).c_str(), 1);    
       BOOM->SetBranchAddress(("Tau_"+pstats["Tau1"].smap["DiscrAgainstMuon"]).c_str(), &againstMuon.second);
-    } else againstMuon.second = againstMuon.first;
+    }
   }
 
   /////Isolation discrimination
-  if(pstats["Tau1"].bmap["DoDiscrByIsolation"]) {
+  if(pstats["Tau1"].bmap["DoDiscrByIsolation"] && pstats["Tau2"].bmap["DoDiscrByIsolation"] &&
+     pstats["Tau1"].smap["DiscrByMaxIsolation"] == pstats["Tau2"].smap["DiscrByMaxIsolation"]) {
     BOOM->SetBranchStatus(("Tau_"+pstats["Tau1"].smap["DiscrByMaxIsolation"]).c_str(), 1);
-    BOOM->SetBranchAddress(("Tau_"+pstats["Tau1"].smap["DiscrByMaxIsolation"]).c_str(), &(maxIso.first));
-    if(pstats["Tau1"].smap["DiscrByMinIsolation"] != "ZERO") {
-      BOOM->SetBranchStatus(("Tau_"+pstats["Tau1"].smap["DiscrByMinIsolation"]).c_str(), 1);
-      BOOM->SetBranchAddress(("Tau_"+pstats["Tau1"].smap["DiscrByMinIsolation"]).c_str(), &(minIso.first));
+    BOOM->SetBranchAddress(("Tau_"+pstats["Tau1"].smap["DiscrByMaxIsolation"]).c_str(), &(maxIso.first));      
+    maxIso.second = maxIso.first;
+  } else {
+    if(pstats["Tau1"].bmap["DoDiscrByIsolation"]) {
+      BOOM->SetBranchStatus(("Tau_"+pstats["Tau1"].smap["DiscrByMaxIsolation"]).c_str(), 1);
+      BOOM->SetBranchAddress(("Tau_"+pstats["Tau1"].smap["DiscrByMaxIsolation"]).c_str(), &(maxIso.first));      
     }
-  }
-  if(pstats["Tau2"].bmap["DoDiscrByIsolation"]) {
-    if(pstats["Tau1"].smap["DiscrByMaxIsolation"] != pstats["Tau2"].smap["DiscrByMaxIsolation"]) {
+    if(pstats["Tau2"].bmap["DoDiscrByIsolation"]) {
       BOOM->SetBranchStatus(("Tau_"+pstats["Tau2"].smap["DiscrByMaxIsolation"]).c_str(), 1);
       BOOM->SetBranchAddress(("Tau_"+pstats["Tau2"].smap["DiscrByMaxIsolation"]).c_str(), &(maxIso.second));
-    } else maxIso.second = maxIso.first;
-    if( (pstats["Tau1"].smap["DiscrByMinIsolation"] != pstats["Tau2"].smap["DiscrByMinIsolation"]) &&
-	(pstats["Tau2"].smap["DiscrByMinIsolation"] != "ZERO") ) {
-      BOOM->SetBranchStatus(("Tau_"+pstats["Tau2"].smap["DiscrByMinIsolation"]).c_str(), 1);
-      BOOM->SetBranchAddress(("Tau_"+pstats["Tau2"].smap["DiscrByMinIsolation"]).c_str(), &(minIso.second));
-    } else minIso.second = minIso.first;
-  }
+    }
+  }      ////min stuff
+  if(pstats["Tau1"].bmap["DoDiscrByIsolation"] && pstats["Tau2"].bmap["DoDiscrByIsolation"] &&
+     pstats["Tau1"].smap["DiscrByMinIsolation"] == pstats["Tau2"].smap["DiscrByMinIsolation"] &&
+     pstats["Tau1"].smap["DiscrByMinIsolation"] != "ZERO") {
+    BOOM->SetBranchStatus(("Tau_"+pstats["Tau1"].smap["DiscrByMinIsolation"]).c_str(), 1);
+    BOOM->SetBranchAddress(("Tau_"+pstats["Tau1"].smap["DiscrByMinIsolation"]).c_str(), &(minIso.first));      
+    minIso.second = minIso.first;
+  } else {
+    if(pstats["Tau1"].bmap["DoDiscrByIsolation"] && pstats["Tau1"].smap["DiscrByMinIsolation"] != "ZERO") {
+      BOOM->SetBranchStatus(("Tau_"+pstats["Tau1"].smap["DiscrByMinIsolation"]).c_str(), 1);
+      BOOM->SetBranchAddress(("Tau_"+pstats["Tau1"].smap["DiscrByMinIsolation"]).c_str(), &(minIso.first));      
+    }
+    if(pstats["Tau2"].bmap["DoDiscrByIsolation"] && pstats["Tau2"].smap["DiscrByMinIsolation"] != "ZERO") {
+      BOOM->SetBranchStatus(("Tau_"+pstats["Tau2"].smap["DiscrByMaxIsolation"]).c_str(), 1);
+      BOOM->SetBranchAddress(("Tau_"+pstats["Tau2"].smap["DiscrByMaxIsolation"]).c_str(), &(minIso.second));
+    }
+  }      
+
+
 
   BOOM->SetBranchStatus("Tau_decayModeFindingNewDMs", 1);
   BOOM->SetBranchStatus("Tau_nProngs", 1);
@@ -173,6 +199,7 @@ Taus::Taus(TTree* BOOM, string filename) : Lepton(BOOM, "Tau", filename) {
   BOOM->SetBranchAddress("Tau_nProngs", &nProngs);
   BOOM->SetBranchAddress("Tau_leadChargedCandPt", &leadChargedCandPt);
 
+  
   //////NOT USED BRANCHES/////
   //  BOOM->SetBranchStatus("Tau_decayModeFinding", 1);
   //  BOOM->SetBranchAddress("Tau_leadChargedCandCharge", &leadChargedCandCharge);
@@ -192,7 +219,7 @@ void Particle::getPartStats(string filename) {
     std::cout << "could not open file " << filename <<std::endl;
     return;
   }
-  
+
   vector<string> stemp;
   string group,line;
   while(getline(info_file, line)) {
@@ -211,13 +238,14 @@ void Particle::getPartStats(string filename) {
       exit(1);
     } else if(stemp.size() == 2) {
       if(stemp[1].find(".") != string::npos) pstats[group].dmap[stemp[0]]=stod(stemp[1]);
-      else if(stemp[1].find("1") != string::npos || stemp[1].find("true") != string::npos) pstats[group].bmap[stemp[0]]=true;
-      else if(stemp[1].find("0") != string::npos || stemp[1].find("false") != string::npos) pstats[group].bmap[stemp[0]]=false; 
+      else if(stemp[1] == "1" || stemp[1] == "true" ) pstats[group].bmap[stemp[0]] = true;
+      else if(stemp[1] == "0"  || stemp[1] == "false" ) pstats[group].bmap[stemp[0]]=false; 
       else pstats[group].smap[stemp[0]] = stemp[1];
 
     } else  pstats[group].pmap[stemp[0]] = make_pair(stod(stemp[1]), stod(stemp[2]));
   }
   info_file.close();
+
 }
 
 // int main() {
