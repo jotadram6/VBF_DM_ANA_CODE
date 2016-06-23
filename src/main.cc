@@ -23,6 +23,7 @@ int main (int argc, char* argv[]) {
 
 
   Analyzer testing(argv[1], argv[2]);
+  //  Analyzer testing("TNT.root", "test.root");
 
   for(int i=0; i < testing.nentries; i++) {
     testing.clear_values();
@@ -30,4 +31,5 @@ int main (int argc, char* argv[]) {
     testing.fill_histogram();
   }
   testing.printCuts();
+  return 0;
 }

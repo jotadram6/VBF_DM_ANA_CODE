@@ -11,7 +11,8 @@
 
 using namespace std;
 
-struct DataPiece {
+class DataPiece {
+ public:
   vector<int> data;
   double begin, end, width;
   int bins, Nfold;
@@ -22,7 +23,7 @@ struct DataPiece {
   ~DataPiece();
   void write_histogram(vector<string>&, TFile*);
   int get_bin(double);
-  void bin(int, double);
+  void bin(int, double, double);
 };
 
 
@@ -31,7 +32,7 @@ class DataBinner {
 public:
   DataBinner();
   ~DataBinner();
-  void AddPoint(string,int, double);
+  void AddPoint(string,int, double, double);
   void Add_Hist(string, string, int, double, double, int);
   void write_histogram(TFile*, vector<string>&);
 

@@ -17,8 +17,11 @@ int DataPiece::get_bin(double y) {
   return (int)((y-this->begin)/this->width);
 }
 
-void DataPiece::bin(int folder, double y) {
-  data[Nfold*folder + get_bin(y)]++;
+void DataPiece::bin(int folder, double y, double weight) {
+  int putbin = get_bin(y);
+  if((2*putbin - bins + 1 ) / bins == 0) {
+    data[Nfold*folder + putbin] += weight;
+  }
 }
 
 void DataPiece::write_histogram(vector<string>& folders, TFile* outfile) {
@@ -53,10 +56,10 @@ void DataBinner::Add_Hist(string shortname, string fullname, int bin, double lef
   order.push_back(shortname);
 }
 
-void DataBinner::AddPoint(string name, int maxfolder, double value) {
+void DataBinner::AddPoint(string name, int maxfolder, double value, double weight) {
   if(datamap[name] == NULL) return;
   for(int i=0; i < maxfolder; i++) {
-      datamap[name]->bin(i,value);
+    datamap[name]->bin(i,value, weight);
   }
 }
 

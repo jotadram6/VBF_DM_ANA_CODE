@@ -35,6 +35,8 @@
 #include "Particle.h"
 #include "Histo.h"
 
+//#include <ctime>
+
 //#define const
 using namespace std;
 
@@ -52,6 +54,16 @@ class Analyzer {
   void fill_histogram();
   
  private:
+  /* double gent; */
+  /* double smeart; */
+  /* double trigt; */
+  /* double recolt; */
+  /* double recojt; */
+  /* double mett; */
+  /* double susyt; */
+  /* double combot; */
+  /* double dit; */
+  /* double jet1t=0., jet2t=0., cent=0., bjett=0., leadt=0.; */
   void fill_Folder(string, int);
 
   void getInputs();
@@ -60,27 +72,27 @@ class Analyzer {
   void read_info(string);
   void setupGeneral(TTree*, string);
 
-  void SmearLepton(Lepton&, CUTS, const PartStats&);
-  void SmearJet(const PartStats&);
+  void smearLepton(Lepton&, CUTS, const PartStats&);
+  void smearJet(const PartStats&);
 
   bool JetMatchesLepton(Lepton&, const TLorentzVector&, double, CUTS);
-  TLorentzVector* matchLeptonToGen(const TLorentzVector&, const PartStats&, CUTS);
-  TLorentzVector* matchTauToGen(const TLorentzVector&, double);
+  TLorentzVector matchLeptonToGen(const TLorentzVector&, const PartStats&, CUTS);
+  TLorentzVector matchTauToGen(const TLorentzVector&, double);
 
-  void ExtractNumberOfTauNu();  
-  void ExtractNumberOfGoodGen(int, int, CUTS, const PartStats&);
-  void ExtractNumberOfGoodReco(Lepton&, CUTS, CUTS, const PartStats&);
-  void ExtractNumberOfGoodRecoJets(CUTS, const PartStats&);
+  void getGoodTauNu();  
+  void getGoodGen(int, int, CUTS, const PartStats&);
+  void getGoodRecoLeptons(Lepton&, CUTS, CUTS, const PartStats&);
+  void getGoodRecoJets(CUTS, const PartStats&);
 
-  void passRecoLeptonMetTopologyCuts(Lepton&, CUTS,CUTS, const PartStats&);
-  void passLeptonComboTopologyCut(Lepton&, Lepton&, CUTS,CUTS,CUTS, const PartStats&);
-  void passDiJetTopologyCuts(const PartStats&);
+  void getGoodMetTopologyLepton(Lepton&, CUTS,CUTS, const PartStats&);
+  void getGoodLeptonCombos(Lepton&, Lepton&, CUTS,CUTS,CUTS, const PartStats&);
+  void getGoodDiJets(const PartStats&);
 
-  void SusyTopologyCuts();
+  void VBFTopologyCut();
   bool passTriggerCuts(string);
 
-  double CalculateLeptonMetMt(const TLorentzVector&);
-  double DiParticleMass(const TLorentzVector&, const TLorentzVector&, string);
+  double calculateLeptonMetMt(const TLorentzVector&);
+  double diParticleMass(const TLorentzVector&, const TLorentzVector&, string);
   bool passDiParticleApprox(const TLorentzVector&, const TLorentzVector&, string);
   bool isZdecay(const TLorentzVector&, Lepton&);
 
@@ -89,8 +101,8 @@ class Analyzer {
   bool isInTheCracks(float);
   bool passedLooseJetID(int);
 
-  double CalculatePZeta(const TLorentzVector&, const TLorentzVector&);
-  double CalculatePZetaVis(const TLorentzVector&, const TLorentzVector&);
+  double getPZeta(const TLorentzVector&, const TLorentzVector&);
+  double getPZetaVis(const TLorentzVector&, const TLorentzVector&);
   double normPhi(double);
   double absnormPhi(double);
 
@@ -130,7 +142,7 @@ class Analyzer {
   double Met_pz = 0;
   
 
-  double pu_weight;
+  double pu_weight, wgt;
 
   unordered_map<string, CUTS> fill_num = { {"FillVertices", CUTS::eRVertex}, {"FillTauJet1", CUTS::eRTau1}, {"FillTauJet2", CUTS::eRTau2}, {"FillMuon1", CUTS::eRMuon1}, {"FillMuon2", CUTS::eRMuon2}, {"FillJet1", CUTS::eRJet1}, {"FillJet2", CUTS::eRJet2}, {"FillBJet", CUTS::eRBJet}, {"FillCentralJet", CUTS::eRCenJet}, {"FillSusyCuts", CUTS::eSusyCom}, {"FillDiMuon", CUTS::eDiMuon}, {"FillDiTau", CUTS::eDiTau}, {"FillMuon1Tau1", CUTS::eMuon1Tau1}, {"FillMuon1Tau2", CUTS::eMuon1Tau2}, {"FillMuon2Tau1", CUTS::eMuon2Tau1}, {"FillMuon2Tau2", CUTS::eMuon2Tau2} };
   

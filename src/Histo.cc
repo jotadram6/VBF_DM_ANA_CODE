@@ -144,14 +144,14 @@ vector<string>* Histogramer::get_groups() {
 }
 
 
-void Histogramer::addVal(double value, string group, int maxcut, string histn) {
+void Histogramer::addVal(double value, string group, int maxcut, string histn, double weight) {
   int maxFolder=0;
 
   for(int i = 0; i < NFolders; i++) {
     if(maxcut > folder_num[i]) maxFolder = folder_num[i];
     else break;
   }
-  data[group]->AddPoint(histn, maxFolder, value);
+  data[group]->AddPoint(histn, maxFolder, value, weight);
 }
 
 // int main() {

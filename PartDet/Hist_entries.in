@@ -36,7 +36,7 @@ TauJet1NumSignalTracks 10 0 10
 TauJet1SeedTrackPt     2000 0. 5000.
 TauJet1Charge 10 -5. 5.
 
-FillTauJet2 0
+FillTauJet2 0 
 
 NTauJet2         20 0. 20.
 TauJet2Energy 2000 0. 5000.
@@ -49,7 +49,7 @@ TauJet2NumSignalTracks 10 0 10
 TauJet2SeedTrackPt     2000 0. 5000.
 TauJet2Charge 10 -5. 5.
 
-FillMuon1 0
+FillMuon1 1
 
 NMuon1 20 0. 20.
 Muon1Energy 2000 0. 5000.
@@ -71,7 +71,7 @@ FirstLeadingMuon2Eta 144 -7.2 +7.2
 Muon2Phi 36 -3.15 +3.15
 Muon2MetMt 100 0 500
 
-FillJet1 0
+FillJet1 1
 NJet1 20 0. 20.
 Jet1Energy 200 0. 500.
 Jet1Pt 200 0. 500.
@@ -87,7 +87,7 @@ Jet2Pt 200 0. 500.
 Jet2Eta 100 -5.0 +5.0
 Jet2Phi 144 -6.3 +6.3
 
-FillBJet 0
+FillBJet 1
 
 NBJet 20 0. 20.
 BJetEnergy 200 0. 500.
@@ -95,13 +95,13 @@ BJetPt 200 0. 500.
 BJetEta 72 -3.6 +3.6
 BJetPhi 36 -3.15 +3.15
 
-FillCentralJet 0
+FillCentralJet 1
 
 NCentralJet 20 0. 20.
 CentralJetPt 200 0. 500.
 CentralJetEta 100 -5.0 +5.0
 
-FillSusyCuts 0
+FillSusyCuts 1
 
 Met 100 0 1000
 MetDiJetDeltaPhi 72 0 +3.15
@@ -109,7 +109,7 @@ MHT 500 0 5000
 HT 500 0 5000
 Meff 500 0 5000
 
-FillLeadingJet 0
+FillLeadingJet 1
 
 FirstLeadingJetPt 200 0. 1000.
 SecondLeadingJetPt 200 0. 1000.
@@ -132,7 +132,7 @@ Dphi2 72 -6.3 +6.3
 Dphi1VsDphi2 72 -6.3 +6.3 72 -6.3 +6.3
 Alpha 50 0 2
 
-FillDiJet 0
+FillDiJet 1
 DiJetDeltaR 200 0 10.
 DiJetDeltaEta 200 0 10.
 DiJetDeltaPhi 72 0 +3.15
@@ -170,7 +170,7 @@ DiMuonZeta1D 150 -300 300
 DiMuonNotReconstructableMass 600 0 1500
 DiMuonReconstructableMass 600 0 1500
 
-FillDiTau 0
+FillDiTau 1
 
 DiTau_Tau1DiJetDeltaPhi 72 0 +3.15 
 DiTau_Tau2DiJetDeltaPhi 72 0 +3.15

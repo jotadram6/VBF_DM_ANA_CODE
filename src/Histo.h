@@ -34,7 +34,7 @@ class Histogramer {
   unordered_map<string,pair<int,int>>* get_cuts();
   vector<string>* get_order();
   vector<string>* get_groups();
-  void addVal(double, string, int, string);
+  void addVal(double, string, int, string, double);
 
  private:
   TFile * outfile;
