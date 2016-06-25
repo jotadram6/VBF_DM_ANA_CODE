@@ -7,10 +7,10 @@ DeltaRCut      0.3
 
 DiscrByOSLSType  No
 DiscrByCosDphi	 0
-CosDphiCut 	 -0.95   -1.00
+CosDphiCut 	 -1.00   -0.95
 
 DiscrByMassReco  0
-HowCalculateMassReco CollinearApprox     ###VectorSumOfProductsAndMet   or    CollinearApprox 
+HowCalculateMassReco none     ###VectorSumOfProductsAndMet   or    CollinearApprox 
 MassCut          0.0   200.0
 
 DiscrByCDFzeta2D          0
@@ -32,10 +32,10 @@ DeltaRCut      0.3
 
 DiscrByOSLSType  No
 DiscrByCosDphi	 0
-CosDphiCut 	 -0.95   -1.00
+CosDphiCut 	 -1.00   -0.95
 
 DiscrByMassReco  0
-HowCalculateMassReco CollinearApprox     ###VectorSumOfProductsAndMet   or    CollinearApprox 
+HowCalculateMassReco none     ###VectorSumOfProductsAndMet   or    CollinearApprox 
 MassCut          0.0   200.0
 
 DiscrByCDFzeta2D          0
@@ -57,10 +57,10 @@ DeltaRCut      0.3
 
 DiscrByOSLSType  No
 DiscrByCosDphi	 0
-CosDphiCut 	 -0.95   -1.00
+CosDphiCut 	 -1.00   -0.95
 
 DiscrByMassReco  0
-HowCalculateMassReco CollinearApprox     ###VectorSumOfProductsAndMet   or    CollinearApprox 
+HowCalculateMassReco none     ###VectorSumOfProductsAndMet   or    CollinearApprox 
 MassCut          0.0   200.0
 
 DiscrByCDFzeta2D          0
@@ -82,10 +82,10 @@ DeltaRCut      0.3
 
 DiscrByOSLSType  No
 DiscrByCosDphi	 0
-CosDphiCut 	 -0.95   -1.00
+CosDphiCut 	 -1.00   -0.95
 
 DiscrByMassReco  0
-HowCalculateMassReco CollinearApprox     ###VectorSumOfProductsAndMet   or    CollinearApprox 
+HowCalculateMassReco none     ###VectorSumOfProductsAndMet   or    CollinearApprox 
 MassCut          0.0   200.0
 
 DiscrByCDFzeta2D          0

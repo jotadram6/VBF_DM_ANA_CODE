@@ -13,7 +13,7 @@ using namespace std;
 
 class DataPiece {
  public:
-  vector<int> data;
+  vector<float> data;
   double begin, end, width;
   int bins, Nfold;
   string name;

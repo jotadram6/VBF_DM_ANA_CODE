@@ -79,7 +79,7 @@ void Analyzer::preprocess(int event) {
 
    // clock_t t1;
    // t1 = clock();
- 
+
   // SET NUMBER OF GEN PARTICLES
   // TODOGeneralize to remove magic numbers
   if(!isData){
@@ -105,6 +105,7 @@ void Analyzer::preprocess(int event) {
 
   // smeart += clock() - t1;
   // t1 = clock();
+
 
   //////Triggers and Vertices
   goodParts[ival(CUTS::eRVertex)].resize(bestVertices);
@@ -147,7 +148,6 @@ void Analyzer::preprocess(int event) {
   getGoodRecoJets(CUTS::eR1stJet, _Jet->pstats["FirstLeadingJet"]);
   leadIndex = goodParts[ival(CUTS::eR1stJet)].at(0); 
   getGoodRecoJets(CUTS::eR2ndJet, _Jet->pstats["SecondLeadingJet"]);
-
   // leadt += clock() - t1;
   // t1 = clock();
 
@@ -156,8 +156,10 @@ void Analyzer::preprocess(int event) {
   /////  SET NUMBER OF RECO MET TOPOLOGY PARTICLES
   getGoodMetTopologyLepton(*_Electron, CUTS::eRElec1, CUTS::eTElec1, _Electron->pstats["Elec1"]);
   getGoodMetTopologyLepton(*_Electron, CUTS::eRElec2, CUTS::eTElec2, _Electron->pstats["Elec2"]);
+
   getGoodMetTopologyLepton(*_Muon, CUTS::eRMuon1, CUTS::eTMuon1, _Muon->pstats["Muon1"]);
   getGoodMetTopologyLepton(*_Muon, CUTS::eRMuon2, CUTS::eTMuon2, _Muon->pstats["Muon2"]);
+
   getGoodMetTopologyLepton(*_Tau, CUTS::eRTau1, CUTS::eTTau1, _Tau->pstats["Tau1"]);
   getGoodMetTopologyLepton(*_Tau, CUTS::eRTau2, CUTS::eTTau2, _Tau->pstats["Tau2"]);
 
@@ -286,7 +288,7 @@ void Analyzer::updateMet() {
   int i=0;
   for(vector<TLorentzVector>::iterator it=_Jet->smearP.begin(); it!=_Jet->smearP.end(); it++, i++) {
     if( (it->Pt() > distats["Run"].dmap.at("JetPtForMhtAndHt")) && (fabs(it->Eta()) < distats["Run"].dmap.at("JetEtaForMhtAndHt")) ) {
-      if(distats["Run"].bmap.at("ApplyJetLooseIDforMhtAndHt") ) continue;//&& !passLooseJetID() continue;
+      if(distats["Run"].bmap.at("ApplyJetLooseIDforMhtAndHt") && !passedLooseJetID(i) ) continue;
       
       sumpxForMht -= it->Px();
       sumpyForMht -= it->Py();
@@ -500,7 +502,7 @@ TLorentzVector Analyzer::matchTauToGen(const TLorentzVector& lvec, double lDelta
 ////Calculates the number of gen particles.  Based on id number and status of each particle
 void Analyzer::getGoodGen(int particle_id, int particle_status, CUTS ePos, const PartStats& stats) {
   for(int j = 0; j < (int)_Gen->pt->size(); j++) {
-    if(particle_id == 15 && (_Gen->pt->at(j) < stats.dmap.at("TauPtMinCut")) && (abs(_Gen->eta->at(j)) > stats.dmap.at("TauEtaMaxCut"))) continue;
+    if(particle_id == 15 && (_Gen->pt->at(j) < stats.pmap.at("TauPtCut").first && _Gen->pt->at(j) > stats.pmap.at("TauPtCut").second && abs(_Gen->eta->at(j)) > stats.dmap.at("TauEtaCut"))) continue;
     
     if((abs(_Gen->pdg_id->at(j)) == particle_id) && (_Gen->status->at(j) == particle_status)) {
       goodParts[ival(ePos)].push_back(j);
@@ -930,12 +932,14 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
 }
 
 
+//////////////LOOK INTO DIJET PICKING
+///////HOW TO GET RID OF REDUNCENCIES??
+
 /////Same as gooddilepton, just jet specific
 void Analyzer::getGoodDiJets(const PartStats& stats) {
   // ----Separation cut between jets (remove overlaps)
-  for(vec_iter ij1=goodParts[ival(CUTS::eRJet1)].begin(); ij1 != goodParts[ival(CUTS::eRJet1)].end(); ij1++) {
-    for(vec_iter ij2=goodParts[ival(CUTS::eRJet2)].begin(); ij2 != goodParts[ival(CUTS::eRJet2)].end(); ij2++) {
-
+  for(vec_iter ij2=goodParts[ival(CUTS::eRJet2)].begin(); ij2 != goodParts[ival(CUTS::eRJet2)].end(); ij2++) {
+    for(vec_iter ij1=goodParts[ival(CUTS::eRJet1)].begin(); ij1 != goodParts[ival(CUTS::eRJet1)].end() && (*ij1) < (*ij2); ij1++) {
       if (stats.bmap.at("DiscrByDeltaR")) {
 	if(_Jet->smearP.at(*ij1).DeltaR(_Jet->smearP.at(*ij2)) < stats.dmap.at("DeltaRCut")) continue;
       }
@@ -1211,7 +1215,7 @@ void Analyzer::fill_Folder(string group, int max) {
     }
 
     histo.addVal(goodParts[ival(ePos)].size(), group,max, "N", wgt);
-
+    //D    if(ePos == CUTS::eRMuon1) cout << "Muons: " << goodParts[ival(ePos)].size() << endl;
   } else if(group == "FillSusyCuts") {
 
     histo.addVal(sqrt((sumpxForMht * sumpxForMht) + (sumpyForMht * sumpyForMht)),group,max, "MHT", wgt);
@@ -1240,8 +1244,8 @@ void Analyzer::fill_Folder(string group, int max) {
     histo.addVal(fabs(first.Eta() - second.Eta()), group,max, "DeltaEta", wgt); 
     histo.addVal(first.DeltaR(second),group,max, "DeltaR", wgt);  
 
-    double dphiDijets = absnormPhi(second.Phi() - second.Phi());
-    double dphi1 = normPhi(first.Phi() - theMETVector.Phi());
+    double dphiDijets = absnormPhi(first.Phi() - second.Phi());
+    double dphi1 = normPhi(first.Phi());// - theMETVector.Phi());
     double dphi2 = normPhi(second.Phi() - theMETVector.Phi());
     double alpha = (LeadDiJet.M() > 0) ? second.Pt() / LeadDiJet.M() : 999999999.0;
 
@@ -1265,7 +1269,7 @@ void Analyzer::fill_Folder(string group, int max) {
     double leaddijetpt = 0;
     double leaddijetdeltaR = 0;
     double leaddijetdeltaEta = 0;
-    double etaproduct = -100;
+    double etaproduct = 0;
     for(vec_iter it=goodParts[ival(CUTS::eDiJet)].begin(); it!=goodParts[ival(CUTS::eDiJet)].end(); it++) {
       int p1 = (*it) / _Jet->smearP.size();
       int p2 = (*it) % _Jet->smearP.size();
@@ -1277,17 +1281,17 @@ void Analyzer::fill_Folder(string group, int max) {
 	leaddijetmass = DiJet.M();
 	etaproduct = (jet1.Eta() * jet2.Eta() > 0) ? 1 : -1;
       }
-      leaddijetpt = (DiJet.Pt() > leaddijetpt) ? DiJet.Pt() : leaddijetpt;
-      leaddijetdeltaEta = (fabs(jet1.Eta() - jet2.Eta()) > leaddijetdeltaEta) ? fabs(jet1.Eta() - jet2.Eta()) : leaddijetdeltaEta;
-      leaddijetdeltaR = (jet1.DeltaR(jet2) > leaddijetdeltaR) ? jet1.DeltaR(jet2) : leaddijetdeltaR;
+      if(DiJet.Pt() > leaddijetpt) leaddijetpt = DiJet.Pt();
+      if(fabs(jet1.Eta() - jet2.Eta()) > leaddijetdeltaEta) leaddijetdeltaEta = fabs(jet1.Eta() - jet2.Eta());
+      if(jet1.DeltaR(jet2) > leaddijetdeltaR) leaddijetdeltaR = jet1.DeltaR(jet2);
 
       histo.addVal(DiJet.M(), group,max, "Mass", wgt);
       histo.addVal(DiJet.Pt(), group,max, "Pt", wgt);
-      histo.addVal(fabs(jet1.Eta() - jet2.Eta()), group,max, "DetlaEta", wgt);
+      histo.addVal(fabs(jet1.Eta() - jet2.Eta()), group,max, "DeltaEta", wgt);
       histo.addVal(absnormPhi(jet1.Phi() - jet2.Phi()), group,max, "DeltaPhi", wgt);
       histo.addVal(jet1.DeltaR(jet2), group,max, "DeltaR", wgt);
     }
-  
+
     histo.addVal(leaddijetmass, group,max, "LeadMass", wgt);
     histo.addVal(leaddijetpt, group,max, "LeadPt", wgt);  
     histo.addVal(leaddijetdeltaEta, group,max, "LeadDeltaEta", wgt);
@@ -1388,15 +1392,16 @@ double Analyzer::getPileupWeight(float ntruePUInt) {
   Datavalue = hPUdata->GetBinContent(bin);
   Dataintegral = hPUdata->Integral();
 
-  // printouts for debugging
-  //std::cout << "Number of true pileup interactions = " << ntruePUInt << std::endl;
-  //std::cout << "Histogram bin, given the number of true pileup interactions = " << bin << std::endl;
-  //std::cout << "MC PU probability density, given the number of true pileup interactions = " << MCvalue << std::endl;
-  //std::cout << "Data PU probability density, given the number of true pileup interactions = " << Datavalue << std::endl;
+  // //  printouts for debugging
+  // std::cout << "Number of true pileup interactions = " << ntruePUInt << std::endl;
+  // std::cout << "Histogram bin, given the number of true pileup interactions = " << bin << std::endl;
+  // std::cout << "MC PU probability density, given the number of true pileup interactions = " << MCvalue << std::endl;
+  // std::cout << "Data PU probability density, given the number of true pileup interactions = " << Datavalue << std::endl;
 
-  //std::cout << "Grabbing pileup weight. " << std::endl;
-  //Ratio of normalized histograms in given bin
-
+  // std::cout << "Grabbing pileup weight. " << std::endl;
+  // //Ratio of normalized histograms in given bin
+  // double blah = ((MCvalue * Dataintegral) != 0) ? (Datavalue * MCintegral) / (MCvalue * Dataintegral) : 1.0;
+  // cout << blah << endl;
   return ((MCvalue * Dataintegral) != 0) ? (Datavalue * MCintegral) / (MCvalue * Dataintegral) : 1.0;
 }
 

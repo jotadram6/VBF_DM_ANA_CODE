@@ -148,7 +148,7 @@ void Histogramer::addVal(double value, string group, int maxcut, string histn, d
   int maxFolder=0;
 
   for(int i = 0; i < NFolders; i++) {
-    if(maxcut > folder_num[i]) maxFolder = folder_num[i];
+    if(maxcut > folder_num[i]) maxFolder = folder_num[i]+1;
     else break;
   }
   data[group]->AddPoint(histn, maxFolder, value, weight);

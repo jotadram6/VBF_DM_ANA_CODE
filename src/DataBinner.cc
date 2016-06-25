@@ -58,6 +58,7 @@ void DataBinner::Add_Hist(string shortname, string fullname, int bin, double lef
 
 void DataBinner::AddPoint(string name, int maxfolder, double value, double weight) {
   if(datamap[name] == NULL) return;
+
   for(int i=0; i < maxfolder; i++) {
     datamap[name]->bin(i,value, weight);
   }

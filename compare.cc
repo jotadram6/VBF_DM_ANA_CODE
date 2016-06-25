@@ -28,6 +28,8 @@
 
 using namespace std;
 
+string switchNames(string);
+
 int compare() {
 
   string filename1 = "test.root";
@@ -45,6 +47,7 @@ int compare() {
     string histname = key->GetName();
     TH1F* histo1 = (TH1F*)( dir1->FindObjectAny(histname.c_str()) );
     histname += "_0";
+    if(switchNames(histname) != "no switch") histname = switchNames(histname);
     TH1F* histo2 = (TH1F*)( dir2->FindObjectAny(histname.c_str()) );
     
     if(histo1 != 0 && histo2 != 0) {
@@ -55,11 +58,12 @@ int compare() {
 	continue;
       }
       for(int i =0; i < histo1->GetNbinsX(); i++) {
-	if(histo1->GetBinContent(i) != histo2->GetBinContent(i)) {
-	  cout << histname << " has different entries" << endl;
-	  count++;
-	  passed = false;
-	  break;
+	if(abs(histo1->GetBinContent(i) - histo2->GetBinContent(i)) > 1) {
+
+	    cout << histname << " has different entries " << endl;
+	    count++;
+	    passed = false;
+	    break;
 	}
       }
       if(passed) cout << "******" << histname << " passed**********" << endl;
@@ -69,4 +73,20 @@ int compare() {
     }
   }
   return count;
+}
+
+
+string switchNames(string name) {
+  if(name == "LeadingJetMass_0") return "LeadingJetsMass_0";
+  else if(name == "LeadingJetPt_0") return "LeadingJetsPt_0";
+  else if(name == "LeadingJetDeltaR_0") return "LeadingJetsDeltaR_0";
+  else if(name == "LeadingJetDeltaEta_0") return "LeadingJetsDeltaEta_0";
+  else if(name == "DiTau_Tau1DiJetDeltaPhi_0") return "Tau1Tau2_Tau1DiJetDeltaPhi_0";
+  else if(name == "DiTau_Tau2DiJetDeltaPhi_0") return "Tau1Tau2_Tau2DiJetDeltaPhi_0";
+  else if(name == "DiTauDeltaR_0") return "Tau1Tau2DeltaR_0";
+  else if(name == "DiTauDeltaPtDivSumPt_0") return "Tau1Tau2DeltaPtDivSumPt_0";
+  else if(name == "DiTauDeltaPt_0") return "Tau1Tau2DeltaPt_0";
+  else if(name == "DiTauOSLS_0") return "Tau1Tau2OSLS_0";
+  else if(name == "DiTauCosDphi_0") return "Tau1Tau2CosDphi_0";
+  else return "no switch";
 }

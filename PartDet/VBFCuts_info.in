@@ -8,13 +8,13 @@ MassCut 750.0 10000.0
 DiscrByPt 0
 PtCut 0 10000.0
 DiscrByDeltaEta 0
-DeltaEtaCut 4.2 10000.0
+DeltaEtaCut 5.0 10000.0
 DiscrByDeltaPhi 0
 DeltaPhiCut 4.2 10000.0
 
 DiscrByOSEta 0 
 
-DiscrByMet 1   
+DiscrByMet 0
 RecoMetCut 50.0 10000.0
 
 DiscrByMHT 0 

@@ -1,6 +1,6 @@
 Gen
 
-TauPtMinCut 10.0
-TauEtaMaxCut 2.4
+TauPtCut 0.0  10000.0
+TauEtaCut 10.0
 
 

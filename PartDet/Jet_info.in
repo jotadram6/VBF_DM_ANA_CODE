@@ -2,7 +2,7 @@
 	        Smear
 #######################################
 
-SmearTheJet 1
+SmearTheJet 0
 JetEnergyScaleOffset 1.0
 
 MuonMatchingDeltaR  0.3
@@ -16,7 +16,7 @@ TauMatchingDeltaR  0.3
 #######################################
 
 EtaCut 0. 5.0
-PtCut 10.0
+PtCut 30.0
 
 ApplyLooseID 0
 
@@ -40,7 +40,7 @@ Tau2MatchingDeltaR 0.3
 #######################################
 
 EtaCut 0. 5.0
-PtCut 10.0
+PtCut 30.0
 ApplyLooseID 0
 
 RemoveOverlapWithMuon1s 0
@@ -62,8 +62,8 @@ Tau2MatchingDeltaR 0.3
           CentralJet
 ###################################
 
-ApplyLooseID 1 
-PtCut 50.0
+ApplyLooseID 1
+PtCut 30.0
 
 RemoveOverlapWithMuon1s 0
 RemoveOverlapWithMuon2s 0
@@ -75,8 +75,8 @@ RemoveOverlapWithElectron2s 0
 Electron1MatchingDeltaR 0.3
 Electron2MatchingDeltaR 0.3
 
-RemoveOverlapWithTau1s 1
-RemoveOverlapWithTau2s 1
+RemoveOverlapWithTau1s 0
+RemoveOverlapWithTau2s 0
 Tau1MatchingDeltaR 0.3
 Tau2MatchingDeltaR 0.3
 
@@ -88,7 +88,7 @@ DoDiscrByThisJet 1
 
 ApplyLooseID 1       
 EtaCut 0.0 5.0
-PtCut 50.0
+PtCut 30.0
 
 RemoveOverlapWithMuon1s 0 
 RemoveOverlapWithMuon2s 0
@@ -100,8 +100,8 @@ RemoveOverlapWithElectron2s 0
 Electron1MatchingDeltaR 0.3
 Electron2MatchingDeltaR 0.3
 
-RemoveOverlapWithTau1s 1
-RemoveOverlapWithTau2s 1
+RemoveOverlapWithTau1s 0
+RemoveOverlapWithTau2s 0
 Tau1MatchingDeltaR 0.3
 Tau2MatchingDeltaR 0.3
 
@@ -112,7 +112,7 @@ Tau2MatchingDeltaR 0.3
 DoDiscrByThisJet 1
 
 EtaCut 0.0 5.0
-PtCut 50.0
+PtCut 30.0
 ApplyLooseID 1       
 
 RemoveOverlapWithMuon1s 0
@@ -125,8 +125,8 @@ RemoveOverlapWithElectron2s 0
 Electron1MatchingDeltaR 0.3
 Electron2MatchingDeltaR 0.3
 
-RemoveOverlapWithTau1s 1
-RemoveOverlapWithTau2s 1
+RemoveOverlapWithTau1s 0
+RemoveOverlapWithTau2s 0
 Tau1MatchingDeltaR 0.3
 Tau2MatchingDeltaR 0.3
 
@@ -147,11 +147,11 @@ RemoveOverlapWithElectron2s 0
 Electron1MatchingDeltaR 0.3
 Electron2MatchingDeltaR 0.3
 
-RemoveOverlapWithTau1s 1
-RemoveOverlapWithTau2s 1
+RemoveOverlapWithTau1s 0
+RemoveOverlapWithTau2s 0
 Tau1MatchingDeltaR 0.3
 Tau2MatchingDeltaR 0.3
 
 ApplyJetBTagging 1    
-JetBTaggingCut 0.679  
+JetBTaggingCut 0.500
 MatchBToGen   0
