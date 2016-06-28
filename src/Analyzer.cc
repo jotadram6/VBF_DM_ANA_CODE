@@ -1,5 +1,6 @@
 #include "Analyzer.h"
 #define ival(x) static_cast<int>(x)
+#define BIG_NUM 46340
 /*For speed, uncomment these commands and the define statement in the h file.  It will lead to 
   unchecked bounds on values, but will improve speed */
 //#define const
@@ -37,7 +38,7 @@ Analyzer::Analyzer(string infile, string outfile) : hPUmc(new TH1F("hPUmc", "hPU
   cuts_cumul.resize(histo.get_cuts()->size());
 
   
-  _Gen = new Generated(BOOM, FILESPACE + "Gen_info.in");
+  if(!isData) _Gen = new Generated(BOOM, FILESPACE + "Gen_info.in");
   _Electron = new Electron(BOOM, FILESPACE + "Electron_info.in");
   _Muon = new Muon(BOOM, FILESPACE + "Muon_info.in");
   _Tau = new Taus(BOOM, FILESPACE + "Tau_info.in");
@@ -47,11 +48,12 @@ Analyzer::Analyzer(string infile, string outfile) : hPUmc(new TH1F("hPUmc", "hPU
 ////destructor
 Analyzer::~Analyzer() {
   delete f;
-  delete _Gen;
   delete _Electron;
   delete _Muon;
   delete _Tau;
   delete _Jet;
+
+  if(!isData) delete _Gen;
 }
 
 
@@ -196,7 +198,6 @@ void Analyzer::preprocess(int event) {
 
   // dit += clock() - t1;
   // t1 = clock();
-
   if(event % 50000 == 0) {
     cout << "Event #" << event << endl;
   }
@@ -889,8 +890,10 @@ bool Analyzer::passDiParticleApprox(const TLorentzVector& Tobj1, const TLorentzV
 /////abs for values
 ///Find the number of lepton combos that pass the dilepton cuts
 void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS ePos2, CUTS ePosFin, const PartStats& stats) {
+  bool sameParticle = (&lep1 == &lep2);
   for(vec_iter i1=goodParts[ival(ePos1)].begin(); i1 != goodParts[ival(ePos1)].end(); i1++) {
     for(vec_iter i2=goodParts[ival(ePos2)].begin(); i2 != goodParts[ival(ePos2)].end(); i2++) {
+      if(sameParticle && (*i2) <= (*i1)) continue;
       if(stats.bmap.at("DiscrByDeltaR") && (lep1.smearP.at(*i1).DeltaR(lep2.smearP.at(*i2))) < stats.dmap.at("DeltaRCut")) continue;
    
       if(stats.smap.at("DiscrByOSLSType") == "LS" && (lep1.charge->at(*i1) * lep2.charge->at(*i2) >= 0)) continue;
@@ -926,7 +929,7 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
       ///Particlesp that lead to good combo are nGen * part1 + part2
       /// final / nGen = part1 (make sure is integer)
       /// final % nGen = part2 
-      goodParts[ival(ePosFin)].push_back((*i1)*_Gen->pt->size() + (*i2));
+      goodParts[ival(ePosFin)].push_back((*i1)*BIG_NUM + (*i2));
     }
   }
 }
@@ -1300,14 +1303,14 @@ void Analyzer::fill_Folder(string group, int max) {
 
 
     ////diparticle stuff
-  } else if(group == "FillDiMuon" || group == "FillDiTau" || group == "Muon1Tau1" || group == "Muon1Tau2" || group == "Muon2Tau1" || group == "Muon2Tau2") {  ///mumu/mutau/tautau
+  } else if(group == "FillDiMuon" || group == "FillDiTau" || group == "FillMuon1Tau1" || group == "FillMuon1Tau2" || group == "FillMuon2Tau1" || group == "FillMuon2Tau2") {  ///mumu/mutau/tautau
     Lepton* lep1 = NULL;
     Lepton* lep2 = NULL;
     CUTS ePos = fill_num[group];
     if(ePos == CUTS::eMuon1Tau1 || ePos == CUTS::eMuon1Tau2 || ePos == CUTS::eMuon2Tau1 || ePos == CUTS::eMuon2Tau2) {
-      lep1 = _Muon; lep2 = _Tau;
+      lep1 = _Tau; lep2 = _Muon;
     } else if(ePos == CUTS::eElec1Tau1 || ePos == CUTS::eElec1Tau2 || ePos == CUTS::eElec2Tau1 || ePos == CUTS::eElec2Tau2) {
-      lep1 = _Electron; lep2 = _Tau;
+      lep1 = _Tau; lep2 = _Electron;
     } else if(ePos == CUTS::eDiMuon) {
       lep1 = _Muon; lep2 = _Muon;
     } else if(ePos == CUTS::eDiTau) { lep1 = _Tau; lep2 = _Tau; 
@@ -1315,27 +1318,27 @@ void Analyzer::fill_Folder(string group, int max) {
 
     
     for(vec_iter it=goodParts[ival(ePos)].begin(); it!=goodParts[ival(ePos)].end(); it++) {
-
-      int p1= (*it) / _Gen->pt->size();
-      int p2= (*it) % _Gen->pt->size();
-
+      int p1= (*it) / BIG_NUM;
+      int p2= (*it) % BIG_NUM;
+      //      cout << p1 << " " << lep1->smearP.size() << " " << p2 << " " << lep2->smearP.size() << group;
       //    histo.addVal(Muon->smearP.at(mj).Pt(),Tau->smearP.at(tj).Pt());   //Muon1PtVsTau1Pt######################
       histo.addVal(lep1->smearP.at(p1).DeltaR(lep2->smearP.at(p2)), group,max, "DeltaR", wgt); 
-      histo.addVal((lep1->smearP.at(p1).Pt() - lep1->smearP.at(p2).Pt()) / (lep1->smearP.at(p1).Pt() + lep2->smearP.at(p2).Pt()), group,max, "DeltaPtDivSumPt", wgt);   //Muon1Tau1DeltaPtDivSumPt
+      histo.addVal((lep1->smearP.at(p1).Pt() - lep2->smearP.at(p2).Pt()) / (lep1->smearP.at(p1).Pt() + lep2->smearP.at(p2).Pt()), group,max, "DeltaPtDivSumPt", wgt);   //Muon1Tau1DeltaPtDivSumPt
       histo.addVal(lep1->smearP.at(p1).Pt() - lep2->smearP.at(p2).Pt(), group,max, "DeltaPt", wgt);
       histo.addVal(cos(absnormPhi(lep2->smearP.at(p2).Phi() - lep1->smearP.at(p1).Phi())), group,max, "CosDphi", wgt);
-      histo.addVal(absnormPhi(lep2->smearP.at(p2).Phi() - theMETVector.Phi()), group,max, "Part1MetDeltaPhi", wgt);
+      histo.addVal(absnormPhi(lep1->smearP.at(p1).Phi() - theMETVector.Phi()), group,max, "Part1MetDeltaPhi", wgt);
       ///      histo.addVal(absnormPhi(lep2->smearP.at(p2).Phi() - theMETVector.Phi()), cos(absnormPhi(lep2->smearP.at(p2).Phi() - lep1->smearP.at(p1).Phi())));   //Muon1MetDeltaPhiVsMuon1Tau1CosDphi
-      histo.addVal(absnormPhi(lep1->smearP.at(p1).Phi() - theMETVector.Phi()), group,max, "Part2MetDeltaPhi", wgt);
+      histo.addVal(absnormPhi(lep2->smearP.at(p2).Phi() - theMETVector.Phi()), group,max, "Part2MetDeltaPhi", wgt);
       // if(CalculateTheDiTau4Momentum(lep1->smearP.at(p1),lep2->smearP.at(p2)).first) {
       // 	histo.addVal(DiParticleMass(lep1->smearP.at(p1),lep2->smearP.at(p2)), group,max, "ReconstructableMass");
       // } else {
       // 	histo.addVal(DiParticleMass(lep1->smearP.at(p1),lep2->smearP.at(p2)), group,max, "NotReconstructableMass");
       // }
+
       double PZeta = getPZeta(lep1->smearP.at(p1),lep2->smearP.at(p2));
       double PZetaVis = getPZetaVis(lep1->smearP.at(p1),lep2->smearP.at(p2));
-      histo.addVal(calculateLeptonMetMt(lep2->smearP.at(p2)), group,max, "Part1MetMt", wgt);
-      histo.addVal(calculateLeptonMetMt(lep1->smearP.at(p1)), group,max, "Part2MetMt", wgt); 
+      histo.addVal(calculateLeptonMetMt(lep1->smearP.at(p1)), group,max, "Part1MetMt", wgt);
+      histo.addVal(calculateLeptonMetMt(lep2->smearP.at(p2)), group,max, "Part2MetMt", wgt); 
       histo.addVal(lep2->charge->at(p2) * lep1->charge->at(p1), group,max, "OSLS", wgt);  
       histo.addVal(PZeta, group,max, "PZeta", wgt); 
       histo.addVal(PZetaVis, group,max, "PZetaVis", wgt);  

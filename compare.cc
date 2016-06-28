@@ -32,6 +32,8 @@ string switchNames(string);
 
 int compare() {
 
+  TFile* diff = new TFile("diff.root", "RECREATE");
+
   string filename1 = "test.root";
   string filename2 = "final.root";
   TFile* file1 = new TFile(filename1.c_str());
@@ -59,6 +61,13 @@ int compare() {
       }
       for(int i =0; i < histo1->GetNbinsX(); i++) {
 	if(abs(histo1->GetBinContent(i) - histo2->GetBinContent(i)) > 1) {
+	  TH1F* diffhist = new TH1F(histname.c_str(), histname.c_str(),  histo1->GetNbinsX(), histo1->GetXaxis()->GetXmin(), histo1->GetXaxis()->GetXmax());
+	  for(int j =0; j < histo1->GetNbinsX(); j++) {
+	    diffhist->SetBinContent(j, histo1->GetBinContent(j) - histo2->GetBinContent(j));
+	  }
+	  diff->cd("");
+	  diffhist->Write();
+
 
 	    cout << histname << " has different entries " << endl;
 	    count++;
