@@ -1,3 +1,4 @@
+```
 To build the program, simply type
 
 make Analyzer
@@ -14,8 +15,8 @@ All of the parameters are stored in PartDet/.
 
                              #####################################
                              ######       Info Files        ######
- 			     #####################################
-
+                             #####################################
+ 			     
 The info files are parsed in a similar way for almost all of them.
 
 All files can have lines commented out.  Anything to the right of // or # will be ignored by the parser.  This makes it
@@ -58,7 +59,7 @@ for a value in a place where it is not assigned.
 
                              #####################################
                              ######       Analyzer.cc       ######
- 			     #####################################
+                             #####################################
 
 Analyzer is the object that does most of the analysis of the code.  It is split into five main public functions
 
@@ -117,20 +118,20 @@ This prints off the individual passing and cumulative passing of each of the cut
 
 
                              #####################################
-			     ######       Particle.cc       ######
-			     #####################################
+                             ######       Particle.cc       ######
+                             #####################################
 
 Particle divides the particles up into a tree of heirarchy as such:
 
-	     Generated
-	   /
-	 /
+             Generated
+          /
+         /
 Particle ---Jet 
-         \	   _Electron
-	  \	  /
-	   Lepton --Muon
-		  \_
-		    Taus
+         \         _Electron
+          \       /
+           Lepton --Muon
+                  \_
+                     Taus
 
 This means that qualities that are shared across multiple types of particles can initalized for each with only 
 one writing of the code.  So if more properties are added for analysis to leptons, adding this becomes simple.
@@ -152,9 +153,9 @@ Muons:	     PartDet/Muon_info.in
 Taus:	     PartDet/Tau_info.in
 		  	    
 
-			     #####################################
-			     ######       Histogram.cc      ######
-			     #####################################
+                             #####################################
+                             ######       Histogram.cc      ######
+                             #####################################
 
 Histogramer is the name of the object that stores all of the histograms.  It works by first reading in the histograms
 and cuts from the file using two different parsers.  The files read are:
@@ -169,9 +170,9 @@ groups are put into a DataBinner object.
 Number of particles cuts that add no information (ie range from 0 to infinity (-1 in the code)) are ignored by the 
 parser.
 
-			     #####################################
-			     ######       DataBinner.cc     ######
-			     #####################################
+                             #####################################
+                             ######       DataBinner.cc     ######
+                             #####################################
 
 This file is divided into two objects, the DataBinner and DataPiece.  
 
@@ -192,3 +193,4 @@ DiMuon_Muon1MetMt => Part1MetMt
 DiMuon_Muon2MetMt => Part2MetMt
 
 These shortened names can be seen in the Analyzer file in the fill_Folder function.
+```
