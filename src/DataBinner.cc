@@ -3,7 +3,7 @@
 using namespace std;
 
 DataPiece::DataPiece(string name, int _bins, double _begin, double _end, int _Nfold) :  
-  data(_Nfold*_bins, 0), begin(_begin), end(_end), bins(_bins), Nfold(_Nfold),
+  data(_Nfold*_bins, 0), begin(_begin), end(_end), underflow(0), overflow(0), bins(_bins), Nfold(_Nfold),
   histogram(name.c_str(), name.c_str(), _bins, _begin, _end) {
   
   width = (end - begin)/bins;
@@ -18,10 +18,10 @@ int DataPiece::get_bin(double y) {
 }
 
 void DataPiece::bin(int folder, double y, double weight) {
-  int putbin = get_bin(y);
-  if((2*putbin - bins + 1 ) / bins == 0) {
-    data[Nfold*folder + putbin] += weight;
-  }
+  if(y < begin) underflow += weight;
+  else if(y > end) overflow += weight;
+  else data[Nfold*folder + get_bin(y)] += weight;
+  
 }
 
 void DataPiece::write_histogram(vector<string>& folders, TFile* outfile) {
@@ -34,6 +34,8 @@ void DataPiece::write_histogram(vector<string>& folders, TFile* outfile) {
       histogram.SetBinContent(j+1, data[i*Nfold + j]);
       entries += data[i*Nfold + j];
     }
+    if(underflow != 0) histogram.SetBinContent(0, underflow);
+    if(overflow != 0) histogram.SetBinContent(bins+1, overflow);
     histogram.SetEntries(entries);
     histogram.Write();
   }

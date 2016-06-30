@@ -34,18 +34,19 @@ int compare() {
 
   TFile* diff = new TFile("diff.root", "RECREATE");
 
-  string filename1 = "test.root";
-  string filename2 = "final.root";
+  string filename1 = "testlong.root";
+  string filename2 = "finallong.root";
   TFile* file1 = new TFile(filename1.c_str());
   TFile* file2 = new TFile(filename2.c_str());
   
   TDirectory* dir1 = (TDirectory*)file1->Get("NGenMuon");
   TDirectory* dir2 = (TDirectory*)file2->Get("DiJetCombinationsNmin");
   int count = 0;
-
+  int all = 0;
   TIter iter(dir1->GetListOfKeys());
   TKey* key;
   while((key = (TKey*)iter())) {
+    all++;
     string histname = key->GetName();
     TH1F* histo1 = (TH1F*)( dir1->FindObjectAny(histname.c_str()) );
     histname += "_0";
@@ -75,18 +76,40 @@ int compare() {
 	    break;
 	}
       }
-      if(passed) cout << "******" << histname << " passed**********" << endl;
+      //      if(passed) cout << "******" << histname << " passed**********" << endl;
     } else {
       cout << histname << " not found" << endl;
-      count++;
+      //      count++;
     }
   }
+  cout << "Didn't match " << count << " out of " << all << " graphs" << endl;
   return count;
 }
 
 
 string switchNames(string name) {
   if(name == "LeadingJetMass_0") return "LeadingJetsMass_0";
+  else if(name == "NTauJet1_0") return "NTau1_0";
+    else if(name == "NTauJet2_0") return "NTau2_0";
+
+  else if(name == "DiMuon_Muon1DiJetDeltaPhi_0") return "Muon1Muon2_Muon1DiJetDeltaPhi_0";
+  else if(name == "DiMuon_Muon2DiJetDeltaPhi_0") return "Muon1Muon2_Muon2DiJetDeltaPhi_0";
+  else if(name == "DiMuonDeltaR_0") return "Muon1Muon2DeltaR_0";
+  else if(name == "DiMuonDeltaPtDivSumPt_0") return "Muon1Muon2DeltaPtDivSumPt_0";
+  else if(name == "DiMuonDeltaPt_0") return "Muon1Muon2DeltaPt_0";
+  else if(name == "DiMuonOSLS_0") return "Muon1Muon2OSLS_0";
+  else if(name == "DiMuonCosDphi_0") return "Muon1Muon2CosDphi_0";
+
+  else if(name == "DiMuon_Muon1IsZdecay_0") return "Muon1Muon2_Muon1IsZmm_0";
+  else if(name == "DiMuon_Muon2IsZdecay_0") return "Muon1Muon2_Muon2IsZmm_0";
+  else if(name == "Muon1Tau1_Muon1IsZdecay_0") return "Muon1Tau1_Muon1IsZmm_0";
+  else if(name == "Muon1Tau2_Muon1IsZdecay_0") return "Muon1Tau2_Muon1IsZmm_0";
+  else if(name == "Muon2Tau1_Muon2IsZdecay_0") return "Muon2Tau1_Muon2IsZmm_0";
+  else if(name == "Muon2Tau1_Muon2IsZdecay_0") return "Muon2Tau1_Muon2IsZmm_0";
+
+  else if(name == "DiMuon_Muon1MetMt_0") return "DiMuon_Muon2MetMt_0";
+  else if(name == "DiMuon_Muon2MetMt_0") return "DiMuon_Muon1MetMt_0";
+
   else if(name == "LeadingJetPt_0") return "LeadingJetsPt_0";
   else if(name == "LeadingJetDeltaR_0") return "LeadingJetsDeltaR_0";
   else if(name == "LeadingJetDeltaEta_0") return "LeadingJetsDeltaEta_0";

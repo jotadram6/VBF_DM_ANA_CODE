@@ -14,7 +14,7 @@ using namespace std;
 class DataPiece {
  public:
   vector<float> data;
-  double begin, end, width;
+  double begin, end, width, underflow, overflow;
   int bins, Nfold;
   string name;
   TH1F histogram;

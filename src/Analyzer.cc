@@ -139,7 +139,7 @@ void Analyzer::preprocess(int event) {
   // jet2t += clock() - t1;
   // t1 = clock();
 
-  getGoodRecoJets(CUTS::eRCenJet, _Jet->pstats["CentralJet"]);
+
   // cent += clock() - t1;
   // t1 = clock();
 
@@ -624,7 +624,7 @@ void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats) {
     ///if else loop for central jet requirements
 
     if( ePos == CUTS::eRCenJet) {
-      if(lvec.Pt() > 2.5) continue;
+      if(fabs(lvec.Eta()) > 2.5) continue;
     } else if (fabs(lvec.Eta()) < stats.pmap.at("EtaCut").first || fabs(lvec.Eta()) > stats.pmap.at("EtaCut").second) continue;
     if (lvec.Pt() < stats.dmap.at("PtCut")) continue;
 
@@ -1141,16 +1141,6 @@ double Analyzer::absnormPhi(double phi) {
 
 
 
-//       // ------Central Jet Histograms
-//       int nCJets = 0;
-//       for(int j = 0; j < Jet_pt->size(); j++) {
-// 	if (!passRecoCentralJetCuts(j)) continue;
-// 	_hCentralJetPt[i][NpdfID]->Fill(smearedJetMomentumVector.at(j).Pt(),weight);
-// 	_hCentralJetEta[i][NpdfID]->Fill(smearedJetMomentumVector.at(j).Eta(),weight);
-// 	nCJets++;
-
-//       _hNCentralJet[i][NpdfID]->Fill(nCJets,weight);
-
   
   // if(group == "FillGenTau") {
   //   for(int i = 0; i < goodParts[ival(eGTau)].size(); i++) {
@@ -1174,13 +1164,6 @@ double Analyzer::absnormPhi(double phi) {
   //     }
   //   }
 
-  //     if(Muon->smearP.at(j).Pt() >= leadingmuonpt) {
-  // 	leadingmuonpt = Muon->smearP.at(j).Pt();
-  // 	leadingmuoneta = Muon->smearP.at(j).Eta();
-  //   if(nMuons > 0) {
-  //     _hFirstLeadingMuon1Pt->Fill(leadingmuonpt);
-  //     _hFirstLeadingMuon1Eta->Fill(leadingmuoneta);
-  //   }
   //////////num with pt/eta/phi/e 
 
 ////Grabs a list of the groups of histograms to be filled and asked Fill_folder to fill up the histograms
@@ -1196,7 +1179,7 @@ void Analyzer::fill_histogram() {
 ///Function that fills up the histograms
 void Analyzer::fill_Folder(string group, int max) {
 
-  if(group == "FillTauJet1" || group == "FillTauJet2" || group == "FillMuon1" || group == "FillMuon2" || group == "FillJet1" || group == "FillJet2" || group == "FillBJet") {
+  if(group == "FillTauJet1" || group == "FillTauJet2" || group == "FillMuon1" || group == "FillMuon2" || group == "FillJet1" || group == "FillJet2" || group == "FillBJet" || group == "FillCentralJet") {
     Particle* part;
     if(group == "FillTauJet1" || group == "FillTauJet2") part=_Tau;
     else if(group == "FillMuon1" || group == "FillMuon2") part=_Muon;
@@ -1211,11 +1194,28 @@ void Analyzer::fill_Folder(string group, int max) {
       if(dynamic_cast<Taus*>(part) != NULL) {
 	histo.addVal(_Tau->nProngs->at(*it), group,max, "NumSignalTracks", wgt);
   	histo.addVal(_Tau->charge->at(*it), group,max, "Charge", wgt);
-	histo.addVal(_Tau->leadChargedCandPt->at(*it), group,max, "SeedTracks", wgt);
-      } else if(dynamic_cast<Muon*>(part)) {
+	histo.addVal(_Tau->leadChargedCandPt->at(*it), group,max, "SeedTrackPt", wgt);
+      } else if(dynamic_cast<Muon*>(part) != NULL) {
 	histo.addVal(calculateLeptonMetMt(_Muon->smearP.at(*it)), group,max, "MetMt", wgt);  
       }
     }
+    
+    if((ePos == CUTS::eRMuon1 || ePos == CUTS::eRMuon2 || ePos == CUTS::eRTau1 || ePos == CUTS::eRTau2) && goodParts[ival(ePos)].size() > 0) {
+      double leadpt = 0;
+      double leadeta = 0;
+      for(vec_iter it=goodParts[ival(ePos)].begin(); it!=goodParts[ival(ePos)].end(); it++) {
+	if(part->smearP.at(*it).Pt() >= leadpt) {
+	  leadpt = part->smearP.at(*it).Pt();
+	  leadeta = part->smearP.at(*it).Eta();
+	}
+      }
+
+      histo.addVal(leadpt, group, max, "FirstLeadingPt", wgt);
+      histo.addVal(leadeta, group, max, "FirstLeadingEta", wgt);
+    }
+  
+
+
 
     histo.addVal(goodParts[ival(ePos)].size(), group,max, "N", wgt);
     //D    if(ePos == CUTS::eRMuon1) cout << "Muons: " << goodParts[ival(ePos)].size() << endl;
@@ -1229,14 +1229,31 @@ void Analyzer::fill_Folder(string group, int max) {
       TLorentzVector DiJet = _Jet->smearP.at(goodParts[ival(CUTS::eR1stJet)].at(0)) + _Jet->smearP.at(goodParts[ival(CUTS::eR2ndJet)].at(0));
       histo.addVal(absnormPhi(theMETVector.Phi() - DiJet.Phi()), group,max, "MetDiJetDeltaPhi", wgt);
     }
-  
+    
+  } else if(group == "FillLeadingJet" && goodParts[ival(CUTS::eSusyCom)].size() == 0) {
+    double eta1 = -100, eta2 = -100;
+    double pt1 = 0, pt2 = 0;
+    if(goodParts[ival(CUTS::eR1stJet)].at(0) != -1) {
+      pt1 = _Jet->smearP.at(goodParts[ival(CUTS::eR1stJet)].at(0)).Pt();
+      eta1 = _Jet->smearP.at(goodParts[ival(CUTS::eR1stJet)].at(0)).Eta();
+    }
+    if(goodParts[ival(CUTS::eR2ndJet)].at(0) != -1) {
+      pt2 = _Jet->smearP.at(goodParts[ival(CUTS::eR2ndJet)].at(0)).Pt();
+      eta2 = _Jet->smearP.at(goodParts[ival(CUTS::eR2ndJet)].at(0)).Eta();
+    }
+    histo.addVal(pt1,group,max, "FirstPt", wgt);
+    histo.addVal(eta1,group,max, "FirstEta", wgt);
+
+    histo.addVal(pt2,group,max, "SecondPt", wgt);
+    histo.addVal(eta2,group,max, "SecondEta", wgt);
 
   } else if(group == "FillLeadingJet" && goodParts[ival(CUTS::eSusyCom)].size() != 0) {
     TLorentzVector first = _Jet->smearP.at(goodParts[ival(CUTS::eR1stJet)].at(0));
     TLorentzVector second = _Jet->smearP.at(goodParts[ival(CUTS::eR2ndJet)].at(0));
-
+    
     histo.addVal(first.Pt(),group,max, "FirstPt", wgt);
     histo.addVal(second.Pt(),group,max, "SecondPt", wgt);
+
     histo.addVal(first.Eta(),group,max, "FirstEta", wgt);
     histo.addVal(second.Eta(),group,max, "SecondEta", wgt);
     
@@ -1248,7 +1265,7 @@ void Analyzer::fill_Folder(string group, int max) {
     histo.addVal(first.DeltaR(second),group,max, "DeltaR", wgt);  
 
     double dphiDijets = absnormPhi(first.Phi() - second.Phi());
-    double dphi1 = normPhi(first.Phi());// - theMETVector.Phi());
+    double dphi1 = normPhi(first.Phi() - theMETVector.Phi());
     double dphi2 = normPhi(second.Phi() - theMETVector.Phi());
     double alpha = (LeadDiJet.M() > 0) ? second.Pt() / LeadDiJet.M() : 999999999.0;
 
@@ -1307,10 +1324,12 @@ void Analyzer::fill_Folder(string group, int max) {
     Lepton* lep1 = NULL;
     Lepton* lep2 = NULL;
     CUTS ePos = fill_num[group];
+    string digroup = group;
+    digroup.erase(0,4);
     if(ePos == CUTS::eMuon1Tau1 || ePos == CUTS::eMuon1Tau2 || ePos == CUTS::eMuon2Tau1 || ePos == CUTS::eMuon2Tau2) {
-      lep1 = _Tau; lep2 = _Muon;
+      lep1 = _Muon; lep2 = _Tau;
     } else if(ePos == CUTS::eElec1Tau1 || ePos == CUTS::eElec1Tau2 || ePos == CUTS::eElec2Tau1 || ePos == CUTS::eElec2Tau2) {
-      lep1 = _Tau; lep2 = _Electron;
+      lep1 = _Electron; lep2 = _Tau;
     } else if(ePos == CUTS::eDiMuon) {
       lep1 = _Muon; lep2 = _Muon;
     } else if(ePos == CUTS::eDiTau) { lep1 = _Tau; lep2 = _Tau; 
@@ -1318,9 +1337,9 @@ void Analyzer::fill_Folder(string group, int max) {
 
     
     for(vec_iter it=goodParts[ival(ePos)].begin(); it!=goodParts[ival(ePos)].end(); it++) {
-      int p1= (*it) / BIG_NUM;
-      int p2= (*it) % BIG_NUM;
-      //      cout << p1 << " " << lep1->smearP.size() << " " << p2 << " " << lep2->smearP.size() << group;
+      int p1= (*it) % BIG_NUM;
+      int p2= (*it) / BIG_NUM;
+
       //    histo.addVal(Muon->smearP.at(mj).Pt(),Tau->smearP.at(tj).Pt());   //Muon1PtVsTau1Pt######################
       histo.addVal(lep1->smearP.at(p1).DeltaR(lep2->smearP.at(p2)), group,max, "DeltaR", wgt); 
       histo.addVal((lep1->smearP.at(p1).Pt() - lep2->smearP.at(p2).Pt()) / (lep1->smearP.at(p1).Pt() + lep2->smearP.at(p2).Pt()), group,max, "DeltaPtDivSumPt", wgt);   //Muon1Tau1DeltaPtDivSumPt
@@ -1329,11 +1348,15 @@ void Analyzer::fill_Folder(string group, int max) {
       histo.addVal(absnormPhi(lep1->smearP.at(p1).Phi() - theMETVector.Phi()), group,max, "Part1MetDeltaPhi", wgt);
       ///      histo.addVal(absnormPhi(lep2->smearP.at(p2).Phi() - theMETVector.Phi()), cos(absnormPhi(lep2->smearP.at(p2).Phi() - lep1->smearP.at(p1).Phi())));   //Muon1MetDeltaPhiVsMuon1Tau1CosDphi
       histo.addVal(absnormPhi(lep2->smearP.at(p2).Phi() - theMETVector.Phi()), group,max, "Part2MetDeltaPhi", wgt);
-      // if(CalculateTheDiTau4Momentum(lep1->smearP.at(p1),lep2->smearP.at(p2)).first) {
-      // 	histo.addVal(DiParticleMass(lep1->smearP.at(p1),lep2->smearP.at(p2)), group,max, "ReconstructableMass");
-      // } else {
-      // 	histo.addVal(DiParticleMass(lep1->smearP.at(p1),lep2->smearP.at(p2)), group,max, "NotReconstructableMass");
-      // }
+
+      double diMass = diParticleMass(lep1->smearP.at(p1),lep2->smearP.at(p2), distats[digroup].smap.at("HowCalculateMassReco"));
+      if(passDiParticleApprox(lep1->smearP.at(p1),lep2->smearP.at(p2), distats[digroup].smap.at("HowCalculateMassReco"))) {
+	histo.addVal(diMass, group,max, "ReconstructableMass", wgt);
+      } else {
+      	histo.addVal(diMass, group,max, "NotReconstructableMass", wgt);
+      }
+
+
 
       double PZeta = getPZeta(lep1->smearP.at(p1),lep2->smearP.at(p2));
       double PZetaVis = getPZetaVis(lep1->smearP.at(p1),lep2->smearP.at(p2));
@@ -1343,15 +1366,21 @@ void Analyzer::fill_Folder(string group, int max) {
       histo.addVal(PZeta, group,max, "PZeta", wgt); 
       histo.addVal(PZetaVis, group,max, "PZetaVis", wgt);  
       // histo.addVal(PZetaVis,PZeta, group,max, "Zeta2D");   //Muon1Tau1Zeta2D
-      ///histo.addVal((_Muon1Tau1PZetaCutCoefficient * PZeta) + (_Muon1Tau1PZetaVisCutCoefficient * PZetaVis));   //Muon
+      histo.addVal((distats.at(digroup).dmap.at("PZetaCutCoefficient") * PZeta) + (distats.at(digroup).dmap.at("PZetaVisCutCoefficient") * PZetaVis), group, max, "Zeta1D", wgt);   //Muon
 
       if ((goodParts[ival(CUTS::eR1stJet)].at(0) != -1) && (goodParts[ival(CUTS::eR2ndJet)].at(0) != -1)) {
-	TLorentzVector TheLeadDiJetVect = _Jet->smearP.at(goodParts[ival(CUTS::eR2ndJet)].at(0)) + _Jet->smearP.at(goodParts[ival(CUTS::eR2ndJet)].size());
+	TLorentzVector TheLeadDiJetVect = _Jet->smearP.at(goodParts[ival(CUTS::eR1stJet)].at(0)) + _Jet->smearP.at(goodParts[ival(CUTS::eR2ndJet)].at(0));
+
 	histo.addVal(absnormPhi(lep1->smearP.at(p1).Phi() - TheLeadDiJetVect.Phi()), group,max, "Part1DiJetDeltaPhi", wgt);
 	histo.addVal(absnormPhi(lep2->smearP.at(p2).Phi() - TheLeadDiJetVect.Phi()), group,max, "Part2DiJetDeltaPhi", wgt);
-	////////#####histo.addVal(DiParticleMass(TheLeadDiJetVect, Muon->smearP.at(mj)+Tau->smearP.at(tj) ));   //Muon1Tau1DiJetReconstructableMass
+	histo.addVal(diParticleMass(TheLeadDiJetVect, lep1->smearP.at(p1)+lep2->smearP.at(p2), "VectorSumOfVisProductsAndMet"), group, max, "DiJetReconstructableMass", wgt); 
       }
-      // Fill(isZmm(Muon->smearP.at(mj)).first);   //Muon1Tau1_Muon1IsZmm
+      if(dynamic_cast<Taus*>(lep1) == NULL) {
+	histo.addVal(isZdecay(lep1->smearP.at(p1), *lep1), group,max, "Part1IsZdecay", wgt); 
+      }
+      if(dynamic_cast<Taus*>(lep2) == NULL){ 
+	histo.addVal(isZdecay(lep2->smearP.at(p1), *lep2), group,max, "Part2IsZdecay", wgt); 
+      }
     }
   }
 }

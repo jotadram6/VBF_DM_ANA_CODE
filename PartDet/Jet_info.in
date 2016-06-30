@@ -62,7 +62,7 @@ Tau2MatchingDeltaR 0.3
           CentralJet
 ###################################
 
-ApplyLooseID 1
+ApplyLooseID 0
 PtCut 30.0
 
 RemoveOverlapWithMuon1s 0
