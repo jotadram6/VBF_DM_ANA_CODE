@@ -52,8 +52,8 @@ Analyzer::~Analyzer() {
   delete _Muon;
   delete _Tau;
   delete _Jet;
-
   if(!isData) delete _Gen;
+  
 }
 
 
@@ -139,7 +139,7 @@ void Analyzer::preprocess(int event) {
   // jet2t += clock() - t1;
   // t1 = clock();
 
-
+  getGoodRecoJets(CUTS::eRCenJet, _Jet->pstats["CentralJet"]);
   // cent += clock() - t1;
   // t1 = clock();
 
@@ -176,14 +176,14 @@ void Analyzer::preprocess(int event) {
   // t1 = clock();
 
   /////lepton lepton topology cuts
-  getGoodLeptonCombos(*_Tau, *_Electron, CUTS::eRTau1, CUTS::eRElec1, CUTS::eElec1Tau1, distats["Electron1Tau1"]);
-  getGoodLeptonCombos(*_Tau, *_Electron, CUTS::eRTau1, CUTS::eRElec2, CUTS::eElec2Tau1, distats["Electron2Tau1"]);
-  getGoodLeptonCombos(*_Tau, *_Muon, CUTS::eRTau1, CUTS::eRMuon1, CUTS::eMuon1Tau1, distats["Muon1Tau1"]);
-  getGoodLeptonCombos(*_Tau, *_Muon, CUTS::eRTau1, CUTS::eRMuon2, CUTS::eMuon2Tau1, distats["Muon2Tau1"]);
-  getGoodLeptonCombos(*_Tau, *_Electron, CUTS::eRTau2, CUTS::eRElec1, CUTS::eElec1Tau2, distats["Electron1Tau2"]);
-  getGoodLeptonCombos(*_Tau, *_Electron, CUTS::eRTau2, CUTS::eRElec2, CUTS::eElec2Tau2, distats["Electron2Tau2"]);
-  getGoodLeptonCombos(*_Tau, *_Muon, CUTS::eRTau2, CUTS::eRMuon1, CUTS::eMuon1Tau2, distats["Muon1Tau2"]);
-  getGoodLeptonCombos(*_Tau, *_Muon, CUTS::eRTau2, CUTS::eRMuon2, CUTS::eMuon2Tau2, distats["Muon2Tau2"]);
+  getGoodLeptonCombos(*_Electron, *_Tau, CUTS::eRElec1,CUTS::eRTau1, CUTS::eElec1Tau1, distats["Electron1Tau1"]);
+  getGoodLeptonCombos(*_Electron, *_Tau, CUTS::eRElec2, CUTS::eRTau1, CUTS::eElec2Tau1, distats["Electron2Tau1"]);
+  getGoodLeptonCombos(*_Muon, *_Tau, CUTS::eRMuon1, CUTS::eRTau1, CUTS::eMuon1Tau1, distats["Muon1Tau1"]);
+  getGoodLeptonCombos(*_Muon, *_Tau, CUTS::eRMuon2, CUTS::eRTau1, CUTS::eMuon2Tau1, distats["Muon2Tau1"]);
+  getGoodLeptonCombos(*_Electron, *_Tau, CUTS::eRElec1, CUTS::eRTau2, CUTS::eElec1Tau2, distats["Electron1Tau2"]);
+  getGoodLeptonCombos(*_Electron, *_Tau, CUTS::eRElec2, CUTS::eRTau2, CUTS::eElec2Tau2, distats["Electron2Tau2"]);
+  getGoodLeptonCombos(*_Muon, *_Tau, CUTS::eRMuon1, CUTS::eRTau2, CUTS::eMuon1Tau2, distats["Muon1Tau2"]);
+  getGoodLeptonCombos(*_Muon, *_Tau, CUTS::eRMuon2, CUTS::eRTau2, CUTS::eMuon2Tau2, distats["Muon2Tau2"]);
 
   // combot += clock() - t1;
   // t1 = clock();
@@ -1185,7 +1185,7 @@ void Analyzer::fill_Folder(string group, int max) {
     else if(group == "FillMuon1" || group == "FillMuon2") part=_Muon;
     else part = _Jet;
     CUTS ePos = fill_num[group];
-    //cout << goodParts[ival(ePos)].size() << " " << goodParts[ival(CUTS::eRTau1)].size() << endl;
+
     for(vec_iter it=goodParts[ival(ePos)].begin(); it!=goodParts[ival(ePos)].end(); it++) {
       histo.addVal(part->smearP.at(*it).Energy(), group,max, "Energy", wgt);
       histo.addVal(part->smearP.at(*it).Pt(), group,max, "Pt", wgt);
@@ -1337,13 +1337,18 @@ void Analyzer::fill_Folder(string group, int max) {
 
     
     for(vec_iter it=goodParts[ival(ePos)].begin(); it!=goodParts[ival(ePos)].end(); it++) {
-      int p1= (*it) % BIG_NUM;
-      int p2= (*it) / BIG_NUM;
+      int p1= (*it) / BIG_NUM;
+      int p2= (*it) % BIG_NUM;
 
       //    histo.addVal(Muon->smearP.at(mj).Pt(),Tau->smearP.at(tj).Pt());   //Muon1PtVsTau1Pt######################
       histo.addVal(lep1->smearP.at(p1).DeltaR(lep2->smearP.at(p2)), group,max, "DeltaR", wgt); 
-      histo.addVal((lep1->smearP.at(p1).Pt() - lep2->smearP.at(p2).Pt()) / (lep1->smearP.at(p1).Pt() + lep2->smearP.at(p2).Pt()), group,max, "DeltaPtDivSumPt", wgt);   //Muon1Tau1DeltaPtDivSumPt
-      histo.addVal(lep1->smearP.at(p1).Pt() - lep2->smearP.at(p2).Pt(), group,max, "DeltaPt", wgt);
+      if(group.find("Di") != string::npos) {
+	histo.addVal((lep1->smearP.at(p1).Pt() - lep2->smearP.at(p2).Pt()) / (lep1->smearP.at(p1).Pt() + lep2->smearP.at(p2).Pt()), group,max, "DeltaPtDivSumPt", wgt);   //Muon1Tau1DeltaPtDivSumPt
+	histo.addVal(lep1->smearP.at(p1).Pt() - lep2->smearP.at(p2).Pt(), group,max, "DeltaPt", wgt);
+      } else {
+	histo.addVal((lep2->smearP.at(p2).Pt() - lep1->smearP.at(p1).Pt()) / (lep1->smearP.at(p1).Pt() + lep2->smearP.at(p2).Pt()), group,max, "DeltaPtDivSumPt", wgt);   //Muon1Tau1DeltaPtDivSumPt
+	histo.addVal(lep2->smearP.at(p2).Pt() - lep1->smearP.at(p1).Pt(), group,max, "DeltaPt", wgt);
+      }
       histo.addVal(cos(absnormPhi(lep2->smearP.at(p2).Phi() - lep1->smearP.at(p1).Phi())), group,max, "CosDphi", wgt);
       histo.addVal(absnormPhi(lep1->smearP.at(p1).Phi() - theMETVector.Phi()), group,max, "Part1MetDeltaPhi", wgt);
       ///      histo.addVal(absnormPhi(lep2->smearP.at(p2).Phi() - theMETVector.Phi()), cos(absnormPhi(lep2->smearP.at(p2).Phi() - lep1->smearP.at(p1).Phi())));   //Muon1MetDeltaPhiVsMuon1Tau1CosDphi

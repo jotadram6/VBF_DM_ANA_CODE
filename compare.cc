@@ -61,7 +61,7 @@ int compare() {
 	continue;
       }
       for(int i =0; i < histo1->GetNbinsX(); i++) {
-	if(abs(histo1->GetBinContent(i) - histo2->GetBinContent(i)) > 1) {
+	if(abs(histo1->GetBinContent(i) - histo2->GetBinContent(i)) > 5) {
 	  TH1F* diffhist = new TH1F(histname.c_str(), histname.c_str(),  histo1->GetNbinsX(), histo1->GetXaxis()->GetXmin(), histo1->GetXaxis()->GetXmax());
 	  for(int j =0; j < histo1->GetNbinsX(); j++) {
 	    diffhist->SetBinContent(j, histo1->GetBinContent(j) - histo2->GetBinContent(j));
@@ -83,6 +83,10 @@ int compare() {
     }
   }
   cout << "Didn't match " << count << " out of " << all << " graphs" << endl;
+  file1->Close();
+  file2->Close();
+  diff->Close();
+
   return count;
 }
 
@@ -105,10 +109,7 @@ string switchNames(string name) {
   else if(name == "Muon1Tau1_Muon1IsZdecay_0") return "Muon1Tau1_Muon1IsZmm_0";
   else if(name == "Muon1Tau2_Muon1IsZdecay_0") return "Muon1Tau2_Muon1IsZmm_0";
   else if(name == "Muon2Tau1_Muon2IsZdecay_0") return "Muon2Tau1_Muon2IsZmm_0";
-  else if(name == "Muon2Tau1_Muon2IsZdecay_0") return "Muon2Tau1_Muon2IsZmm_0";
-
-  else if(name == "DiMuon_Muon1MetMt_0") return "DiMuon_Muon2MetMt_0";
-  else if(name == "DiMuon_Muon2MetMt_0") return "DiMuon_Muon1MetMt_0";
+  else if(name == "Muon2Tau2_Muon2IsZdecay_0") return "Muon2Tau2_Muon2IsZmm_0";
 
   else if(name == "LeadingJetPt_0") return "LeadingJetsPt_0";
   else if(name == "LeadingJetDeltaR_0") return "LeadingJetsDeltaR_0";
