@@ -11,7 +11,7 @@ Histogramer::Histogramer(int _Npdf, string histname, string cutname, string outf
 
 Histogramer::~Histogramer() {
   fill_histogram();
-
+  
   for(vector<string>::iterator it = data_order.begin(); it != data_order.end(); it++) {
     delete data[*it];
     data[*it] = NULL;
@@ -53,6 +53,9 @@ void Histogramer::read_hist(string filename) {
     else if(stemp.size() == 4) {
       string name = extractHistname(group, stemp[0]);
       data[group]->Add_Hist(name, stemp[0], stod(stemp[1]), stod(stemp[2]), stod(stemp[3]), NFolders);
+    } else if(stemp.size() == 7) {
+      string name = extractHistname(group, stemp[0]);
+      data[group]->Add_Hist(name, stemp[0], stod(stemp[1]), stod(stemp[2]), stod(stemp[3]),stod(stemp[4]), stod(stemp[5]), stod(stemp[6]), NFolders);
     }
   }
 
@@ -152,6 +155,16 @@ void Histogramer::addVal(double value, string group, int maxcut, string histn, d
     else break;
   }
   data[group]->AddPoint(histn, maxFolder, value, weight);
+}
+
+void Histogramer::addVal(double valuex, double valuey, string group, int maxcut, string histn, double weight) {
+  int maxFolder=0;
+
+  for(int i = 0; i < NFolders; i++) {
+    if(maxcut > folder_num[i]) maxFolder = folder_num[i]+1;
+    else break;
+  }
+  data[group]->AddPoint(histn, maxFolder, valuex, valuey, weight);
 }
 
 // int main() {

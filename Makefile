@@ -30,8 +30,8 @@ SOURCES = $(wildcard src/*.cc)
 OBJECTS = $(SOURCES:$(SRCDIR)/%.cc=$(OBJDIR)/%.o)
 #------------------------------------------------------------------------------
 
-all: Analyzer $(OBJECTS)
-	$(LD) $(LDFLAGS) -o $< $(OBJECTS) $(LIBS) -g
+all: $(OBJECTS)
+	$(LD) $(LDFLAGS) -o $(EXE) $(OBJECTS) $(LIBS) -g
 
 Analyzer: $(OBJECTS)
 	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS) -g

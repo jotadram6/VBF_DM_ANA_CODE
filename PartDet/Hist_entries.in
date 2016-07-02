@@ -1,27 +1,26 @@
-FillEvents 0
+FillRun 1
 Events 2 0. 2.
-
-FillVertices 0
 NVertices 100 0. 100.
 
-FillGen 0
+FillGen 1
+
 NGenTau			20   0. 20.
 NGenHadTau     		20   0. 20.
 GenTauEnergy 		500  0. 5000.
 GenTauPt    		500  0. 5000.
-//GenTauEta 		72  -3.6 +3.6
-//GenHadTauPt    		500  0. 5000.
-//GenHadTauEta 		72  -3.6 +3.6
+GenTauEta 		72  -3.6 +3.6
 GenTauPhi 		36  -3.15 +3.15
-NGenMuon     20 0. 20.
+GenHadTauPt    		500  0. 5000.
+GenHadTauEta 		72  -3.6 +3.6
+NGenMuon     20  0. d 20.
 GenMuonEnergy 200 0. 500.
 GenMuonPt    200 0. 500.
 GenMuonEta 72 -3.6 +3.6
 GenMuonPhi 36 -3.15 +3.15
 GenDiTauMass    100 0. 10000.
-GenZprimeMass    100 0. 10000.
-GenZprimeStatusCode     100 0. 100.
-GenTauStatusCode     100 0. 100.
+//////GenZprimeMass    100 0. 10000.      NOT IMPLIMENTED
+//////GenZprimeStatusCode     100 0. 100.
+//////GenTauStatusCode     100 0. 100.
 
 FillTauJet1 1
 
@@ -118,8 +117,8 @@ SecondLeadingJetEta 100 -5. 5.
 
 LeadingJetMass 1000 0 5000
 LeadSublDijetDphi 72 0 +3.15
-///MetVsDiJetDeltaPhiLeadSubl 100 0 1000. 72 0 +3.15
-//DeltaEtaVsDeltaPhiLeadSubl 200 0 10. 72 0 +3.15
+MetVsDiJetDeltaPhiLeadSubl 100 0 1000. 72 0 +3.15
+DeltaEtaVsDeltaPhiLeadSubl 200 0 10. 72 0 +3.15
 LeadingJetPt 1000 0 5000
 LeadingJetDeltaR 200 0 10.
 LeadingJetDeltaEta 200 0 10.
@@ -129,7 +128,7 @@ Dphi1 72 -6.3 +6.3
 Dphi2MHT 72 -6.3 +6.3
 Dphi1MHT 72 -6.3 +6.3
 Dphi2 72 -6.3 +6.3
-///Dphi1VsDphi2 72 -6.3 +6.3 72 -6.3 +6.3
+Dphi1VsDphi2 72 -6.3 +6.3 72 -6.3 +6.3
 Alpha 50 0 2
 
 FillDiJet 1
@@ -144,13 +143,13 @@ LeadDiJetPt 1000 0 5000
 LeadDiJetEtaProduct 4 -2 2
 LeadDiJetDeltaR 200 0 10.
 LeadDiJetDeltaEta 200 0 10.
-////LeadDiJetDeltaPhi 72 0 +3.15   not in code
+///LeadDiJetDeltaPhi 72 0 +3.15   not in code
 
 FillDiMuon 1
 
 DiMuon_Muon1DiJetDeltaPhi 72 0 +3.15
 DiMuon_Muon2DiJetDeltaPhi 72 0 +3.15 
-///Muon1PtVsMuon2Pt 100 0 500 100 0 500
+Muon1PtVsMuon2Pt 100 0 500 100 0 500
 DiMuon_Muon1IsZdecay 2 0 2
 DiMuon_Muon2IsZdecay 2 0 2
 DiMuonDeltaR 100 0 5.
@@ -162,15 +161,17 @@ DiMuonOSLS 20 -10 10
 DiMuonCosDphi 220 -1.1 1.1
 DiMuon_Muon1MetDeltaPhi 72 0 +3.15
 DiMuon_Muon2MetDeltaPhi 72 0 +3.15
-///Muon1MetDeltaPhiVsMuon1Muon2CosDphi 72 0 +3.15 220 -1.1 1.1
+Muon1MetDeltaPhiVsDiMuonCosDphi 72 0 +3.15 220 -1.1 1.1
 DiMuonPZeta 200 -100 100
 DiMuonPZetaVis 100 0 100
-///DiMuonZeta2D 100 0 100 200 -100 100
+DiMuonZeta2D 100 0 100 200 -100 100
 DiMuonZeta1D 150 -300 300
 DiMuonNotReconstructableMass 600 0 1500
 DiMuonReconstructableMass 600 0 1500
 
 FillDiTau 1
+
+
 
 DiTau_Tau1DiJetDeltaPhi 72 0 +3.15 
 DiTau_Tau2DiJetDeltaPhi 72 0 +3.15
@@ -184,11 +185,11 @@ DiTauOSLS 20 -10 10
 DiTauCosDphi 220 -1.1 1.1
 DiTau_Tau1MetDeltaPhi 72 0 +3.15
 DiTau_Tau2MetDeltaPhi 72 0 +3.15
-///Tau1MetDeltaPhiVsDiTauCosDphi 72 0 +3.15 220 -1.1 1.1
+Tau1MetDeltaPhiVsDiTauCosDphi 72 0 +3.15 220 -1.1 1.1 
 DiTauPZeta 200 -100 100
 DiTauPZetaVis 100 0 100
 DiTauZeta2D 100 0 100 200 -100 100
-DiTauZeta1D 150 -300 300
+DiTauZeta1D 150 -300. 300
 DiTauNotReconstructableMass 600 0 1500
 DiTauReconstructableMass 600 0 1500
 DiTauDiJetReconstructableMass 100 0 5000

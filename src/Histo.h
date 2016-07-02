@@ -35,6 +35,7 @@ class Histogramer {
   vector<string>* get_order();
   vector<string>* get_groups();
   void addVal(double, string, int, string, double);
+  void addVal(double, double, string, int, string, double);
 
  private:
   TFile * outfile;
