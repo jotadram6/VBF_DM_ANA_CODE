@@ -19,6 +19,7 @@ class DataPiece {
   virtual void write_histogram(vector<string>&, TFile*) {};
   virtual void bin(int, double, double) {};
   virtual void bin(int, double, double, double) {};
+
 };
 
 
@@ -26,7 +27,7 @@ class Piece1D : public DataPiece {
  public:
   vector<float> data;
   double begin, end, width;
-  int bins, Nfold;
+  int bins, Nfold, fold_width;
   string name;
   TH1F histogram;
 
@@ -41,7 +42,7 @@ class Piece2D : public DataPiece {
  public:
   vector<float> data;
   double beginx, endx, beginy, endy, widthx, widthy;
-  int binx, biny, Nfold;
+  int binx, biny, Nfold, fold_width;
   string name;
   TH2F histogram;
 
