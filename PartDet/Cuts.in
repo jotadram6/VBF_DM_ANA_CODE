@@ -31,7 +31,7 @@ NRecoTau2MetTopology 	   0   -1
 
 NDiMuonCombinations	   0   -1
 NDiElectronCombinations	   0   -1
-NDiTauCombinations	   0   -1
+***NDiTauCombinations	   0   -1
 NDiJetCombinations	   0   -1
 			   
 NMuon1Tau1Combinations       0   -1

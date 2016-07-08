@@ -79,9 +79,6 @@ void Analyzer::preprocess(int event) {
   theMETVector.SetPxPyPzE(Met_px, Met_py, Met_pz, sqrt(pow(Met_px,2) + pow(Met_py,2)));
   pu_weight = (!isData && CalculatePUSystematics) ? getPileupWeight(nTruePU) : 1.0;
 
-   // clock_t t1;
-   // t1 = clock();
-
   // SET NUMBER OF GEN PARTICLES
   // TODOGeneralize to remove magic numbers
   if(!isData){
@@ -96,28 +93,16 @@ void Analyzer::preprocess(int event) {
     getGoodTauNu();
   }
 
-   // gent+= clock() - t1;
-   // t1 = clock();
-
   //////Smearing  
   smearLepton(*_Electron, CUTS::eGElec, _Electron->pstats["Smear"]);
   smearLepton(*_Muon, CUTS::eGMuon, _Muon->pstats["Smear"]);
   smearLepton(*_Tau, CUTS::eGTau, _Tau->pstats["Smear"]);
   smearJet(_Jet->pstats["Smear"]);
 
-  // smeart += clock() - t1;
-  // t1 = clock();
-
-
   //////Triggers and Vertices
   goodParts[ival(CUTS::eRVertex)].resize(bestVertices);
   if(passTriggerCuts("Trigger1")) goodParts[ival(CUTS::eRTrig1)].resize(1);
   if(passTriggerCuts("Trigger2")) goodParts[ival(CUTS::eRTrig2)].resize(1);
-
-
-
-  // trigt += clock() - t1;
-  // t1 = clock(); 
 
   // // SET NUMBER OF RECO PARTICLES
   // // MUST BE IN ORDER: Muon/Electron, Tau, Jet
@@ -128,30 +113,13 @@ void Analyzer::preprocess(int event) {
   getGoodRecoLeptons(*_Tau, CUTS::eRTau1, CUTS::eGTau, _Tau->pstats["Tau1"]);
   getGoodRecoLeptons(*_Tau, CUTS::eRTau2, CUTS::eGTau, _Tau->pstats["Tau2"]);
 
-  // recolt += clock() - t1;
-  // t1 = clock();
-
   getGoodRecoJets(CUTS::eRJet1, _Jet->pstats["Jet1"]);
-  // jet1t += clock() - t1;
-  // t1 = clock();
-
   getGoodRecoJets(CUTS::eRJet2, _Jet->pstats["Jet2"]);
-  // jet2t += clock() - t1;
-  // t1 = clock();
-
   getGoodRecoJets(CUTS::eRCenJet, _Jet->pstats["CentralJet"]);
-  // cent += clock() - t1;
-  // t1 = clock();
-
   getGoodRecoJets(CUTS::eRBJet, _Jet->pstats["BJet"]);
-  // bjett += clock() - t1;
-  // t1 = clock();
-
   getGoodRecoJets(CUTS::eR1stJet, _Jet->pstats["FirstLeadingJet"]);
   leadIndex = goodParts[ival(CUTS::eR1stJet)].at(0); 
   getGoodRecoJets(CUTS::eR2ndJet, _Jet->pstats["SecondLeadingJet"]);
-  // leadt += clock() - t1;
-  // t1 = clock();
 
   updateMet();
 
@@ -165,15 +133,8 @@ void Analyzer::preprocess(int event) {
   getGoodMetTopologyLepton(*_Tau, CUTS::eRTau1, CUTS::eTTau1, _Tau->pstats["Tau1"]);
   getGoodMetTopologyLepton(*_Tau, CUTS::eRTau2, CUTS::eTTau2, _Tau->pstats["Tau2"]);
 
- 
-  // mett += clock() - t1;
-  // t1 = clock();
-
   ///VBF Susy cut on leadin jets
   if(goodParts[ival(CUTS::eR1stJet)].at(0) != -1 && goodParts[ival(CUTS::eR2ndJet)].at(0) != -1) VBFTopologyCut();
-
-  // susyt += clock() - t1;
-  // t1 = clock();
 
   /////lepton lepton topology cuts
   getGoodLeptonCombos(*_Electron, *_Tau, CUTS::eRElec1,CUTS::eRTau1, CUTS::eElec1Tau1, distats["Electron1Tau1"]);
@@ -185,9 +146,6 @@ void Analyzer::preprocess(int event) {
   getGoodLeptonCombos(*_Muon, *_Tau, CUTS::eRMuon1, CUTS::eRTau2, CUTS::eMuon1Tau2, distats["Muon1Tau2"]);
   getGoodLeptonCombos(*_Muon, *_Tau, CUTS::eRMuon2, CUTS::eRTau2, CUTS::eMuon2Tau2, distats["Muon2Tau2"]);
 
-  // combot += clock() - t1;
-  // t1 = clock();
-
   ////DIlepton topology cuts
   getGoodLeptonCombos(*_Tau, *_Tau, CUTS::eRTau1, CUTS::eRTau2, CUTS::eDiTau, distats["DiTau"]);
   getGoodLeptonCombos(*_Electron, *_Electron, CUTS::eRElec1, CUTS::eRElec2, CUTS::eDiElec, distats["DiElectron"]);
@@ -196,8 +154,7 @@ void Analyzer::preprocess(int event) {
   ////Dijet cuts
   getGoodDiJets(distats["DiJet"]);
 
-  // dit += clock() - t1;
-  // t1 = clock();
+
   if(event % 50000 == 0) {
     cout << "Event #" << event << endl;
   }
