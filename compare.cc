@@ -93,8 +93,9 @@ int compare() {
 	  count++;
 	  continue;
 	}
-	for(int i =1; i < histo1->GetNbinsX()+1; i++) {
-	  if(abs(histo1->GetBinContent(i) - histo2->GetBinContent(i)) > 500) {
+	if(histo1->Integral() - histo2->Integral() > 10) cout << "Bad Integral: " << histo1->GetNbinsX() << histname << endl;;
+	for(int i =0; i < histo1->GetNbinsX()+2; i++) {
+	  if(abs(histo1->GetBinContent(i) - histo2->GetBinContent(i)) > 1) {
 	    TH1F* diffhist = new TH1F(histname.c_str(), histname.c_str(),  histo1->GetNbinsX(), histo1->GetXaxis()->GetXmin(), histo1->GetXaxis()->GetXmax());
 	    for(int j =0; j < histo1->GetNbinsX()+2; j++) {
 	      diffhist->SetBinContent(j, histo1->GetBinContent(j) - histo2->GetBinContent(j));

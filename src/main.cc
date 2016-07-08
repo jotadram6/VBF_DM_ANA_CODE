@@ -13,9 +13,9 @@ int main (int argc, char* argv[]) {
     exit(EXIT_FAILURE);
   }
 
-
-  ifstream ifile(argv[1]);
-  if ( !ifile) {
+  string name = argv[1];
+  ifstream ifile(name);
+  if ( !ifile && name.find("root://") == string::npos && name.find("root\\://") == string::npos) {
     std::cout << "The file '" << argv[1] << "' doesn't exist" << std::endl;
     exit(EXIT_FAILURE);
   }

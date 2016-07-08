@@ -248,35 +248,6 @@ void Particle::getPartStats(string filename) {
 
 }
 
-// int main() {
-//   std::cout << "test" << std::endl;
-//   char fname[] = "TNT.root";
-//   TFile *f = TFile::Open(fname);
-//   f->cd("TNT");
-//   TTree* BOOM = (TTree*)f->Get("TNT/BOOM");
-//   int nentries = (int) BOOM->GetEntries();
-//   BOOM->SetBranchStatus("*", 0);
-//   std::cout << "setup" << std::endl;
-
-
-//   Taus* tau = new Taus(BOOM, "PartDet/Tau_info.in");
-//   std::cout << "Taus done" << std::endl;
-
-//   Muon* muon = new Muon(BOOM, "PartDet/Muon1_info.in");
-//   std::cout << "Muon done" << std::endl;
-//   Electron* elect = new Electron(BOOM, "PartDet/Electron_info.in");
-//   std::cout << "Electron done" << std::endl;
-
-//   cout << tau->pstats["Tau1"].smap["DiscrByMinIsolation"]  << endl;
-  
-  
-//   for(int i=0; i < nentries; i++) {
-//     BOOM->GetEntry(i);
-//     if(tau->minIso.second->size() != 0) {
-//       cout << "bad stuff" << endl;
-//     }
-//   }
-// }
 
 
 

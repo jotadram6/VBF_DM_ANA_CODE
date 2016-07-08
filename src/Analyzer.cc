@@ -548,6 +548,7 @@ void Analyzer::getGoodRecoLeptons(Lepton& lep, CUTS ePos, CUTS eGenPos, const Pa
 	againstElectron = (ePos == CUTS::eRTau1) ? partT.againstElectron.first->at(i) : partT.againstElectron.second->at(i);
 	if (againstElectron < 0.5) continue;
       } else if (stats.bmap.at("SelectTausThatAreElectrons")) {
+	againstElectron = (ePos == CUTS::eRTau1) ? partT.againstElectron.first->at(i) : partT.againstElectron.second->at(i);
 	if (againstElectron > 0.5) continue;
       }
 
@@ -849,35 +850,37 @@ bool Analyzer::passDiParticleApprox(const TLorentzVector& Tobj1, const TLorentzV
 ///Find the number of lepton combos that pass the dilepton cuts
 void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS ePos2, CUTS ePosFin, const PartStats& stats) {
   bool sameParticle = (&lep1 == &lep2);
+
   for(vec_iter i1=goodParts[ival(ePos1)].begin(); i1 != goodParts[ival(ePos1)].end(); i1++) {
     for(vec_iter i2=goodParts[ival(ePos2)].begin(); i2 != goodParts[ival(ePos2)].end(); i2++) {
       if(sameParticle && (*i2) <= (*i1)) continue;
       if(stats.bmap.at("DiscrByDeltaR") && (lep1.smearP.at(*i1).DeltaR(lep2.smearP.at(*i2))) < stats.dmap.at("DeltaRCut")) continue;
    
-      if(stats.smap.at("DiscrByOSLSType") == "LS" && (lep1.charge->at(*i1) * lep2.charge->at(*i2) >= 0)) continue;
-      else if(stats.smap.at("DiscrByOSLSType") == "OS" && (lep1.charge->at(*i1) * lep2.charge->at(*i2) <= 0)) continue;
+      if(stats.smap.at("DiscrByOSLSType") == "LS" && (lep1.charge->at(*i1) * lep2.charge->at(*i2) <= 0)) continue;
+      else if(stats.smap.at("DiscrByOSLSType") == "OS" && (lep1.charge->at(*i1) * lep2.charge->at(*i2) >= 0)) continue;
 
       if(stats.bmap.at("DiscrByCosDphi")) {
 	double Dphi = absnormPhi( lep1.smearP.at(*i1).Phi() - lep2.smearP.at(*i2).Phi());
-	if(cos(Dphi) > stats.pmap.at("CosDphiCut").first || cos(Dphi) < stats.pmap.at("CosDphiCut").second) continue;
+	if(cos(Dphi) < stats.pmap.at("CosDphiCut").first || cos(Dphi) > stats.pmap.at("CosDphiCut").second) continue;
       }
   // ----Mass window requirement
-
+      
       if (stats.bmap.at("DiscrByMassReco")) {
       	double diMass = diParticleMass(lep1.smearP.at(*i1),lep2.smearP.at(*i2), stats.smap.at("HowCalculateMassReco"));
-      	if( diMass < stats.pmap.at("MassCut").first || diMass > stats.pmap.at("MassMaxCut").second) continue;
+      	if( diMass < stats.pmap.at("MassCut").first || diMass > stats.pmap.at("MassCut").second) continue;
       }
 
       if (stats.bmap.at("DiscrByCDFzeta2D")) {
       	double CDFzeta = stats.dmap.at("PZetaCutCoefficient") * getPZeta(lep1.smearP.at(*i1), lep2.smearP.at(*i2)) 
-	  + stats.dmap.at("PZetaVisCutCoeffiecient") * getPZetaVis(lep1.smearP.at(*i1), lep2.smearP.at(*i2));
+	  + stats.dmap.at("PZetaVisCutCoefficient") * getPZetaVis(lep1.smearP.at(*i1), lep2.smearP.at(*i2));
       	if( CDFzeta < stats.pmap.at("CDFzeta2DCutValue").first || CDFzeta > stats.pmap.at("CDFzeta2DCutValue").second ) continue;
       }
+
       //////////abs on the difference????
       ///////////////////
       if (stats.bmap.at("DiscrByDeltaPtDivSumPt")) {
 	double ptDiv = (lep1.smearP.at(*i1).Pt() - lep2.smearP.at(*i2).Pt()) / (lep1.smearP.at(*i1).Pt() + lep2.smearP.at(*i2).Pt());
-	if( ptDiv < stats.pmap.at("DeltaPtDivSumPtCut").first || ptDiv > stats.pmap.at("DeltaPtDivSumPtCut").second) continue;
+	if( ptDiv < stats.pmap.at("DeltaPtDivSumPtCutValue").first || ptDiv > stats.pmap.at("DeltaPtDivSumPtCutValue").second) continue;
       }
 
       if (stats.bmap.at("DiscrByDeltaPt")) {
@@ -920,8 +923,8 @@ void Analyzer::getGoodDiJets(const PartStats& stats) {
       }
       // ----Require both legs to be almost back-to-back in phi
       if (stats.bmap.at("DiscrByCosDphi")) {
-	if(cos(absnormPhi(_Jet->smearP.at(*ij1).Phi() - _Jet->smearP.at(*ij2).Phi())) > stats.pmap.at("CosDphiMaxCut").first) continue;
-	if(cos(absnormPhi(_Jet->smearP.at(*ij1).Phi() - _Jet->smearP.at(*ij2).Phi())) < stats.pmap.at("CosDphiMinCut").second) continue;
+	if(cos(absnormPhi(_Jet->smearP.at(*ij1).Phi() - _Jet->smearP.at(*ij2).Phi())) < stats.pmap.at("CosDphiCut").first) continue;
+	if(cos(absnormPhi(_Jet->smearP.at(*ij1).Phi() - _Jet->smearP.at(*ij2).Phi())) > stats.pmap.at("CosDphiCut").second) continue;
       }
       // ----Mass window requirement
       if (stats.bmap.at("DiscrByMassReco")) {

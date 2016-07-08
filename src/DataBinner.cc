@@ -3,7 +3,7 @@
 using namespace std;
 
 Piece1D::Piece1D(string name, int _bins, double _begin, double _end, int _Nfold) :  
-  data(_Nfold*(_bins+2), 0), begin(_begin), end(_end), bins(_bins), Nfold(_Nfold),
+  data(_Nfold*(_bins+2), 0),  begin(_begin), end(_end), bins(_bins), Nfold(_Nfold),fold_width(_bins+2),
   histogram(name.c_str(), name.c_str(), _bins, _begin, _end) {
   
   width = (end - begin)/bins;
@@ -20,7 +20,7 @@ int Piece1D::get_bin(double y) {
 void Piece1D::bin(int folder, double y, double weight) {
   int by = (y < begin) ? -1 : get_bin(y);
   by = (y > end) ? bins+1 : by+1;
-  data[Nfold*folder + by] += weight;
+  data[fold_width*folder + by] += weight;
 }
 
 void Piece1D::write_histogram(vector<string>& folders, TFile* outfile) {
@@ -29,8 +29,8 @@ void Piece1D::write_histogram(vector<string>& folders, TFile* outfile) {
     outfile->cd(folders.at(i).c_str());
     entries = 0;
     for(int j = 0; j < (bins+2); j++) {
-      histogram.SetBinContent(j, data[i*Nfold + j]);
-      entries += data[i*Nfold + j];
+      histogram.SetBinContent(j, data[i*fold_width + j]);
+      entries += data[i*fold_width + j];
     }
     histogram.SetEntries((int)(entries+0.5));
     histogram.Write();
@@ -42,7 +42,7 @@ void Piece1D::write_histogram(vector<string>& folders, TFile* outfile) {
 
 Piece2D::Piece2D(string name, int _binx, double _beginx, double _endx, int _biny, double _beginy, double _endy, int _Nfold) :  
   data(_Nfold*(_binx+2)*(_biny+2), 0), beginx(_beginx), endx(_endx), beginy(_beginy), endy(_endy), binx(_binx), biny(_biny), Nfold(_Nfold),
-  histogram(name.c_str(), name.c_str(), _binx, _beginx, _endx, _biny, _beginy, _endy) {
+  fold_width((_binx+2)*(_biny+2)), histogram(name.c_str(), name.c_str(), _binx, _beginx, _endx, _biny, _beginy, _endy) {
   
   widthx = (endx - beginx)/binx;
   widthy = (endy - beginy)/biny;
@@ -66,7 +66,7 @@ void Piece2D::bin(int folder, double x, double y, double weight) {
 
   //  cout << x << ", " << y << " : " << bx << ", " << by << endl;
 
-  data[Nfold*folder + bx + by*(binx+2)] += weight;
+  data[fold_width*folder + bx + by*(binx+2)] += weight;
   
 }
 
@@ -77,8 +77,8 @@ void Piece2D::write_histogram(vector<string>& folders, TFile* outfile) {
     outfile->cd(folders.at(i).c_str());
     entries = 0;
     for(int j = 0; j < (binx+2)*(biny+2); j++) {
-      histogram.SetBinContent(j, data[i*Nfold + j]);
-      entries += data[i*Nfold + j];
+      histogram.SetBinContent(j, data[i*fold_width + j]);
+      entries += data[i*fold_width + j];
     }
 
     histogram.SetEntries((int)(entries+0.5));
@@ -130,21 +130,4 @@ void DataBinner::write_histogram(TFile* outfile, vector<string>& folders) {
     datamap[*it]->write_histogram(folders, outfile);
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
