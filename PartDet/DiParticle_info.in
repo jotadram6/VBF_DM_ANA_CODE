@@ -2,26 +2,26 @@
               DiTau
 #######################################
 
-DiscrByDeltaR  1
-DeltaRCut      0.3 
+DiscrByDeltaR  0
+DeltaRCut      0.3
 
-DiscrByOSLSType  No
-DiscrByCosDphi	 0
+DiscrByOSLSType  None	#### OS or LS
+DiscrByCosDphi	 false
 CosDphiCut 	 -1.00   -0.95
 
-DiscrByMassReco  0
-HowCalculateMassReco None     ###VectorSumOfProductsAndMet   or    CollinearApprox 
+DiscrByMassReco  false
+HowCalculateMassReco   None    ###VectorSumOfVisProductsAndMet   or    CollinearApprox 
 MassCut          100.0   10000.0
 
-DiscrByCDFzeta2D          0
+DiscrByCDFzeta2D          false
 PZetaCutCoefficient       1.0
 PZetaVisCutCoefficient    -3.1
 CDFzeta2DCutValue         -50.0    1000
 
-DiscrByDeltaPtDivSumPt     0
-DeltaPtDivSumPtCutValue    0.1  1.0
-DiscrByDeltaPt 		   0
-DeltaPtCutValue 	   30.0   1000.0
+DiscrByDeltaPtDivSumPt     false
+DeltaPtDivSumPtCutValue    0.4  1.0
+DiscrByDeltaPt 		   false
+DeltaPtCutValue 	   50.0   1000.0
 
 ######################################
                DiMuon
@@ -30,12 +30,12 @@ DeltaPtCutValue 	   30.0   1000.0
 DiscrByDeltaR  1
 DeltaRCut      0.3 
 
-DiscrByOSLSType  No
+DiscrByOSLSType  OS
 DiscrByCosDphi	 0
 CosDphiCut 	 -1.00   -0.95
 
-DiscrByMassReco  0
-HowCalculateMassReco None     ###VectorSumOfProductsAndMet   or    CollinearApprox 
+DiscrByMassReco  true
+HowCalculateMassReco VectorSumOfVisProductsAndMet     ###VectorSumOfVisProductsAndMet   or    CollinearApprox 
 MassCut          150.0   10000.0
 
 DiscrByCDFzeta2D          0
@@ -45,8 +45,8 @@ CDFzeta2DCutValue         -50.0    1000
 
 DiscrByDeltaPtDivSumPt     0
 DeltaPtDivSumPtCutValue    0.1  1.0
-DiscrByDeltaPt 		   0
-DeltaPtCutValue 	   30.0   1000.0
+DiscrByDeltaPt 		   true
+DeltaPtCutValue 	   30.0   9999.0
 
 ########################################
                DiElectron
@@ -56,17 +56,17 @@ DiscrByDeltaR  1
 DeltaRCut      0.3 
 
 DiscrByOSLSType  No
-DiscrByCosDphi	 0
+DiscrByCosDphi	 true
 CosDphiCut 	 -1.00   -0.95
 
 DiscrByMassReco  0
-HowCalculateMassReco None     ###VectorSumOfProductsAndMet   or    CollinearApprox 
+HowCalculateMassReco None     ###VectorSumOfVisProductsAndMet   or    CollinearApprox 
 MassCut          150.0   10000.0
 
-DiscrByCDFzeta2D          0
+DiscrByCDFzeta2D          false
 PZetaCutCoefficient       1.0
 PZetaVisCutCoefficient    -3.1
-CDFzeta2DCutValue         -50.0    1000
+CDFzeta2DCutValue         -50.0    9999.0
 
 DiscrByDeltaPtDivSumPt     0
 DeltaPtDivSumPtCutValue    0.1  1.0
@@ -78,17 +78,17 @@ DeltaPtCutValue 	   30.0   1000.0
                DiJet
 #####################################
 
-DiscrByDeltaR 0
+DiscrByDeltaR false
 DeltaRCut 0.3
 
-DiscrByDeltaEta 0
-DeltaEtaCut 4.2 9999.0
-DiscrByDeltaPhi 0
-DeltaPhiCut 0 9999.0
+DiscrByDeltaEta      false
+DeltaEtaCut         4.2  9999.0
+DiscrByDeltaPhi      false
+DeltaPhiCut         0    9999.0
 DiscrByOSEta 0
-DiscrByCosDphi 0
-CosDphiCut  -1.00 -0.95
+DiscrByCosDphi false
+CosDphiCut  -1.00 -0.80
 
-DiscrByMassReco 0
-DiJetMassCut 750.0 9999.0
+DiscrByMassReco false
+MassCut 500.0 9999.0
 

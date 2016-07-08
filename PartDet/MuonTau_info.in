@@ -10,7 +10,7 @@ DiscrByCosDphi	 0
 CosDphiCut 	 -1.00   -0.95
 
 DiscrByMassReco  0
-HowCalculateMassReco none     ###VectorSumOfProductsAndMet   or    CollinearApprox 
+HowCalculateMassReco none     ###VectorSumOfVisProductsAndMet   or    CollinearApprox 
 MassCut          0.0   200.0
 
 DiscrByCDFzeta2D          0
@@ -35,7 +35,7 @@ DiscrByCosDphi	 0
 CosDphiCut 	 -1.00   -0.95
 
 DiscrByMassReco  0
-HowCalculateMassReco none     ###VectorSumOfProductsAndMet   or    CollinearApprox 
+HowCalculateMassReco none     ###VectorSumOfVisProductsAndMet   or    CollinearApprox 
 MassCut          0.0   200.0
 
 DiscrByCDFzeta2D          0
@@ -60,7 +60,7 @@ DiscrByCosDphi	 0
 CosDphiCut 	 -1.00   -0.95
 
 DiscrByMassReco  0
-HowCalculateMassReco none     ###VectorSumOfProductsAndMet   or    CollinearApprox 
+HowCalculateMassReco none     ###VectorSumOfVisProductsAndMet   or    CollinearApprox 
 MassCut          0.0   200.0
 
 DiscrByCDFzeta2D          0
@@ -85,7 +85,7 @@ DiscrByCosDphi	 0
 CosDphiCut 	 -1.00   -0.95
 
 DiscrByMassReco  0
-HowCalculateMassReco none     ###VectorSumOfProductsAndMet   or    CollinearApprox 
+HowCalculateMassReco none     ###VectorSumOfVisProductsAndMet   or    CollinearApprox 
 MassCut          0.0   200.0
 
 DiscrByCDFzeta2D          0

@@ -23,7 +23,7 @@ MotherID 23.
 
 //---RECO CUTS---///
 
-EtaCut 2.1
+EtaCut 1.5
 PtCut 20.0 9999.9
 
 DoDiscrByIsolation 0
