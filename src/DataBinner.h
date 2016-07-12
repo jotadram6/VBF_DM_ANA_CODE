@@ -29,9 +29,9 @@ class Piece1D : public DataPiece {
   double begin, end, width;
   int bins, Nfold, fold_width;
   string name;
-  TH1F histogram;
 
   Piece1D(string, int, double, double, int);
+  Piece1D(const Piece1D&);
   ~Piece1D();
   void write_histogram(vector<string>&, TFile*);
   int get_bin(double);
@@ -44,9 +44,9 @@ class Piece2D : public DataPiece {
   double beginx, endx, beginy, endy, widthx, widthy;
   int binx, biny, Nfold, fold_width;
   string name;
-  TH2F histogram;
 
   Piece2D(string, int, double, double, int, double, double, int);
+  Piece2D(const Piece2D&);
   ~Piece2D();
     void write_histogram(vector<string>&, TFile*);
   int get_bin(double, bool);
@@ -58,6 +58,7 @@ class Piece2D : public DataPiece {
 class DataBinner {
 public:
   DataBinner();
+  DataBinner(const DataBinner&);
   ~DataBinner();
   void AddPoint(string,int, double, double);
   void AddPoint(string,int, double, double, double);

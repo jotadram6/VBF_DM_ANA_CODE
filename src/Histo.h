@@ -26,7 +26,10 @@ using namespace std;
 class Histogramer {
 
  public:
-  Histogramer(int, string, string, string);
+  Histogramer();
+  Histogramer(int, string, string, string, bool);
+  Histogramer(const Histogramer&);
+  Histogramer& operator=(const Histogramer&);
   ~Histogramer();
   
   vector<int> get_folders();
@@ -36,13 +39,14 @@ class Histogramer {
   vector<string>* get_groups();
   void addVal(double, string, int, string, double);
   void addVal(double, double, string, int, string, double);
+  void fill_histogram();
 
  private:
   TFile * outfile;
-
+  string outname;
   int NFolders;
   int Npdf;
-
+  bool isData;
   unordered_map<string, pair<int,int>> cuts;
   vector<string> cut_order;
   vector<string> folders;
@@ -52,7 +56,7 @@ class Histogramer {
 
   void read_hist(string);
   void read_cuts(string);
-  void fill_histogram();
+
   
   string extractHistname(string, string);
 };

@@ -13,20 +13,20 @@ const string FILESPACE = "PartDet/";
 //////////PUBLIC FUNCTIONS////////////////////
 
 ///Constructor
-Analyzer::Analyzer(string infile, string outfile) : hPUmc(new TH1F("hPUmc", "hPUmc", 100, 0, 100)), hPUdata(new TH1F("hPUdata", "hPUdata", 100, 0, 100)), histo(1, FILESPACE+"Hist_entries.in", FILESPACE+"Cuts.in", outfile) {
-
+Analyzer::Analyzer(string infile, string outfile) : hPUmc(new TH1F("hPUmc", "hPUmc", 100, 0, 100)), hPUdata(new TH1F("hPUdata", "hPUdata", 100, 0, 100)) {
+  cout << "setup start" << endl;
   f = TFile::Open(infile.c_str());
   f->cd("TNT");
   BOOM = (TTree*)f->Get("TNT/BOOM");
   nentries = (int) BOOM->GetEntries();
   BOOM->SetBranchStatus("*", 0);
-  std::cout << "setup" << std::endl;
-  std::cout << nentries << std::endl;
+  std::cout << "TOTAL EVENTS: " << nentries << std::endl;
 
   setupGeneral(BOOM,infile);
 
   isData = distats["Run"].bmap.at("isData");
   CalculatePUSystematics = distats["Run"].bmap.at("CalculatePUSystematics");
+  histo = Histogramer(1, FILESPACE+"Hist_entries.in", FILESPACE+"Cuts.in", outfile, isData);
 
   prevTrig["Trigger1"] = make_pair(0,0);
   prevTrig["Trigger2"] = make_pair(0,0);
@@ -38,11 +38,18 @@ Analyzer::Analyzer(string infile, string outfile) : hPUmc(new TH1F("hPUmc", "hPU
   cuts_cumul.resize(histo.get_cuts()->size());
 
   
-  if(!isData) _Gen = new Generated(BOOM, FILESPACE + "Gen_info.in");
+  if(!isData) {
+    _Gen = new Generated(BOOM, FILESPACE + "Gen_info.in");
+    genStat = _Gen->pstats["Gen"];
+    genMap = genStat.dmap;
+  }
   _Electron = new Electron(BOOM, FILESPACE + "Electron_info.in");
   _Muon = new Muon(BOOM, FILESPACE + "Muon_info.in");
   _Tau = new Taus(BOOM, FILESPACE + "Tau_info.in");
   _Jet = new Jet(BOOM, FILESPACE + "Jet_info.in");
+
+  std::cout << "setup complete" << std::endl << endl;
+
 }
 
 ////destructor
@@ -79,25 +86,18 @@ void Analyzer::preprocess(int event) {
   theMETVector.SetPxPyPzE(Met_px, Met_py, Met_pz, sqrt(pow(Met_px,2) + pow(Met_py,2)));
   pu_weight = (!isData && CalculatePUSystematics) ? getPileupWeight(nTruePU) : 1.0;
 
-   // clock_t t1;
-   // t1 = clock();
-
   // SET NUMBER OF GEN PARTICLES
   // TODOGeneralize to remove magic numbers
   if(!isData){
-    PartStats genStat = _Gen->pstats["Gen"];
-    getGoodGen(15, 2, CUTS::eGTau, genStat);
-    getGoodGen(6, 2, CUTS::eGTop, genStat);
-    getGoodGen(11, 1, CUTS::eGElec, genStat);
-    getGoodGen(13, 1, CUTS::eGMuon, genStat);
-    getGoodGen(23, 2, CUTS::eGZ, genStat);
-    getGoodGen(24, 2, CUTS::eGW, genStat);
-    getGoodGen(25, 2, CUTS::eGHiggs, genStat);
+    getGoodGen(genMap.at("TauID"), genMap.at("TauStatus"), CUTS::eGTau, genStat);
+    getGoodGen(genMap.at("TopID"), genMap.at("TopStatus"), CUTS::eGTop, genStat);
+    getGoodGen(genMap.at("ElectronID"), genMap.at("ElectronStatus"), CUTS::eGElec, genStat);
+    getGoodGen(genMap.at("MuonID"), genMap.at("MuonStatus"), CUTS::eGMuon, genStat);
+    getGoodGen(genMap.at("ZID"), genMap.at("ZStatus"), CUTS::eGZ, genStat);
+    getGoodGen(genMap.at("WID"), genMap.at("WStatus"), CUTS::eGW, genStat);
+    getGoodGen(genMap.at("HiggsID"), genMap.at("HiggsStatus"), CUTS::eGHiggs, genStat);
     getGoodTauNu();
   }
-
-   // gent+= clock() - t1;
-   // t1 = clock();
 
   //////Smearing  
   smearLepton(*_Electron, CUTS::eGElec, _Electron->pstats["Smear"]);
@@ -105,19 +105,10 @@ void Analyzer::preprocess(int event) {
   smearLepton(*_Tau, CUTS::eGTau, _Tau->pstats["Smear"]);
   smearJet(_Jet->pstats["Smear"]);
 
-  // smeart += clock() - t1;
-  // t1 = clock();
-
-
   //////Triggers and Vertices
   goodParts[ival(CUTS::eRVertex)].resize(bestVertices);
   if(passTriggerCuts("Trigger1")) goodParts[ival(CUTS::eRTrig1)].resize(1);
   if(passTriggerCuts("Trigger2")) goodParts[ival(CUTS::eRTrig2)].resize(1);
-
-
-
-  // trigt += clock() - t1;
-  // t1 = clock(); 
 
   // // SET NUMBER OF RECO PARTICLES
   // // MUST BE IN ORDER: Muon/Electron, Tau, Jet
@@ -128,30 +119,14 @@ void Analyzer::preprocess(int event) {
   getGoodRecoLeptons(*_Tau, CUTS::eRTau1, CUTS::eGTau, _Tau->pstats["Tau1"]);
   getGoodRecoLeptons(*_Tau, CUTS::eRTau2, CUTS::eGTau, _Tau->pstats["Tau2"]);
 
-  // recolt += clock() - t1;
-  // t1 = clock();
-
   getGoodRecoJets(CUTS::eRJet1, _Jet->pstats["Jet1"]);
-  // jet1t += clock() - t1;
-  // t1 = clock();
-
   getGoodRecoJets(CUTS::eRJet2, _Jet->pstats["Jet2"]);
-  // jet2t += clock() - t1;
-  // t1 = clock();
-
   getGoodRecoJets(CUTS::eRCenJet, _Jet->pstats["CentralJet"]);
-  // cent += clock() - t1;
-  // t1 = clock();
-
   getGoodRecoJets(CUTS::eRBJet, _Jet->pstats["BJet"]);
-  // bjett += clock() - t1;
-  // t1 = clock();
 
   getGoodRecoJets(CUTS::eR1stJet, _Jet->pstats["FirstLeadingJet"]);
   leadIndex = goodParts[ival(CUTS::eR1stJet)].at(0); 
   getGoodRecoJets(CUTS::eR2ndJet, _Jet->pstats["SecondLeadingJet"]);
-  // leadt += clock() - t1;
-  // t1 = clock();
 
   updateMet();
 
@@ -165,15 +140,8 @@ void Analyzer::preprocess(int event) {
   getGoodMetTopologyLepton(*_Tau, CUTS::eRTau1, CUTS::eTTau1, _Tau->pstats["Tau1"]);
   getGoodMetTopologyLepton(*_Tau, CUTS::eRTau2, CUTS::eTTau2, _Tau->pstats["Tau2"]);
 
- 
-  // mett += clock() - t1;
-  // t1 = clock();
-
   ///VBF Susy cut on leadin jets
   if(goodParts[ival(CUTS::eR1stJet)].at(0) != -1 && goodParts[ival(CUTS::eR2ndJet)].at(0) != -1) VBFTopologyCut();
-
-  // susyt += clock() - t1;
-  // t1 = clock();
 
   /////lepton lepton topology cuts
   getGoodLeptonCombos(*_Electron, *_Tau, CUTS::eRElec1,CUTS::eRTau1, CUTS::eElec1Tau1, distats["Electron1Tau1"]);
@@ -185,9 +153,6 @@ void Analyzer::preprocess(int event) {
   getGoodLeptonCombos(*_Muon, *_Tau, CUTS::eRMuon1, CUTS::eRTau2, CUTS::eMuon1Tau2, distats["Muon1Tau2"]);
   getGoodLeptonCombos(*_Muon, *_Tau, CUTS::eRMuon2, CUTS::eRTau2, CUTS::eMuon2Tau2, distats["Muon2Tau2"]);
 
-  // combot += clock() - t1;
-  // t1 = clock();
-
   ////DIlepton topology cuts
   getGoodLeptonCombos(*_Tau, *_Tau, CUTS::eRTau1, CUTS::eRTau2, CUTS::eDiTau, distats["DiTau"]);
   getGoodLeptonCombos(*_Electron, *_Electron, CUTS::eRElec1, CUTS::eRElec2, CUTS::eDiElec, distats["DiElectron"]);
@@ -196,8 +161,6 @@ void Analyzer::preprocess(int event) {
   ////Dijet cuts
   getGoodDiJets(distats["DiJet"]);
 
-  // dit += clock() - t1;
-  // t1 = clock();
   if(event % 50000 == 0) {
     cout << "Event #" << event << endl;
   }
@@ -214,6 +177,8 @@ int Analyzer::fillCuts() {
   int nparticles, i=0;
   int maxCut=0;
 
+  
+
   for(vector<string>::iterator it=cut_order->begin(); it != cut_order->end(); it++, i++) {
     if(isData && it->find("Gen") != string::npos) continue;
     cut = *it;
@@ -221,6 +186,10 @@ int Analyzer::fillCuts() {
     max= cut_info->at(cut).second;
     nparticles = goodParts[ival(cut_num[cut])].size();
     if( (nparticles >= min) && (nparticles <= max || max == -1)) {
+      if((cut_num[cut] == CUTS::eR1stJet || cut_num[cut] == CUTS::eR2ndJet) && goodParts[ival(cut_num[cut])].at(0) == -1 ) {
+	prevTrue = false;
+	continue;  ////dirty dirty hack
+      }
       cuts_per[i]++;
       cuts_cumul[i] += (prevTrue) ? 1 : 0;
       maxCut += (prevTrue) ? 1 : 0;
@@ -241,30 +210,16 @@ void Analyzer::printCuts() {
   cout << "\n";
   cout << "Selection Efficiency " << "\n";
   cout << "Total events: " << nentries << "\n";
-  cout << "         Name                     Indiv.      Cumulative\n";
+  cout << "               Name                 Indiv.         Cumulative\n";
   cout << "---------------------------------------------------------------------------\n";
   for(vector<string>::iterator it=cut_order->begin(); it != cut_order->end(); it++, i++) {
-    cout << setw(28) << *it << " ";
+    cout << setw(28) << *it << "    ";
     if(isData && it->find("Gen") != string::npos) cout << "Skipped" << endl;
-    else cout << setw(8) << cuts_per.at(i) << " (" << setw(8) << ((float)cuts_per.at(i)) / nentries << ") "
-	      << setw(8) << cuts_cumul.at(i) << "( " << setw(8) << ((float)cuts_cumul.at(i)) / nentries << ") " << endl;
+    else cout << setw(5) << cuts_per.at(i) << "  ( " << setw(5) << ((float)cuts_per.at(i)) / nentries << ") "
+	      << setw(5) << cuts_cumul.at(i) << "  ( " << setw(5) << ((float)cuts_cumul.at(i)) / nentries << ") " << endl;
   }
   cout << "---------------------------------------------------------------------------\n";  
-
-  // cout << "gen: " << gent << endl;
-  // cout << "smear: " << smeart << endl;
-  // cout << "trigger: " << trigt << endl;
-  // cout << "reco lepton: " << recolt << endl;
-  // cout << "reco1 jets: " << jet1t << endl;
-  // cout << "reco2 jets: " << jet2t << endl;
-  // cout << "central jets: " << cent << endl;
-  // cout << "bjets: " << bjett << endl;
-  // cout << "lead jet: " << leadt << endl;
-  // cout << "met top: " << mett << endl;
-  // cout << "susy: " << susyt << endl;
-  // cout << "combo: " << combot << endl;
-  // cout << "diparticle: " << dit << endl;
-
+  histo.fill_histogram();
 }
 
 /////////////PRIVATE FUNCTIONS////////////////
@@ -504,7 +459,7 @@ TLorentzVector Analyzer::matchTauToGen(const TLorentzVector& lvec, double lDelta
 ////Calculates the number of gen particles.  Based on id number and status of each particle
 void Analyzer::getGoodGen(int particle_id, int particle_status, CUTS ePos, const PartStats& stats) {
   for(int j = 0; j < (int)_Gen->pt->size(); j++) {
-    if(particle_id == 15 && (_Gen->pt->at(j) < stats.pmap.at("TauPtCut").first && _Gen->pt->at(j) > stats.pmap.at("TauPtCut").second && abs(_Gen->eta->at(j)) > stats.dmap.at("TauEtaCut"))) continue;
+    if(particle_id == 15 && (_Gen->pt->at(j) < stats.pmap.at("TauPtCut").first || _Gen->pt->at(j) > stats.pmap.at("TauPtCut").second || abs(_Gen->eta->at(j)) > stats.dmap.at("TauEtaCut"))) continue;
     
     if((abs(_Gen->pdg_id->at(j)) == particle_id) && (_Gen->status->at(j) == particle_status)) {
       goodParts[ival(ePos)].push_back(j);
@@ -706,30 +661,29 @@ bool Analyzer::passedLooseJetID(int nobj) {
 
 ///sees if the event passed one of the two cuts provided
 bool Analyzer::passTriggerCuts(string TriggerN) {
+  
   if(prevTrig[TriggerN].first >= (int)Trigger_names->size() ||
      distats["Run"].smap[TriggerN+"FirstRequirement"] != Trigger_names->at(prevTrig[TriggerN].first)) {
 
-    int temp = 0;
-    vector<string>::iterator it = find(Trigger_names->begin(), Trigger_names->end(), distats["Run"].smap[TriggerN+"FirstRequirement"]);
-    while(it != Trigger_names->begin()) {
-      temp++; it--;
-    }
-    prevTrig[TriggerN].first = temp;
+    prevTrig[TriggerN].first = find_trigger(*Trigger_names, distats["Run"].smap.at(TriggerN+"FirstRequirement"));
   }
   if(prevTrig[TriggerN].second >= (int)Trigger_names->size() ||
      distats["Run"].smap[TriggerN+"SecondRequirement"] != Trigger_names->at(prevTrig[TriggerN].second)) {
-    int temp = 0;
-    vector<string>::iterator it = find(Trigger_names->begin(), Trigger_names->end(), distats["Run"].smap[TriggerN+"SecondRequirement"]);
-    while(it != Trigger_names->begin()) {
-      temp++; 
-      it--;
-    }
-    prevTrig[TriggerN].second = temp;
+
+    prevTrig[TriggerN].second = find_trigger(*Trigger_names, distats["Run"].smap.at(TriggerN+"SecondRequirement"));
   }     
   if( (prevTrig[TriggerN].first < (int)Trigger_names->size() && Trigger_decision->at(prevTrig[TriggerN].first) == 1) || 
 	(prevTrig[TriggerN].second < (int)Trigger_names->size() && Trigger_decision->at(prevTrig[TriggerN].second) == 1) ) return true;
 
   return false;
+}
+
+int Analyzer::find_trigger(vector<string>& vNames, string findName) {
+  int i = 0;
+  for(; i < (int)vNames.size(); i++) {
+    if(vNames.at(i).find(findName) != string::npos) return i;
+  }
+  return i;
 }
 
 ////VBF specific cuts dealing with the leading jets.
@@ -1067,7 +1021,7 @@ void Analyzer::fill_Folder(string group, int max) {
     histo.addVal(true, group,max, "Events", wgt);
     histo.addVal(bestVertices, group,max, "NVertices", wgt);
 
-  } else if(group == "FillGen") {
+  } else if(!isData && group == "FillGen") {
 
     bool leptonicDecay = false;
     int nhadtau = 0;
@@ -1376,16 +1330,6 @@ double Analyzer::getPileupWeight(float ntruePUInt) {
   Datavalue = hPUdata->GetBinContent(bin);
   Dataintegral = hPUdata->Integral();
 
-  // //  printouts for debugging
-  // std::cout << "Number of true pileup interactions = " << ntruePUInt << std::endl;
-  // std::cout << "Histogram bin, given the number of true pileup interactions = " << bin << std::endl;
-  // std::cout << "MC PU probability density, given the number of true pileup interactions = " << MCvalue << std::endl;
-  // std::cout << "Data PU probability density, given the number of true pileup interactions = " << Datavalue << std::endl;
-
-  // std::cout << "Grabbing pileup weight. " << std::endl;
-  // //Ratio of normalized histograms in given bin
-  // double blah = ((MCvalue * Dataintegral) != 0) ? (Datavalue * MCintegral) / (MCvalue * Dataintegral) : 1.0;
-  // cout << blah << endl;
   return ((MCvalue * Dataintegral) != 0) ? (Datavalue * MCintegral) / (MCvalue * Dataintegral) : 1.0;
 }
 
