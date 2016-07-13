@@ -362,7 +362,6 @@ void Analyzer::smearLepton(Lepton& lepton, CUTS eGenPos, const PartStats& stats)
     lepton.smearP.push_back(final);
     deltaMEx += tmpSmear.Px() - final.Px();
     deltaMEy += tmpSmear.Py() - final.Py();
-
   }
 }
 
@@ -386,7 +385,9 @@ void Analyzer::smearJet(const PartStats& stats) {
       _Jet->smearP.push_back(jetV);
       continue;
     }
-    
+    cout << "test" << endl;
+    cout << "test" << endl;
+    cout << "test" << endl;
     _Jet->smearP.push_back(stats.dmap.at("JetEnergyScaleOffset") * jetV);
 
   }
@@ -428,31 +429,21 @@ TLorentzVector Analyzer::matchLeptonToGen(const TLorentzVector& lvec, const Part
 //a matching tau neutrino showing that the tau decayed and decayed hadronically
 TLorentzVector Analyzer::matchTauToGen(const TLorentzVector& lvec, double lDeltaR) {
   TLorentzVector genVec(0,0,0,0);
-  bool leptonicDecay = false;
-  
-  for(vec_iter it=goodParts[ival(CUTS::eGTau)].begin(); it !=goodParts[ival(CUTS::eGTau)].end();it++) {
-    leptonicDecay = false;
-    for(int j = 0; j < (int)_Gen->pt->size(); j++) {
-      if( ((abs(_Gen->pdg_id->at(j)) == 12) || (abs(_Gen->pdg_id->at(j)) == 14)) && (_Gen->BmotherIndex->at(j) == (*it)) ) {
-	leptonicDecay = true; 
-	break;
-      }
-    }
-    if(leptonicDecay) continue;
+  int i = 0;
+  for(vec_iter it=goodParts[ival(CUTS::eGTau)].begin(); it !=goodParts[ival(CUTS::eGTau)].end();it++, i++) {
+    int nu = goodParts[ival(CUTS::eNuTau)].at(i);
+    if(nu == -1) continue;
 
-    for(vec_iter inu=goodParts[ival(CUTS::eNuTau)].begin(); inu !=goodParts[ival(CUTS::eNuTau)].end();inu++) {
-      if(_Gen->BmotherIndex->at(*inu) != (*it)) continue;
-      TLorentzVector tmp1, tmp2;
-      tmp1.SetPtEtaPhiE(_Gen->pt->at(*it), _Gen->eta->at(*it), _Gen->phi->at(*it), _Gen->energy->at(*it));
-      tmp2.SetPtEtaPhiE(_Gen->pt->at(*inu), _Gen->eta->at(*inu), _Gen->phi->at(*inu), _Gen->energy->at(*inu));
-      genVec = tmp1 - tmp2;
-      if(lvec.DeltaR(genVec) <= lDeltaR) {
-	return genVec;
-      }
+    TLorentzVector tmp1, tmp2;
+    tmp1.SetPtEtaPhiE(_Gen->pt->at(*it), _Gen->eta->at(*it), _Gen->phi->at(*it), _Gen->energy->at(*it));
+    tmp2.SetPtEtaPhiE(_Gen->pt->at(nu), _Gen->eta->at(nu), _Gen->phi->at(nu), _Gen->energy->at(nu));
+    genVec = tmp1 - tmp2;
+    if(lvec.DeltaR(genVec) <= lDeltaR) {
+      return genVec;
     }
   }
-
   return TLorentzVector(0,0,0,0);
+
 }
 
 
@@ -469,12 +460,17 @@ void Analyzer::getGoodGen(int particle_id, int particle_status, CUTS ePos, const
 
 ////Tau neutrino specific function used for calculating the number of hadronic taus
 void Analyzer::getGoodTauNu() {
-  for(int j = 0; j < (int)_Gen->pt->size(); j++) {
-    
-    if( (abs(_Gen->pdg_id->at(j)) == 16) && (abs(_Gen->pdg_id->at(_Gen->BmotherIndex->at(j))) == 15) && (_Gen->status->at(_Gen->BmotherIndex->at(j)) == 2) ) {
-      goodParts[ival(CUTS::eNuTau)].push_back(j);
-
+  for(vec_iter it=goodParts[ival(CUTS::eGTau)].begin(); it !=goodParts[ival(CUTS::eGTau)].end();it++) {
+    bool leptonDecay = false;
+    int nu = -1;
+    for(int j = 0; j < (int)_Gen->pt->size(); j++) {
+      if(abs(_Gen->BmotherIndex->at(j)) == (*it)) {
+	if( (abs(_Gen->pdg_id->at(j)) == 16) && (abs(_Gen->motherpdg_id->at(j)) == 15) && (_Gen->status->at(_Gen->BmotherIndex->at(j)) == 2) ) nu = j;
+	else if( (abs(_Gen->pdg_id->at(j)) == 12) || (abs(_Gen->pdg_id->at(j)) == 14) ) leptonDecay = true;
+      }
     }
+    nu = (leptonDecay) ? -1 : nu;
+    goodParts[ival(CUTS::eNuTau)].push_back(nu);
   }
 }
 
@@ -1023,30 +1019,21 @@ void Analyzer::fill_Folder(string group, int max) {
 
   } else if(!isData && group == "FillGen") {
 
-    bool leptonicDecay = false;
     int nhadtau = 0;
     TLorentzVector genVec;
+    int i = 0;
+    for(vec_iter it=goodParts[ival(CUTS::eGTau)].begin(); it!=goodParts[ival(CUTS::eGTau)].end(); it++, i++) {
 
-    for(vec_iter it=goodParts[ival(CUTS::eGTau)].begin(); it!=goodParts[ival(CUTS::eGTau)].end(); it++) {
-      leptonicDecay = false;
-      for(int j = 0; j < (int)_Gen->pt->size(); j++) {
-	if( ((abs(_Gen->pdg_id->at(j)) == 12) || (abs(_Gen->pdg_id->at(j)) == 14)) && (_Gen->BmotherIndex->at(j) == (*it)) ) {
-	  leptonicDecay = true; 
-	  break;
-	}
-      }
-      if(!leptonicDecay) {
-	for(vec_iter inu=goodParts[ival(CUTS::eNuTau)].begin(); inu !=goodParts[ival(CUTS::eNuTau)].end();inu++) {
-	  if(_Gen->BmotherIndex->at(*inu) != (*it)) continue;
-	  TLorentzVector tmp1, tmp2;
-	  tmp1.SetPtEtaPhiE(_Gen->pt->at(*it), _Gen->eta->at(*it), _Gen->phi->at(*it), _Gen->energy->at(*it));
-	  tmp2.SetPtEtaPhiE(_Gen->pt->at(*inu), _Gen->eta->at(*inu), _Gen->phi->at(*inu), _Gen->energy->at(*inu));
-	  genVec = tmp1 - tmp2;
-	  histo.addVal(genVec.Pt(), group,max, "HadTauPt", wgt);
-	  histo.addVal(genVec.Eta(), group,max, "HadTauEta", wgt);
-	  nhadtau++;
-	  break;
-	}
+      int nu = goodParts[ival(CUTS::eNuTau)].at(i);
+      if(nu != -1) {
+	TLorentzVector tmp1, tmp2;
+	tmp1.SetPtEtaPhiE(_Gen->pt->at(*it), _Gen->eta->at(*it), _Gen->phi->at(*it), _Gen->energy->at(*it));
+	tmp2.SetPtEtaPhiE(_Gen->pt->at(nu), _Gen->eta->at(nu), _Gen->phi->at(nu), _Gen->energy->at(nu));
+	genVec = tmp1 - tmp2;
+	histo.addVal(genVec.Pt(), group,max, "HadTauPt", wgt);
+	histo.addVal(genVec.Eta(), group,max, "HadTauEta", wgt);
+	nhadtau++;
+
       }
       histo.addVal(_Gen->energy->at(*it), group,max, "TauEnergy", wgt);
       histo.addVal(_Gen->pt->at(*it), group,max, "TauPt", wgt);

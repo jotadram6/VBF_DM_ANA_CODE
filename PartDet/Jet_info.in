@@ -2,8 +2,8 @@
 	        Smear
 #######################################
 
-SmearTheJet 0
-JetEnergyScaleOffset 1.0
+SmearTheJet 1
+JetEnergyScaleOffset 0.3
 
 MuonMatchingDeltaR  0.3
 ElectronMatchingDeltaR  0.3
