@@ -97,7 +97,7 @@ Electron::Electron(TTree* BOOM, string filename) : Lepton(BOOM, "patElectron", f
 
 
 Muon::Muon(TTree* BOOM, string filename) : Lepton(BOOM, "Muon", filename) {
-  if(pstats["Muon1"].bmap["DoDiscrByTightID"] || pstats["Muon1"].bmap["DoDiscrByTightID"]) {
+  if(pstats["Muon1"].bmap["DoDiscrByTightID"] || pstats["Muon2"].bmap["DoDiscrByTightID"]) {
     BOOM->SetBranchStatus("Muon_tight", 1);
     BOOM->SetBranchAddress("Muon_tight", &tight);
   }
@@ -134,8 +134,8 @@ Taus::Taus(TTree* BOOM, string filename) : Lepton(BOOM, "Tau", filename) {
       BOOM->SetBranchAddress(("Tau_"+pstats["Tau1"].smap["DiscrAgainstElectron"]).c_str(), &againstElectron.first);
     }
     if(pstats["Tau2"].bmap["DoDiscrAgainstElectron"] || pstats["Tau2"].bmap["SelectTausThatAreElectrons"]) {
-      BOOM->SetBranchStatus(("Tau_"+pstats["Tau1"].smap["DiscrAgainstElectron"]).c_str(), 1);    
-      BOOM->SetBranchAddress(("Tau_"+pstats["Tau1"].smap["DiscrAgainstElectron"]).c_str(), &againstElectron.second);
+      BOOM->SetBranchStatus(("Tau_"+pstats["Tau2"].smap["DiscrAgainstElectron"]).c_str(), 1);    
+      BOOM->SetBranchAddress(("Tau_"+pstats["Tau2"].smap["DiscrAgainstElectron"]).c_str(), &againstElectron.second);
     }
   }
   ////Muon discrimination
@@ -151,8 +151,8 @@ Taus::Taus(TTree* BOOM, string filename) : Lepton(BOOM, "Tau", filename) {
       BOOM->SetBranchAddress(("Tau_"+pstats["Tau1"].smap["DiscrAgainstMuon"]).c_str(), &againstMuon.first);
     }
     if(pstats["Tau2"].bmap["DoDiscrAgainstMuon"] || pstats["Tau2"].bmap["SelectTausThatAreMuons"]) {
-      BOOM->SetBranchStatus(("Tau_"+pstats["Tau1"].smap["DiscrAgainstMuon"]).c_str(), 1);    
-      BOOM->SetBranchAddress(("Tau_"+pstats["Tau1"].smap["DiscrAgainstMuon"]).c_str(), &againstMuon.second);
+      BOOM->SetBranchStatus(("Tau_"+pstats["Tau2"].smap["DiscrAgainstMuon"]).c_str(), 1);    
+      BOOM->SetBranchAddress(("Tau_"+pstats["Tau2"].smap["DiscrAgainstMuon"]).c_str(), &againstMuon.second);
     }
   }
 
@@ -237,11 +237,12 @@ void Particle::getPartStats(string filename) {
       cout << "error in " << filename << "; no groups specified for data" << endl;
       exit(1);
     } else if(stemp.size() == 2) {
-      if(stemp[1].find(".") != string::npos) pstats[group].dmap[stemp[0]]=stod(stemp[1]);
-      else if(stemp[1] == "1" || stemp[1] == "true" ) pstats[group].bmap[stemp[0]] = true;
-      else if(stemp[1] == "0"  || stemp[1] == "false" ) pstats[group].bmap[stemp[0]]=false; 
-      else pstats[group].smap[stemp[0]] = stemp[1];
 
+      if(stemp[1] == "1" || stemp[1] == "true" ) pstats[group].bmap[stemp[0]] = true;
+      else if(stemp[1] == "0"  || stemp[1] == "false" ) pstats[group].bmap[stemp[0]]=false; 
+
+      else if(stemp[1].find_first_not_of("0123456789+-.") == string::npos) pstats[group].dmap[stemp[0]]=stod(stemp[1]);
+      else pstats[group].smap[stemp[0]] = stemp[1];
     } else  pstats[group].pmap[stemp[0]] = make_pair(stod(stemp[1]), stod(stemp[2]));
   }
   info_file.close();

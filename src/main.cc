@@ -25,7 +25,7 @@ int main (int argc, char* argv[]) {
   Analyzer testing(argv[1], argv[2]);
   //  Analyzer testing("TNT.root", "test.root");
 
-  for(int i=0; i < 10000; i++) {
+  for(int i=0; i < testing.nentries; i++) {
     testing.clear_values();
     testing.preprocess(i);
     testing.fill_histogram();

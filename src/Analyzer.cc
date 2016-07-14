@@ -9,7 +9,7 @@ typedef vector<int>::iterator vec_iter;
 
 //Filespace that has all of the .in files
 const string FILESPACE = "PartDet/";
-
+const string PUSPACE = "Pileup/";
 //////////PUBLIC FUNCTIONS////////////////////
 
 ///Constructor
@@ -37,7 +37,6 @@ Analyzer::Analyzer(string infile, string outfile) : hPUmc(new TH1F("hPUmc", "hPU
   cuts_per.resize(histo.get_cuts()->size());
   cuts_cumul.resize(histo.get_cuts()->size());
 
-  
   if(!isData) {
     _Gen = new Generated(BOOM, FILESPACE + "Gen_info.in");
     genStat = _Gen->pstats["Gen"];
@@ -133,10 +132,8 @@ void Analyzer::preprocess(int event) {
   /////  SET NUMBER OF RECO MET TOPOLOGY PARTICLES
   getGoodMetTopologyLepton(*_Electron, CUTS::eRElec1, CUTS::eTElec1, _Electron->pstats["Elec1"]);
   getGoodMetTopologyLepton(*_Electron, CUTS::eRElec2, CUTS::eTElec2, _Electron->pstats["Elec2"]);
-
   getGoodMetTopologyLepton(*_Muon, CUTS::eRMuon1, CUTS::eTMuon1, _Muon->pstats["Muon1"]);
   getGoodMetTopologyLepton(*_Muon, CUTS::eRMuon2, CUTS::eTMuon2, _Muon->pstats["Muon2"]);
-
   getGoodMetTopologyLepton(*_Tau, CUTS::eRTau1, CUTS::eTTau1, _Tau->pstats["Tau1"]);
   getGoodMetTopologyLepton(*_Tau, CUTS::eRTau2, CUTS::eTTau2, _Tau->pstats["Tau2"]);
 
@@ -314,10 +311,12 @@ void Analyzer::read_info(string filename) {
       cout << "error in " << filename << "; no groups specified for data" << endl;
       exit(1);
     } else if(stemp.size() == 2) {
-      if(stemp[1].find(".") != string::npos && stemp[1].find("root") == string::npos) distats[group].dmap[stemp[0]]=stod(stemp[1]);
-      else if(stemp[1] == "1" || stemp[1] == "true") distats[group].bmap[stemp[0]]=true;
+      char* p;
+      strtod(stemp[1].c_str(), &p);
+      if(stemp[1] == "1" || stemp[1] == "true") distats[group].bmap[stemp[0]]=true;
       else if(stemp[1] == "0" || stemp[1] == "false") distats[group].bmap[stemp[0]]=false; 
-      else distats[group].smap[stemp[0]] = stemp[1];
+      else if(*p) distats[group].smap[stemp[0]] = stemp[1];
+      else  distats[group].dmap[stemp[0]]=stod(stemp[1]);
 
     } else  distats[group].pmap[stemp[0]] = make_pair(stod(stemp[1]), stod(stemp[2]));
   }
@@ -383,13 +382,13 @@ void Analyzer::smearJet(const PartStats& stats) {
        JetMatchesLepton(*_Electron, jetV,stats.dmap.at("ElectronMatchingDeltaR"), CUTS::eGElec)){
 
       _Jet->smearP.push_back(jetV);
+
       continue;
     }
-    cout << "test" << endl;
-    cout << "test" << endl;
-    cout << "test" << endl;
-    _Jet->smearP.push_back(stats.dmap.at("JetEnergyScaleOffset") * jetV);
 
+    _Jet->smearP.push_back(stats.dmap.at("JetEnergyScaleOffset") * jetV);
+    deltaMEx += (1 - stats.dmap.at("JetEnergyScaleOffset"))*jetV.Px();
+    deltaMEy += (1 -stats.dmap.at("JetEnergyScaleOffset"))*jetV.Py();
   }
 }
 
@@ -481,7 +480,7 @@ void Analyzer::getGoodRecoLeptons(Lepton& lep, CUTS ePos, CUTS eGenPos, const Pa
 
   for(vector<TLorentzVector>::iterator it=lep.smearP.begin(); it != lep.smearP.end(); it++, i++) {
     TLorentzVector lvec = (*it);
-    
+
     if (fabs(lvec.Eta()) > stats.dmap.at("EtaCut")) continue;
     if (lvec.Pt() < stats.pmap.at("PtCut").first || lvec.Pt() > stats.pmap.at("PtCut").second) continue;
 
@@ -1283,7 +1282,7 @@ void Analyzer::initializePileupInfo(string MCHisto, string DataHisto) {
   // Filenames must be c_strings below. Here is the conversion from strings to c_strings
   // As you can see above cstr1 corresponds to MC and cstr2 corresponds to data.
 
-  TFile *file1 = new TFile(MCHisto.c_str());
+  TFile *file1 = new TFile((PUSPACE+MCHisto).c_str());
   TH1* histmc = static_cast<TH1*>(file1->Get("analyzeHiMassTau/NVertices_0"));
   if(!histmc) {throw std::runtime_error("failed to extract histogram");}
   for(int bin=0; bin<=(histmc->GetXaxis()->GetNbins() + 1); bin++) {
@@ -1291,7 +1290,7 @@ void Analyzer::initializePileupInfo(string MCHisto, string DataHisto) {
   }
   file1->Close();
 
-  TFile* file2 = new TFile(DataHisto.c_str());
+  TFile* file2 = new TFile((PUSPACE+DataHisto).c_str());
   TH1* histdata = static_cast<TH1*>(file2->Get("analyzeHiMassTau/NVertices_0"));
   if(!histdata) {throw std::runtime_error("failed to extract histogram");}
   for(int bin=0; bin<=(histdata->GetXaxis()->GetNbins() + 1); bin++) {

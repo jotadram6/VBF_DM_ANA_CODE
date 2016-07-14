@@ -6,6 +6,8 @@ in the old code.  Changed this, but leads to different results on different eta/
 
 smear in old code is wrong: smear uses the last particle and returns that, not the
 one that actual matches to the deltaR.  This means different results will be found
-in old and new code (changes in my verision and verified though)
+in old and new code (changed in my verision and verified though)
 
 hps stuff difference not found in files I've tried so far.  will investigate
+
+SmearJet since not verified.  Avoid this.

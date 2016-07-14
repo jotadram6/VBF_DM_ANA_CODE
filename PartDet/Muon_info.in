@@ -13,7 +13,7 @@ EnergyScaleOffset 1.
 EnergySigmaOffset 1.
 
 MatchToGen 0
-GenMatchingDeltaR 0.2
+GenMatchingDeltaR 0.3
 UseMotherID 0
 MotherID 23.0
 
