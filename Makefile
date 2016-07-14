@@ -48,5 +48,3 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cc $(SRCDIR)/%.h
 clean :
 	rm obj/*
 
-test : 
-	./Analyzer TNT.root test.root

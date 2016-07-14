@@ -38,14 +38,18 @@ int compare() {
   string filename2 = "final.root";
   TFile* file1 = new TFile(filename1.c_str());
   TFile* file2 = new TFile(filename2.c_str());
-  
-  TDirectory* dir1 = (TDirectory*)file1->Get("NGenMuon");
+  TDirectory* dir1 = (TDirectory*)file1->Get("NRecoMuon1MetTopology");
+  if(dir1 == NULL) {
+    cout << "bad directory" << endl;
+    exit(1);
+  }
   TDirectory* dir2 = (TDirectory*)file2->Get("DiJetCombinationsNmin");
   int count = 0;
   int all = 0;
   TIter iter(dir1->GetListOfKeys());
   TKey* key;
   while((key = (TKey*)iter())) {
+
     all++;
     string histname = key->GetName();
     
@@ -113,6 +117,7 @@ int compare() {
       
       
       } else {
+	count++;
 	cout << histname << " not found" << endl;
       }
     }

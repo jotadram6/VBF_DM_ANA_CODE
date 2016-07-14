@@ -54,16 +54,6 @@ class Analyzer {
   void fill_histogram();
   
  private:
-  /* double gent; */
-  /* double smeart; */
-  /* double trigt; */
-  /* double recolt; */
-  /* double recojt; */
-  /* double mett; */
-  /* double susyt; */
-  /* double combot; */
-  /* double dit; */
-  /* double jet1t=0., jet2t=0., cent=0., bjett=0., leadt=0.; */
   void fill_Folder(string, int);
 
   void getInputs();
@@ -90,6 +80,7 @@ class Analyzer {
 
   void VBFTopologyCut();
   bool passTriggerCuts(string);
+  int find_trigger(vector<string>&, string);
 
   double calculateLeptonMetMt(const TLorentzVector&);
   double diParticleMass(const TLorentzVector&, const TLorentzVector&, string);
@@ -123,6 +114,8 @@ class Analyzer {
 
   unordered_map<string, PartStats> distats;
   unordered_map<string, pair<int,int> > prevTrig;
+  PartStats genStat;
+  unordered_map<string, double> genMap;
   std::array<std::vector<int>, static_cast<int>(CUTS::enumSize)> goodParts;
   
   vector<int> cuts_per, cuts_cumul;

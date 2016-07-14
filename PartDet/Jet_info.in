@@ -2,8 +2,8 @@
 	        Smear
 #######################################
 
-SmearTheJet 0
-JetEnergyScaleOffset 1.0
+SmearTheJet 1
+JetEnergyScaleOffset 0.3
 
 MuonMatchingDeltaR  0.3
 ElectronMatchingDeltaR  0.3
@@ -22,8 +22,8 @@ ApplyLooseID 0
 
 RemoveOverlapWithMuon1s 0
 RemoveOverlapWithMuon2s 0
-Muon1MatchingDeltaR  0.3
-Muon2MatchingDeltaR  0.3
+Muon1MatchingDeltaR  0.1
+Muon2MatchingDeltaR  0.1
 
 RemoveOverlapWithElectron1s 0
 RemoveOverlapWithElectron2s 0
@@ -32,8 +32,8 @@ Electron2MatchingDeltaR  0.3
 
 RemoveOverlapWithTau1s 0
 RemoveOverlapWithTau2s 0
-Tau1MatchingDeltaR  0.3
-Tau2MatchingDeltaR 0.3
+Tau1MatchingDeltaR  0.1
+Tau2MatchingDeltaR 0.1
 
 ########################################
 	        Jet2
@@ -86,7 +86,7 @@ Tau2MatchingDeltaR 0.3
 
 DoDiscrByThisJet 1
 
-ApplyLooseID 1       
+ApplyLooseID 0
 EtaCut 0.0 5.0
 PtCut 30.0
 
@@ -113,7 +113,7 @@ DoDiscrByThisJet 1
 
 EtaCut 0.0 5.0
 PtCut 30.0
-ApplyLooseID 1       
+ApplyLooseID 0       
 
 RemoveOverlapWithMuon1s 0
 RemoveOverlapWithMuon2s 0
@@ -134,8 +134,8 @@ Tau2MatchingDeltaR 0.3
     	     BJet
 ##################################
 
-EtaCut 0.0 2.5
-PtCut 20.0
+EtaCut 0.0 3.5
+PtCut 50.0
 
 RemoveOverlapWithMuon1s 0
 RemoveOverlapWithMuon2s 0
@@ -152,6 +152,6 @@ RemoveOverlapWithTau2s 0
 Tau1MatchingDeltaR 0.3
 Tau2MatchingDeltaR 0.3
 
-ApplyJetBTagging 1    
-JetBTaggingCut 0.500
-MatchBToGen   0
+ApplyJetBTagging 0
+JetBTaggingCut 0.200
+MatchBToGen   1

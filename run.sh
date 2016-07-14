@@ -1,7 +1,7 @@
 #!/bin/bash
 
-./Analyzer TNT.root test.root
+./Analyzer OutTree_1.root test.root
 cd ..
-./BSM3GAnalyzer Analyzer/TNT.root Analyzer/final.root
+./BSM3GAnalyzer Analyzer/OutTree_1.root Analyzer/final.root
 cd Analyzer
 root -l compare.cc

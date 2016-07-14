@@ -1,16 +1,57 @@
 #include "Histo.h"
 
-Histogramer::Histogramer(int _Npdf, string histname, string cutname, string outfilename): Npdf(_Npdf) {
-  outfile = new TFile(outfilename.c_str(), "RECREATE");
+Histogramer::Histogramer() {
+}
 
+Histogramer::Histogramer(int _Npdf, string histname, string cutname, string outfilename, bool _isData): outname(outfilename), Npdf(_Npdf), isData(_isData) {
+  outfile = NULL;
   read_cuts(cutname);
   NFolders = folders.size();
 
   read_hist(histname);
+
 }
 
+Histogramer& Histogramer::operator=(const Histogramer& rhs) {
+  if(this == &rhs) return *this;
+
+  outname = rhs.outname;
+  NFolders = rhs.NFolders;
+  isData = rhs.isData;
+  
+  cuts = rhs.cuts;
+  cut_order = rhs.cut_order;
+  folders = rhs.folders;
+  folder_num = rhs.folder_num;
+  data_order.reserve(rhs.data_order.size());
+  data_order = rhs.data_order;
+
+  for(unordered_map<string, DataBinner*>::const_iterator mit = rhs.data.begin(); mit != rhs.data.end(); mit++) {
+    data[mit->first] = new DataBinner(*(mit->second));
+  }
+  return *this;
+}
+
+Histogramer::Histogramer(const Histogramer& rhs) {
+
+  NFolders = rhs.NFolders;
+  outname = rhs.outname;
+  isData = rhs.isData;
+  cuts = rhs.cuts;
+  cut_order = rhs.cut_order;
+  folders = rhs.folders;
+  folder_num = rhs.folder_num;
+  data_order = rhs.data_order;  
+  for(unordered_map<string, DataBinner*>::const_iterator mit = rhs.data.begin(); mit != rhs.data.end(); mit++) {
+    data[mit->first] = new DataBinner(*(mit->second));
+  }
+}
+
+
+
 Histogramer::~Histogramer() {
-  fill_histogram();
+  if(outfile != NULL)
+    outfile->Close();
   
   for(vector<string>::iterator it = data_order.begin(); it != data_order.end(); it++) {
     delete data[*it];
@@ -44,7 +85,7 @@ void Histogramer::read_hist(string filename) {
     if(stemp.size() == 0) continue;
     else if(stemp.size() == 2) {
       group = stemp[0];
-      accept = stoi(stemp[1]);
+      accept = stoi(stemp[1]) && !(isData && group.find("Gen") != string::npos);
       if(accept) {
 	data[group] = new DataBinner();
 	data_order.push_back(group); 
@@ -112,7 +153,6 @@ void Histogramer::read_cuts(string filename) {
       name = stemp[0];
       if(name[0]=='*' && name[1]=='*' && name[2]=='*') {
 	name.erase(0,3);
-	outfile->mkdir( name.c_str() );	
 	folders.push_back(name);
 	folder_num.push_back(i);
       } else if(stemp[1] == "0" && stemp[2] == "-1") continue;   ////remove unnecessary cuts
@@ -122,16 +162,29 @@ void Histogramer::read_cuts(string filename) {
     }
   }
 
+  if(folders.size() == 0 && cut_order.size() == 0){
+    folders.push_back(name);
+    folder_num.push_back(i-1);
+  } else if(cut_order.size() != 0 && ( folders.size() == 0 || folders.back() != cut_order.back())) {
+    folders.push_back(cut_order.back());
+    folder_num.push_back(cut_order.size() -1);
+  }
+
   info_file.close(); 
  }
 
 void Histogramer::fill_histogram() {
+
+  outfile = new TFile(outname.c_str(), "RECREATE");
+  for(vector<string>::iterator it = folders.begin(); it != folders.end(); it++) {
+    outfile->mkdir( it->c_str() );	
+  }
+    
   for(vector<string>::iterator it = data_order.begin(); it != data_order.end(); ++it) {
     data[*it]->write_histogram(outfile, folders);
   }
-  outfile->Close();
-}  
 
+}  
 
 
 unordered_map<string,pair<int,int>>* Histogramer::get_cuts() {
@@ -151,9 +204,10 @@ void Histogramer::addVal(double value, string group, int maxcut, string histn, d
   int maxFolder=0;
 
   for(int i = 0; i < NFolders; i++) {
-    if(maxcut > folder_num[i]) maxFolder = folder_num[i]+1;
+    if(maxcut > folder_num[i]) maxFolder++;
     else break;
   }
+
   data[group]->AddPoint(histn, maxFolder, value, weight);
 }
 
@@ -161,13 +215,11 @@ void Histogramer::addVal(double valuex, double valuey, string group, int maxcut,
   int maxFolder=0;
 
   for(int i = 0; i < NFolders; i++) {
-    if(maxcut > folder_num[i]) maxFolder = folder_num[i]+1;
+    if(maxcut > folder_num[i]) maxFolder++;
     else break;
   }
   data[group]->AddPoint(histn, maxFolder, valuex, valuey, weight);
 }
 
-// int main() {
-//   Histogramer histo(1, "PartDet/Hist_entries.in", "PartDet/Cuts.in", "blah.root");
-// }
+
     
