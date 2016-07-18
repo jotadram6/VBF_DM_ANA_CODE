@@ -27,9 +27,9 @@ This should make the file "Analyzer."  Analyzer requires 2 inputs to run.  To ru
     ./Analyzer infile outfile
 ```
 
-All of the parameters are stored in PartDet/.  To convert old config files to new config files, run
+All of the parameters are stored in PartDet/.  To convert old config files (called BSM3GAnalyzer_CutParameters.in to new config files, run
 ```
-    python convert_config.py <OLD CONFIG FILE>
+    python convert_config.py /path/to/BSM3GAnalyzer_CutParameters.in
 ```
 
 
