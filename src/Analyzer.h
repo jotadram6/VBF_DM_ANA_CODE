@@ -34,6 +34,7 @@
 #include <TEnv.h>
 #include "Particle.h"
 #include "Histo.h"
+#include "./svfit/SVfitStandaloneAlgorithm.h"
 
 //#include <ctime>
 
@@ -47,12 +48,13 @@ class Analyzer {
   ~Analyzer();
   void clear_values();
   void preprocess(int);
-  int fillCuts();
+  void fillCuts();
   void printCuts();
   void writeout();
   int nentries;
   void fill_histogram();
-  
+  void runSVFit(string, string);
+
  private:
   void fill_Folder(string, int);
 
@@ -81,6 +83,8 @@ class Analyzer {
   void VBFTopologyCut();
   bool passTriggerCuts(string);
   int find_trigger(vector<string>&, string);
+
+  void SVFit(Lepton&, Lepton&, CUTS, svFitStandalone::kDecayType, svFitStandalone::kDecayType);
 
   double calculateLeptonMetMt(const TLorentzVector&);
   double diParticleMass(const TLorentzVector&, const TLorentzVector&, string);
@@ -123,7 +127,7 @@ class Analyzer {
   TLorentzVector theMETVector;
   double deltaMEx, deltaMEy, sumpxForMht, sumpyForMht, sumptForHt, phiForMht;
   double againstElectron, againstMuon, maxIso, minIso;
-  int leadIndex;
+  int leadIndex, maxCut;
   bool isData, CalculatePUSystematics;
 
   vector<double>* Trigger_decision = 0;
@@ -133,7 +137,8 @@ class Analyzer {
   double Met_px = 0;
   double Met_py = 0;
   double Met_pz = 0;
-  
+  vector<double> MetCov = {0,0,0,0};
+
 
   double pu_weight, wgt;
 

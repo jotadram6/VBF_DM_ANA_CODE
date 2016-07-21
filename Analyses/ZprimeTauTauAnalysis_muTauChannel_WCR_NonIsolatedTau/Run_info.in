@@ -1,0 +1,14 @@
+Run
+
+TreatMuonsAsNeutrinos         0
+JetPtForMhtAndHt             30.0
+JetEtaForMhtAndHt            5.0
+ApplyJetLooseIDforMhtAndHt    1
+Trigger1FirstRequirement     HLT_IsoMu18_v
+Trigger1SecondRequirement    HLT_IsoMu24_eta2p1_v
+Trigger2FirstRequirement     HLT_IsoMu18_v
+Trigger2SecondRequirement    HLT_IsoMu24_eta2p1_v
+CalculatePUSystematics        1
+DataHistos                   PUdata_new_2p11ifb.root
+MCHistos                     PUsim_new.root
+isData                        0

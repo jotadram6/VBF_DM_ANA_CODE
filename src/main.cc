@@ -29,6 +29,7 @@ int main (int argc, char* argv[]) {
     testing.clear_values();
     testing.preprocess(i);
     testing.fill_histogram();
+    testing.runSVFit("Tau", "Tau");
   }
   testing.printCuts();
   return 0;

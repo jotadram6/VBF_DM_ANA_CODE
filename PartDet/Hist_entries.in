@@ -179,6 +179,7 @@ DiMuon_Muon1MetMt              100     0      500
 DiMuon_Muon2MetMt              100     0      500
 DiMuonOSLS                      20   -10       10
 DiMuonCosDphi                  220    -1.1      1.1
+DiMuonCosDphi_DeltaPtAndMet    220    -1.1      1.1
 DiMuon_Muon1MetDeltaPhi         72     0       +3.15
 DiMuon_Muon2MetDeltaPhi         72     0       +3.15
 DiMuonPZeta                    200  -100      100
@@ -204,6 +205,7 @@ DiTau_Tau1MetMt                 100     0   500
 DiTau_Tau2MetMt                 100     0   500
 DiTauOSLS                        20   -10    10
 DiTauCosDphi                    220    -1.1   1.1
+DiTauCosDphi_DeltaPtAndMet      220    -1.1      1.1
 DiTau_Tau1MetDeltaPhi            72     0    +3.15
 DiTau_Tau2MetDeltaPhi            72     0    +3.15
 DiTauPZeta                      200  -100   100
@@ -230,6 +232,7 @@ Muon1Tau1_Muon1MetMt                 100     0      500
 Muon1Tau1_Tau1MetMt                  100     0      500
 Muon1Tau1OSLS                         20   -10       10
 Muon1Tau1CosDphi                     220    -1.1      1.1
+Muon1Tau1CosDphi_DeltaPtAndMet       220    -1.1      1.1
 Muon1Tau1_Muon1MetDeltaPhi            72     0       +3.15
 Muon1Tau1_Tau1MetDeltaPhi             72     0       +3.15
 Muon1Tau1NotReconstructableMass      600     0     1500
@@ -254,6 +257,7 @@ Muon1Tau2_Muon1MetMt                 100     0      500
 Muon1Tau2_Tau2MetMt                  100     0      500
 Muon1Tau2OSLS                         20   -10       10
 Muon1Tau2CosDphi                     220    -1.1      1.1
+Muon1Tau2CosDphi_DeltaPtAndMet       220    -1.1      1.1
 Muon1Tau2_Muon1MetDeltaPhi            72     0       +3.15
 Muon1Tau2_Tau2MetDeltaPhi             72     0       +3.15
 Muon1Tau2NotReconstructableMass      600     0     1500
@@ -278,6 +282,7 @@ Muon2Tau1_Muon2MetMt                 100     0      500
 Muon2Tau1_Tau1MetMt                  100     0      500
 Muon2Tau1OSLS                         20   -10       10
 Muon2Tau1CosDphi                     220    -1.1      1.1
+Muon2Tau1CosDphi_DeltaPtAndMet       220    -1.1      1.1
 Muon2Tau1_Muon2MetDeltaPhi            72     0       +3.15
 Muon2Tau1_Tau1MetDeltaPhi             72     0       +3.15
 Muon2Tau1NotReconstructableMass      600     0     1500
@@ -289,6 +294,7 @@ Muon2Tau1DiJetReconstructableMass    100     0     5000
 Muon2PtVsTau1Pt                      100     0      500      100     0     500
 Muon2Tau1Zeta2D                      100     0      100      200  -100     100
 Muon2MetDeltaPhiVsMuon2Tau1CosDphi    72     0       +3.15   220    -1.1     1.1
+
 
 FillMuon2Tau2 1
 
@@ -302,6 +308,7 @@ Muon2Tau2_Muon2MetMt                 100     0      500
 Muon2Tau2_Tau2MetMt                  100     0      500
 Muon2Tau2OSLS                         20   -10       10
 Muon2Tau2CosDphi                     220    -1.1      1.1
+Muon2Tau2CosDphi_DeltaPtAndMet       220    -1.1      1.1
 Muon2Tau2_Muon2MetDeltaPhi            72     0       +3.15
 Muon2Tau2_Tau2MetDeltaPhi             72     0       +3.15
 Muon2Tau2NotReconstructableMass      600     0     1500

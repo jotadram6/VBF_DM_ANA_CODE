@@ -31,4 +31,7 @@ List of Electron Discriminators
    againstMuonLoose3
    againstMuonTight3
 
+Different config files for different Analyses are already converted to the proper
+format and are in the directory "Analyses."  Just copy the files into PartDet or
 
+cp Analyses/<YOUR ANAYSIS>/* PartDet

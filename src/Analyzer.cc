@@ -74,6 +74,7 @@ void Analyzer::clear_values() {
   sumpyForMht = 0.0;
   sumptForHt  = 0.0;
   leadIndex=-1;
+  maxCut = 0;
 }
 
 ///Function that does most of the work.  Calculates the number of each particle
@@ -163,8 +164,39 @@ void Analyzer::preprocess(int event) {
   }
 }
 
+void Analyzer::runSVFit(string particle1, string particle2) {
+  if(maxCut != (int)histo.get_order()->size()) return;
+
+  using namespace svFitStandalone;
+  CUTS ePos = CUTS::enumSize;
+  
+  if(particle1.find("E") != string::npos) {
+    if(particle1.back() == '1' && particle2.back() == '1') ePos = CUTS::eElec1Tau1;
+    else if(particle1.back() == '1' && particle2.back() == '2') ePos = CUTS::eElec1Tau2;
+    else if(particle1.back() == '2' && particle2.back() == '1') ePos = CUTS::eElec2Tau1;
+    else if(particle1.back() == '2' && particle2.back() == '2') ePos = CUTS::eElec2Tau2;
+    SVFit(*_Electron, *_Tau, ePos, kTauToElecDecay, kTauToHadDecay);
+    
+  } else if(particle1.find("Mu") != string::npos) {
+    if(particle1.back() == '1' && particle2.back() == '1') ePos = CUTS::eMuon1Tau1;
+    else if(particle1.back() == '1' && particle2.back() == '2') ePos = CUTS::eMuon1Tau2;
+    else if(particle1.back() == '2' && particle2.back() == '1') ePos = CUTS::eMuon2Tau1;
+    else if(particle1.back() == '2' && particle2.back() == '2') ePos = CUTS::eMuon2Tau2;
+    SVFit(*_Muon, *_Tau, ePos, kTauToMuDecay, kTauToHadDecay);
+
+  } else if(particle1.find("Tau") != string::npos) {
+    SVFit(*_Tau, *_Tau, CUTS::eDiTau, kTauToHadDecay, kTauToHadDecay);
+
+  }
+  
+  return;
+
+}
+
+
+
 ////Reads cuts from Cuts.in file and see if the event has enough particles
-int Analyzer::fillCuts() {
+void Analyzer::fillCuts() {
   unordered_map<string,pair<int,int> >* cut_info = histo.get_cuts();
   vector<string>* cut_order = histo.get_order();
 
@@ -172,7 +204,7 @@ int Analyzer::fillCuts() {
   int min, max;
   bool prevTrue = true;
   int nparticles, i=0;
-  int maxCut=0;
+  maxCut=0;
 
   
 
@@ -192,7 +224,7 @@ int Analyzer::fillCuts() {
       maxCut += (prevTrue) ? 1 : 0;
     } else prevTrue = false;
   }
-  return maxCut;
+
 }
 
 
@@ -265,6 +297,10 @@ void Analyzer::setupGeneral(TTree* BOOM, string infile) {
   BOOM->SetBranchStatus("Met_type1PF_px", 1);
   BOOM->SetBranchStatus("Met_type1PF_py", 1);
   BOOM->SetBranchStatus("Met_type1PF_pz", 1);
+  BOOM->SetBranchStatus("Met_type1PF_cov00", 1);
+  BOOM->SetBranchStatus("Met_type1PF_cov01", 1);
+  BOOM->SetBranchStatus("Met_type1PF_cov10", 1);
+  BOOM->SetBranchStatus("Met_type1PF_cov11", 1);
 
   BOOM->SetBranchAddress("Trigger_decision", &Trigger_decision);
   BOOM->SetBranchAddress("Trigger_names", &Trigger_names);
@@ -273,6 +309,10 @@ void Analyzer::setupGeneral(TTree* BOOM, string infile) {
   BOOM->SetBranchAddress("Met_type1PF_px", &Met_px);
   BOOM->SetBranchAddress("Met_type1PF_py", &Met_py);
   BOOM->SetBranchAddress("Met_type1PF_pz", &Met_pz);
+  BOOM->SetBranchAddress("Met_type1PF_cov00", &MetCov.at(0));
+  BOOM->SetBranchAddress("Met_type1PF_cov01", &MetCov.at(1));
+  BOOM->SetBranchAddress("Met_type1PF_cov10", &MetCov.at(2));
+  BOOM->SetBranchAddress("Met_type1PF_cov11", &MetCov.at(3));
 
   read_info(FILESPACE + "ElectronTau_info.in");
   read_info(FILESPACE + "MuonTau_info.in");
@@ -842,34 +882,42 @@ bool Analyzer::passDiParticleApprox(const TLorentzVector& Tobj1, const TLorentzV
 ///Find the number of lepton combos that pass the dilepton cuts
 void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS ePos2, CUTS ePosFin, const PartStats& stats) {
   bool sameParticle = (&lep1 == &lep2);
+  TLorentzVector part1, part2;
 
   for(vec_iter i1=goodParts[ival(ePos1)].begin(); i1 != goodParts[ival(ePos1)].end(); i1++) {
     for(vec_iter i2=goodParts[ival(ePos2)].begin(); i2 != goodParts[ival(ePos2)].end(); i2++) {
       if(sameParticle && (*i2) <= (*i1)) continue;
-      if(stats.bmap.at("DiscrByDeltaR") && (lep1.smearP.at(*i1).DeltaR(lep2.smearP.at(*i2))) < stats.dmap.at("DeltaRCut")) continue;
+      part1 = lep1.smearP.at(*i1);
+      part2 = lep2.smearP.at(*i2);
+
+      if(stats.bmap.at("DiscrByDeltaR") && (part1.DeltaR(part2)) < stats.dmap.at("DeltaRCut")) continue;
    
       if(stats.smap.at("DiscrByOSLSType") == "LS" && (lep1.charge->at(*i1) * lep2.charge->at(*i2) <= 0)) continue;
       else if(stats.smap.at("DiscrByOSLSType") == "OS" && (lep1.charge->at(*i1) * lep2.charge->at(*i2) >= 0)) continue;
 
       if(stats.bmap.at("DiscrByCosDphi")) {
-	double Dphi = absnormPhi( lep1.smearP.at(*i1).Phi() - lep2.smearP.at(*i2).Phi());
+	double Dphi = absnormPhi( part1.Phi() - part2.Phi());
 	if(cos(Dphi) < stats.pmap.at("CosDphiCut").first || cos(Dphi) > stats.pmap.at("CosDphiCut").second) continue;
       }
   // ----Mass window requirement
       
       if (stats.bmap.at("DiscrByMassReco")) {
-      	double diMass = diParticleMass(lep1.smearP.at(*i1),lep2.smearP.at(*i2), stats.smap.at("HowCalculateMassReco"));
+      	double diMass = diParticleMass(part1,part2, stats.smap.at("HowCalculateMassReco"));
       	if( diMass < stats.pmap.at("MassCut").first || diMass > stats.pmap.at("MassCut").second) continue;
       }
 
       if (stats.bmap.at("DiscrByCDFzeta2D")) {
-      	double CDFzeta = stats.dmap.at("PZetaCutCoefficient") * getPZeta(lep1.smearP.at(*i1), lep2.smearP.at(*i2)) 
-	  + stats.dmap.at("PZetaVisCutCoefficient") * getPZetaVis(lep1.smearP.at(*i1), lep2.smearP.at(*i2));
+      	double CDFzeta = stats.dmap.at("PZetaCutCoefficient") * getPZeta(part1, part2) 
+	  + stats.dmap.at("PZetaVisCutCoefficient") * getPZetaVis(part1, part2);
       	if( CDFzeta < stats.pmap.at("CDFzeta2DCutValue").first || CDFzeta > stats.pmap.at("CDFzeta2DCutValue").second ) continue;
       }
 
       //////////abs on the difference????
       ///////////////////
+      // if(stats.bmap.at("DiscrByCosDphi_DeltaPtAndMet")) {
+      // 	double DPhi = absnormPhi(atan2(part1.Py() - part2.Py(), part1.Px() - part2.Px()) - theMETVector.Phi());
+      // 	if( cos(DPhi) < stats.pmap.at("CosDphi_DeltaPtMet").first || cos(DPhi) > stats.pmap.at("CosDphi_DeltaPtMet").second) continue;
+      // }
       if (stats.bmap.at("DiscrByDeltaPtDivSumPt")) {
 	double ptDiv = (lep1.smearP.at(*i1).Pt() - lep2.smearP.at(*i2).Pt()) / (lep1.smearP.at(*i1).Pt() + lep2.smearP.at(*i2).Pt());
 	if( ptDiv < stats.pmap.at("DeltaPtDivSumPtCutValue").first || ptDiv > stats.pmap.at("DeltaPtDivSumPtCutValue").second) continue;
@@ -997,10 +1045,46 @@ double Analyzer::absnormPhi(double phi) {
   return abs(normPhi(phi));
 }
 
+void Analyzer::SVFit(Lepton& lep1, Lepton& lep2, CUTS ePos, svFitStandalone::kDecayType l1Type, svFitStandalone::kDecayType l2Type) {
+
+
+  TLorentzVector part1, part2;
+  
+  TMatrixD TcovMet(2,2);
+  TcovMet[0][0] = MetCov.at(0);
+  TcovMet[0][1] = MetCov.at(1);
+  TcovMet[1][0] = MetCov.at(2);
+  TcovMet[1][1] = MetCov.at(3);
+
+
+  for(vec_iter it=goodParts[ival(ePos)].begin(); it != goodParts[ival(ePos)].end(); it++) {
+    int p1= (*it) / BIG_NUM;
+    int p2= (*it) % BIG_NUM;
+
+    part1 = lep1.smearP.at(p1);
+    part2 = lep2.smearP.at(p2);
+
+    vector<svFitStandalone::MeasuredTauLepton> leptons;
+    leptons.push_back(svFitStandalone::MeasuredTauLepton(l1Type, part1.Pt(), part1.Eta(), part1.Phi(), part1.M()));
+    leptons.push_back(svFitStandalone::MeasuredTauLepton(l2Type,part2.Pt(), part2.Eta(), part2.Phi(), part2.M()));
+    SVfitStandaloneAlgorithm algo(leptons, theMETVector.Px(), theMETVector.Py(), TcovMet, 0);
+    algo.maxObjFunctionCalls(5000);
+    algo.integrateMarkovChain();
+    
+    if ( algo.isValidSolution() ) {
+      double mass = diParticleMass(part1,part2, "CollinearApprox");
+      std::cout << "... m svfit : " << algo.mass() << " +/- " << algo.massUncert() << " | " << mass << std::endl; // return value is in units of GeV
+    } else {
+      std::cout << "... m svfit : ---" << std::endl;
+    }
+
+  }
+}
+
 
 ////Grabs a list of the groups of histograms to be filled and asked Fill_folder to fill up the histograms
 void Analyzer::fill_histogram() {
-  int maxCut = fillCuts();
+  fillCuts();
   vector<string> groups = *histo.get_groups();
   wgt = pu_weight;
 
@@ -1093,14 +1177,9 @@ void Analyzer::fill_Folder(string group, int max) {
       histo.addVal(leadpt, group, max, "FirstLeadingPt", wgt);
       histo.addVal(leadeta, group, max, "FirstLeadingEta", wgt);
     }
-  
-
-
 
     histo.addVal(goodParts[ival(ePos)].size(), group,max, "N", wgt);
 
-  } else if(group == "FillGen" && !isData) {
-    
 
   } else if(group == "FillSusyCuts") {
 
@@ -1242,6 +1321,7 @@ void Analyzer::fill_Folder(string group, int max) {
       histo.addVal(absnormPhi(part1.Phi() - theMETVector.Phi()), group,max, "Part1MetDeltaPhi", wgt);
       histo.addVal(absnormPhi(part1.Phi() - theMETVector.Phi()), cos(absnormPhi(part2.Phi() - part1.Phi())), group,max, "Part1MetDeltaPhiVsCosDphi", wgt);
       histo.addVal(absnormPhi(part2.Phi() - theMETVector.Phi()), group,max, "Part2MetDeltaPhi", wgt);
+      histo.addVal(cos(absnormPhi(atan2(part1.Py() - part2.Py(), part1.Px() - part2.Px()) - theMETVector.Phi())), group,max, "CosDphi_DeltaPtAndMet", wgt);
 
       double diMass = diParticleMass(part1,part2, distats[digroup].smap.at("HowCalculateMassReco"));
       if(passDiParticleApprox(part1,part2, distats[digroup].smap.at("HowCalculateMassReco"))) {
