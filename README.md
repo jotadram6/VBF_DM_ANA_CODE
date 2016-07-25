@@ -1,38 +1,80 @@
-```
-                             #####################################
-                             ######        Starting         ######
-                             #####################################
-```
+# Setting Up
 
-To install, make sure you are in a CMSSW area.  This only requires cmsenv have been called, so it will work in any CMSSW area.
+If you are setting up the Analyzer, click on the link for respective version
 
-```
-    cmsrel CMSSW_X_Y_Z
-    cd CMSSW_X_Y_Z
-    cmsenv
+- [CMSSW_7_4_x](https://github.com/dteague/Analyzer/tree/TNT74x)
+- [CMSSW_8_0_x](https://github.com/dteague/Analyzer/tree/TNT80x)
 
-    git clone https://github.com/dteague/Analyzer
-    cd Analyzer
-    git checkout <BRANCH>
-```
-
-For Branch, put in either TNT74x or TNT80x for whichever version you need.
-To build the program, simply type
-```
-    make
-```
-This should make the file "Analyzer."  Analyzer requires 2 inputs to run.  To run it, you simply type:
-
-```
-    ./Analyzer infile outfile
-```
-
-All of the parameters are stored in PartDet/.  To convert old config files (called BSM3GAnalyzer_CutParameters.in to new config files, run
-```
-    python convert_config.py /path/to/BSM3GAnalyzer_CutParameters.in
-```
+# Changes
 
 
+
+# FAQ
+
+## The Program doesn't work! 
+
+If you get a setfault, it can mean one of two things.  If the error looks like:
+
+```
+$ ./Analyzer OutTree.root test.root
+setup start
+TOTAL EVENTS: ###
+setup complete
+
+ *** Break *** segmentation violation
+
+===========================================================
+There was a crash. 
+This is the entire stack trace of all threads:
+=========================================================== 
+...
+...
+###  0x00007fc6e0d9d3f7 in std::__throw_out_of_range (__s=__s entry=0x47dd90 "_Map_base::at") at ../../../../../libstdc++-v3/src/c++11/functexcept.cc:90
+...
+```
+This is a map out of bound error.  This means one of your values is not named correctly or is being parsed as the wrong values.  To check which values, look at the top of the stack.  I should look something like this:
+```
+The lines below might hint at the cause of the crash. 
+If they do not help you then please submit a bug report at
+http://root.cern.ch/bugs. Please post the ENTIRE stack trace 
+from above as an attachment in addition to anything else
+that might help us fixing this issue.
+===========================================================
+...
+...
+#12 Analyzer::getGoodRecoLeptons (this=this
+entry=0x7fff69207790, lep=..., ePos=ePos
+entry=CUTS::eRTau1, eGenPos=eGenPos
+entry=CUTS::eGTau, stats=...) at src/Analyzer.cc:561
+#13 0x0000000000463110 in Analyzer::preprocess (this=0x7fff69207790, event=0) at src/Analyzer.cc:130
+#14 0x000000000041d4ac in main ()
+===========================================================
+```
+In this example, we can see in line #12, the function called getGoodRecoLeptons, and based on the CUTS value sent in (eRTau1), we can see that the RecoTau1 has a value that is wrong.  Now we have to just go into PartDet/Tau_info.in and look under Tau1 to find the error.  To Help with this, one can look through the function in src/Analyzer.cc or look at a template info file such at in [this repository](https://github.com/dteague/Analyzer/tree/master/PartDet)
+
+If the Error looks like:
+```
+$ ./Analyzer TNT.root test.root 
+setup start
+TOTAL EVENTS: 493
+Error in <TTree::SetBranchStatus>: unknown branch -> Tau_byTightIsolationMVArun2v1DBnewDMwLT
+Error in <TTree::SetBranchAddress>: unknown branch -> Tau_byTightIsolationMVArun2v1DBnewDMwLT
+setup complete
+
+ *** Break *** segmentation violation
+ 
+===========================================================
+There was a crash.
+This is the entire stack trace of all threads:
+===========================================================
+...
+...
+...
+```
+The error is being thrown by ROOT because some of the Branches haven't been set correctly.  This can happen because the nTuples for 74x and 80x have different names, or because the name is simply mispelled.  ROOT tells you which branch has been set wrong so just go into PartDet/Tau_info.in and change the name there.  To find the names of the branches, simply list them by typing 
+```
+cat NOTES
+```
 
 ```
                              #####################################
