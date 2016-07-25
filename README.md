@@ -11,7 +11,14 @@ If you are setting up the Analyzer, click on the link for respective version
 
 # FAQ
 
-## The Program doesn't work! 
+- Q: [The program crashes with a SegFault]
+- Q: [The program crashes with SegFault and Error in <TTree::SetBranchStatus>]
+- Q: [How do I set up folders?]
+- Q: [How do I control which histograms make it into my root file?]
+- Q: [How do I add a new histogram?]
+- Q: [What is SVFit?  How do I use it?]
+
+### A: SegFault
 
 If you get a setfault, it can mean one of two things.  If the error looks like:
 
@@ -52,6 +59,8 @@ entry=CUTS::eGTau, stats=...) at src/Analyzer.cc:561
 ```
 In this example, we can see in line #12, the function called getGoodRecoLeptons, and based on the CUTS value sent in (eRTau1), we can see that the RecoTau1 has a value that is wrong.  Now we have to just go into PartDet/Tau_info.in and look under Tau1 to find the error.  To Help with this, one can look through the function in src/Analyzer.cc or look at a template info file such at in [this repository](https://github.com/dteague/Analyzer/tree/master/PartDet)
 
+### SegFault with TBranch Error
+
 If the Error looks like:
 ```
 $ ./Analyzer TNT.root test.root 
@@ -76,6 +85,36 @@ The error is being thrown by ROOT because some of the Branches haven't been set 
 cat NOTES
 ```
 
+### Folders
+
+Folders in the program are made when reading PartDet/Cuts.in.  By default, the program will always make the last significant cut (range is not [0,-1]) into a folder.  To add folders, simply put ```***``` before the cut without any space.  
+
+e.g.
+```
+NRecoMuon1               0  -1
+NRecoTau1                2   2
+***NDiTauCombinations    1   0
+NSusyCombinations        1  -1
+NDiJetCombinations       0  -1
+```
+In this example, there is a cut on Tau1, DiTaus, and a VBF cut.  The folders created are NDiTauCominations and NSusyCombinations (last significant cut).
+
+The order of the cuts can also be rearranged if one wants to see cut flow in a different way.
+
+### SVFit
+
+SVFit is an algorithm used heavily in the Higgs groups for reconstructing decays (especailly H -> tau tau).  It works by using a stochastic method for finding the most probable neutrino(s) for the decayed particle.  By finding the most probable neutrino(s), it can reconstruct the mass closer to the real value.  
+
+For more Details, see [here](https://iopscience.iop.org/article/10.1088/1742-6596/513/2/022035/pdf)
+
+SVFit is now implimented in the new code.  To activate it, in the respective two particle file, put the following lines with the repective values filled in under the header: 
+```
+MassBySVFit    true
+<HISTNAME>    <#BINS>  <HIST MIN>  <HIST MAX>
+```
+This activate SVFit and sets up the histogram for putting the data into it.  
+
+WARNING: SVFit is a very slow algorithm and is still under investigation.  Do not use for Analysis till it has been studied further.  It works and can be tested out, but event take hours to run and the increase in resolution on mass reconstruction may not be much better than Collinear Approximation. 
 ```
                              #####################################
                              ######       Info Files        ######
