@@ -13,7 +13,7 @@ const string PUSPACE = "Pileup/";
 //////////PUBLIC FUNCTIONS////////////////////
 
 ///Constructor
-Analyzer::Analyzer(string infile, string outfile) : hPUmc(new TH1F("hPUmc", "hPUmc", 100, 0, 100)), hPUdata(new TH1F("hPUdata", "hPUdata", 100, 0, 100)) {
+Analyzer::Analyzer(string infile, string outfile) : hPUmc(new TH1F("hPUmc", "hPUmc", 100, 0, 100)), hPUdata(new TH1F("hPUdata", "hPUdata", 100, 0, 100)), MetCov(2,2) {
   cout << "setup start" << endl;
   f = TFile::Open(infile.c_str());
   f->cd("TNT");
@@ -22,11 +22,22 @@ Analyzer::Analyzer(string infile, string outfile) : hPUmc(new TH1F("hPUmc", "hPU
   BOOM->SetBranchStatus("*", 0);
   std::cout << "TOTAL EVENTS: " << nentries << std::endl;
 
+  MetCov[0][0] = 0;
+  MetCov[0][1] = 0;
+  MetCov[1][0] = 0;
+  MetCov[1][1] = 0;
+
   setupGeneral(BOOM,infile);
 
   isData = distats["Run"].bmap.at("isData");
   CalculatePUSystematics = distats["Run"].bmap.at("CalculatePUSystematics");
   histo = Histogramer(1, FILESPACE+"Hist_entries.in", FILESPACE+"Cuts.in", outfile, isData);
+  for(unordered_map<string,PartStats>::iterator it = distats.begin(); it != distats.end(); it++) {
+    if(it->second.bmap["MassBySVFit"]) {
+      histo.setupSVFit(it->first, it->second.smap["SVHistname"], it->second.dmap["SVbins"], it->second.dmap["SVmin"], it->second.dmap["SVmax"]);
+    }
+  }
+
 
   prevTrig["Trigger1"] = make_pair(0,0);
   prevTrig["Trigger2"] = make_pair(0,0);
@@ -128,6 +139,7 @@ void Analyzer::preprocess(int event) {
   leadIndex = goodParts[ival(CUTS::eR1stJet)].at(0); 
   getGoodRecoJets(CUTS::eR2ndJet, _Jet->pstats["SecondLeadingJet"]);
 
+  ////Updates Met and does MET cut
   updateMet();
 
   /////  SET NUMBER OF RECO MET TOPOLOGY PARTICLES
@@ -163,36 +175,6 @@ void Analyzer::preprocess(int event) {
     cout << "Event #" << event << endl;
   }
 }
-
-void Analyzer::runSVFit(string particle1, string particle2) {
-  if(maxCut != (int)histo.get_order()->size()) return;
-
-  using namespace svFitStandalone;
-  CUTS ePos = CUTS::enumSize;
-  
-  if(particle1.find("E") != string::npos) {
-    if(particle1.back() == '1' && particle2.back() == '1') ePos = CUTS::eElec1Tau1;
-    else if(particle1.back() == '1' && particle2.back() == '2') ePos = CUTS::eElec1Tau2;
-    else if(particle1.back() == '2' && particle2.back() == '1') ePos = CUTS::eElec2Tau1;
-    else if(particle1.back() == '2' && particle2.back() == '2') ePos = CUTS::eElec2Tau2;
-    SVFit(*_Electron, *_Tau, ePos, kTauToElecDecay, kTauToHadDecay);
-    
-  } else if(particle1.find("Mu") != string::npos) {
-    if(particle1.back() == '1' && particle2.back() == '1') ePos = CUTS::eMuon1Tau1;
-    else if(particle1.back() == '1' && particle2.back() == '2') ePos = CUTS::eMuon1Tau2;
-    else if(particle1.back() == '2' && particle2.back() == '1') ePos = CUTS::eMuon2Tau1;
-    else if(particle1.back() == '2' && particle2.back() == '2') ePos = CUTS::eMuon2Tau2;
-    SVFit(*_Muon, *_Tau, ePos, kTauToMuDecay, kTauToHadDecay);
-
-  } else if(particle1.find("Tau") != string::npos) {
-    SVFit(*_Tau, *_Tau, CUTS::eDiTau, kTauToHadDecay, kTauToHadDecay);
-
-  }
-  
-  return;
-
-}
-
 
 
 ////Reads cuts from Cuts.in file and see if the event has enough particles
@@ -285,6 +267,18 @@ void Analyzer::updateMet() {
 
   theMETVector.SetPxPyPzE(theMETVector.Px()+deltaMEx, theMETVector.Py()+deltaMEy, theMETVector.Pz(), 
   			  TMath::Sqrt(pow(theMETVector.Px()+deltaMEx,2) + pow(theMETVector.Py()+deltaMEy,2)));
+
+  /////MET CUTS
+
+  if(distats["Run"].bmap.at("DiscrByMet")) {
+    if(theMETVector.Pt() < distats["Run"].pmap.at("RecoMetCut").first) return;
+    if(theMETVector.Pt() > distats["Run"].pmap.at("RecoMetCut").second) return;
+  }
+  if(distats["Run"].bmap.at("DiscrByMHT") && sqrt(pow(sumpxForMht,2) + pow(sumpyForMht,2)) < distats["Run"].dmap.at("MhtCut")) return;
+
+  if(distats["Run"].bmap.at("DiscrByHT") && sumptForHt < distats["Run"].dmap.at("HtCut")) return; 
+  
+  goodParts[ival(CUTS::eMET)].push_back(1);
 }
 
 
@@ -309,10 +303,10 @@ void Analyzer::setupGeneral(TTree* BOOM, string infile) {
   BOOM->SetBranchAddress("Met_type1PF_px", &Met_px);
   BOOM->SetBranchAddress("Met_type1PF_py", &Met_py);
   BOOM->SetBranchAddress("Met_type1PF_pz", &Met_pz);
-  BOOM->SetBranchAddress("Met_type1PF_cov00", &MetCov.at(0));
-  BOOM->SetBranchAddress("Met_type1PF_cov01", &MetCov.at(1));
-  BOOM->SetBranchAddress("Met_type1PF_cov10", &MetCov.at(2));
-  BOOM->SetBranchAddress("Met_type1PF_cov11", &MetCov.at(3));
+  BOOM->SetBranchAddress("Met_type1PF_cov00", &MetCov[0][0]);
+  BOOM->SetBranchAddress("Met_type1PF_cov01", &MetCov[0][1]);
+  BOOM->SetBranchAddress("Met_type1PF_cov10", &MetCov[1][0]);
+  BOOM->SetBranchAddress("Met_type1PF_cov11", &MetCov[1][1]);
 
   read_info(FILESPACE + "ElectronTau_info.in");
   read_info(FILESPACE + "MuonTau_info.in");
@@ -358,7 +352,13 @@ void Analyzer::read_info(string filename) {
       else if(*p) distats[group].smap[stemp[0]] = stemp[1];
       else  distats[group].dmap[stemp[0]]=stod(stemp[1]);
 
-    } else  distats[group].pmap[stemp[0]] = make_pair(stod(stemp[1]), stod(stemp[2]));
+    } else if(stemp.size() == 3) distats[group].pmap[stemp[0]] = make_pair(stod(stemp[1]), stod(stemp[2]));
+    else if(stemp.size() == 4) {
+      distats[group].smap["SVHistname"] = stemp[0];
+      distats[group].dmap["SVbins"] = stod(stemp[1]);
+      distats[group].dmap["SVmin"] = stod(stemp[2]);
+      distats[group].dmap["SVmax"] = stod(stemp[3]);
+    }
   }
   info_file.close();
 }
@@ -515,21 +515,21 @@ void Analyzer::getGoodTauNu() {
 
 ///Function used to find the number of reco leptons that pass the various cuts.
 ///Divided into if blocks for the different lepton requirements.
-void Analyzer::getGoodRecoLeptons(Lepton& lep, CUTS ePos, CUTS eGenPos, const PartStats& stats) {
+void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS eGenPos, const PartStats& stats) {
   int i = 0;
 
-  for(vector<TLorentzVector>::iterator it=lep.smearP.begin(); it != lep.smearP.end(); it++, i++) {
+  for(vector<TLorentzVector>::const_iterator it=lep.smearP.begin(); it != lep.smearP.end(); it++, i++) {
     TLorentzVector lvec = (*it);
 
     if (fabs(lvec.Eta()) > stats.dmap.at("EtaCut")) continue;
     if (lvec.Pt() < stats.pmap.at("PtCut").first || lvec.Pt() > stats.pmap.at("PtCut").second) continue;
 
     if((lep.pstats.at("Smear").bmap.at("MatchToGen")) && (!isData)) {   /////check
-      if(matchLeptonToGen(lvec, lep.pstats["Smear"] ,eGenPos) == TLorentzVector(0,0,0,0)) continue;
+      if(matchLeptonToGen(lvec, lep.pstats.at("Smear") ,eGenPos) == TLorentzVector(0,0,0,0)) continue;
     }
 
     if(ePos == CUTS::eRMuon1 || ePos == CUTS::eRMuon2) {      ////////////////MUON CUTS/////////////
-      Muon& partM = static_cast<Muon&>(lep);
+      const Muon& partM = static_cast<const Muon&>(lep);
     
       if(stats.bmap.at("DoDiscrByTightID") && (partM.tight->at(i) == 0)) continue;
       if(stats.bmap.at("DoDiscrBySoftID") && (partM.soft->at(i) == 0)) continue;
@@ -540,7 +540,7 @@ void Analyzer::getGoodRecoLeptons(Lepton& lep, CUTS ePos, CUTS eGenPos, const Pa
 	if(isoSum < stats.pmap.at("IsoSumPtCutValue").first || isoSum >= stats.pmap.at("IsoSumPtCutValue").second) continue;
       }
     } else if(ePos == CUTS::eRElec1 || ePos == CUTS::eRElec2) {    ///////////////ELECTRON CUT///////////
-      Electron& partE = static_cast<Electron&>(lep);
+      const Electron& partE = static_cast<const Electron&>(lep);
 
       //----Require electron to pass ID discriminators
       if(stats.bmap.at("DoDiscrByVetoID") && (partE.isPassVeto->at(i) == 0)) continue;
@@ -556,7 +556,7 @@ void Analyzer::getGoodRecoLeptons(Lepton& lep, CUTS ePos, CUTS eGenPos, const Pa
       }
 
     } else if(ePos == CUTS::eRTau1 || ePos == CUTS::eRTau2) {   /////////////TAU CUT/////////////////
-      Taus& partT = static_cast<Taus&>(lep);
+      const Taus& partT = static_cast<const Taus&>(lep);
       if (stats.bmap.at("DoDiscrByLeadTrack")) {
 	if(partT.leadChargedCandPt->at(i) < stats.dmap.at("LeadTrackThreshold")) continue;
       }
@@ -750,13 +750,6 @@ void Analyzer::VBFTopologyCut() {
   if(stats.bmap.at("DiscrByOSEta")) {
     if((ljet1.Eta() * ljet2.Eta()) >= 0) return;
   }
-  if(stats.bmap.at("DiscrByMet")) {
-    if(theMETVector.Pt() < stats.pmap.at("RecoMetCut").first) return;
-    if(theMETVector.Pt() > stats.pmap.at("RecoMetCut").second) return;
-  }
-  if(stats.bmap.at("DiscrByMHT") && sqrt(pow(sumpxForMht,2) + pow(sumpyForMht,2)) < stats.dmap.at("MhtCut")) return;
-
-  if(stats.bmap.at("DiscrByHT") && sumptForHt < stats.dmap.at("HtCut")) return; 
 
   double dphi1 = normPhi(ljet1.Phi() - theMETVector.Phi());
   double dphi2 = normPhi(ljet2.Phi() - theMETVector.Phi());
@@ -787,7 +780,7 @@ void Analyzer::VBFTopologyCut() {
 }
 
 
-void Analyzer::getGoodMetTopologyLepton(Lepton& lep, CUTS eReco, CUTS ePos, const PartStats& stats) {
+void Analyzer::getGoodMetTopologyLepton(const Lepton& lep, CUTS eReco, CUTS ePos, const PartStats& stats) {
 
   for(vec_iter it=goodParts[ival(eReco)].begin(); it != goodParts[ival(eReco)].end(); it++) {
     if ((ePos != CUTS::eTTau1 && ePos != CUTS::eTTau2) && stats.bmap.at("DiscrIfIsZdecay")) { 
@@ -914,10 +907,10 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
 
       //////////abs on the difference????
       ///////////////////
-      // if(stats.bmap.at("DiscrByCosDphi_DeltaPtAndMet")) {
-      // 	double DPhi = absnormPhi(atan2(part1.Py() - part2.Py(), part1.Px() - part2.Px()) - theMETVector.Phi());
-      // 	if( cos(DPhi) < stats.pmap.at("CosDphi_DeltaPtMet").first || cos(DPhi) > stats.pmap.at("CosDphi_DeltaPtMet").second) continue;
-      // }
+      if(stats.bmap.at("DiscrByCosDphi_DeltaPtAndMet")) {
+      	double DPhi = absnormPhi(atan2(part1.Py() + part2.Py(), part1.Px() + part2.Px()) - theMETVector.Phi());
+      	if( cos(DPhi) < stats.pmap.at("CosDphi_DeltaPtMetCut").first || cos(DPhi) > stats.pmap.at("CosDphi_DeltaPtMetCut").second) continue;
+      }
       if (stats.bmap.at("DiscrByDeltaPtDivSumPt")) {
 	double ptDiv = (lep1.smearP.at(*i1).Pt() - lep2.smearP.at(*i2).Pt()) / (lep1.smearP.at(*i1).Pt() + lep2.smearP.at(*i2).Pt());
 	if( ptDiv < stats.pmap.at("DeltaPtDivSumPtCutValue").first || ptDiv > stats.pmap.at("DeltaPtDivSumPtCutValue").second) continue;
@@ -981,14 +974,14 @@ void Analyzer::getGoodDiJets(const PartStats& stats) {
 
 ///////Only tested for if is Zdecay, can include massptasymmpair later?
 /////Tests to see if a light lepton came form a zdecay
-bool Analyzer::isZdecay(const TLorentzVector& theObject, Lepton& lep) {
+bool Analyzer::isZdecay(const TLorentzVector& theObject, const Lepton& lep) {
   bool eventIsZdecay = false;
   const float zMass = 90.1876;
   const float zWidth = 2.4952;
   float zmmPtAsymmetry = -10.;
 
   // if mass is within 3 sigmas of z or pt asymmetry is small set to true.
-  for(vector<TLorentzVector>::iterator lepit= lep.smearP.begin(); lepit != lep.smearP.end(); lepit++) {
+  for(vector<TLorentzVector>::const_iterator lepit= lep.smearP.begin(); lepit != lep.smearP.end(); lepit++) {
     if(theObject.DeltaR(*lepit) < 0.3) continue;
     if(theObject == (*lepit)) continue;
 
@@ -1045,18 +1038,12 @@ double Analyzer::absnormPhi(double phi) {
   return abs(normPhi(phi));
 }
 
-void Analyzer::SVFit(Lepton& lep1, Lepton& lep2, CUTS ePos, svFitStandalone::kDecayType l1Type, svFitStandalone::kDecayType l2Type) {
+void Analyzer::SVFit(Lepton& lep1, Lepton& lep2, CUTS ePos, svFitStandalone::kDecayType l1Type, svFitStandalone::kDecayType l2Type, string group, int max, double wgt) {
 
 
   TLorentzVector part1, part2;
+  string keyname = distats[group.substr(4)].smap["SVHistname"];
   
-  TMatrixD TcovMet(2,2);
-  TcovMet[0][0] = MetCov.at(0);
-  TcovMet[0][1] = MetCov.at(1);
-  TcovMet[1][0] = MetCov.at(2);
-  TcovMet[1][1] = MetCov.at(3);
-
-
   for(vec_iter it=goodParts[ival(ePos)].begin(); it != goodParts[ival(ePos)].end(); it++) {
     int p1= (*it) / BIG_NUM;
     int p2= (*it) % BIG_NUM;
@@ -1065,15 +1052,15 @@ void Analyzer::SVFit(Lepton& lep1, Lepton& lep2, CUTS ePos, svFitStandalone::kDe
     part2 = lep2.smearP.at(p2);
 
     vector<svFitStandalone::MeasuredTauLepton> leptons;
-    leptons.push_back(svFitStandalone::MeasuredTauLepton(l1Type, part1.Pt(), part1.Eta(), part1.Phi(), part1.M()));
+    leptons.push_back(svFitStandalone::MeasuredTauLepton(l1Type,part1.Pt(), part1.Eta(), part1.Phi(), part1.M()));
     leptons.push_back(svFitStandalone::MeasuredTauLepton(l2Type,part2.Pt(), part2.Eta(), part2.Phi(), part2.M()));
-    SVfitStandaloneAlgorithm algo(leptons, theMETVector.Px(), theMETVector.Py(), TcovMet, 0);
+    SVfitStandaloneAlgorithm algo(leptons, theMETVector.Px(), theMETVector.Py(), MetCov , 0);
     algo.maxObjFunctionCalls(5000);
     algo.integrateMarkovChain();
     
     if ( algo.isValidSolution() ) {
-      double mass = diParticleMass(part1,part2, "CollinearApprox");
-      std::cout << "... m svfit : " << algo.mass() << " +/- " << algo.massUncert() << " | " << mass << std::endl; // return value is in units of GeV
+      histo.addVal(algo.mass(), group,max, keyname, wgt);
+      std::cout << "... m svfit : " << algo.mass() << " +/- " << algo.massUncert()  << std::endl; // return value is in units of GeV
     } else {
       std::cout << "... m svfit : ---" << std::endl;
     }
@@ -1297,6 +1284,11 @@ void Analyzer::fill_Folder(string group, int max) {
     } else if(ePos == CUTS::eDiTau) { lep1 = _Tau; lep2 = _Tau; 
     } else if (ePos == CUTS::eDiElec) { lep1 = _Electron; lep2 = _Electron; }
 
+    if(distats[digroup].bmap["MassBySVFit"] && maxCut == (int)histo.get_cuts()->size()) {
+      pair<svFitStandalone::kDecayType, svFitStandalone::kDecayType> typePair = getTypePair(ePos);
+      SVFit(*lep1, *lep2, ePos, typePair.first, typePair.second, group, max, wgt);
+    }
+
     TLorentzVector part1;
     TLorentzVector part2;
     
@@ -1347,6 +1339,7 @@ void Analyzer::fill_Folder(string group, int max) {
 	histo.addVal(absnormPhi(part2.Phi() - TheLeadDiJetVect.Phi()), group,max, "Part2DiJetDeltaPhi", wgt);
 	histo.addVal(diParticleMass(TheLeadDiJetVect, part1+part2, "VectorSumOfVisProductsAndMet"), group, max, "DiJetReconstructableMass", wgt); 
       }
+      
       if(dynamic_cast<Taus*>(lep1) == NULL) {
 	histo.addVal(isZdecay(part1, *lep1), group,max, "Part1IsZdecay", wgt); 
       }
@@ -1357,6 +1350,19 @@ void Analyzer::fill_Folder(string group, int max) {
   }
 }
 
+pair<svFitStandalone::kDecayType, svFitStandalone::kDecayType> Analyzer::getTypePair(CUTS ePos) {
+  using namespace svFitStandalone;
+  if(ePos == CUTS::eElec1Tau1 || ePos == CUTS::eElec1Tau2 || ePos == CUTS::eElec2Tau1 || ePos == CUTS::eElec2Tau2)
+    return make_pair(kTauToElecDecay, kTauToHadDecay);
+  else if(ePos == CUTS::eMuon1Tau1 || ePos == CUTS::eMuon1Tau2 || ePos == CUTS::eMuon2Tau1 || ePos == CUTS::eMuon2Tau2)
+    return make_pair(kTauToMuDecay, kTauToHadDecay);
+  else if(ePos == CUTS::eDiTau)
+    return make_pair(kTauToHadDecay, kTauToHadDecay);
+  else if(ePos == CUTS::eDiMuon)
+    return make_pair(kTauToMuDecay, kTauToMuDecay);
+  else 
+    return make_pair(kTauToElecDecay, kTauToElecDecay);
+}
 
 void Analyzer::initializePileupInfo(string MCHisto, string DataHisto) {
   // Filenames must be c_strings below. Here is the conversion from strings to c_strings

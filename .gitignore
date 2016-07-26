@@ -4,6 +4,7 @@ obj/*o
 TODO
 *~
 src/*~
+src/svfit/*~
 PartDet/*~
 Analyzer
 Histo

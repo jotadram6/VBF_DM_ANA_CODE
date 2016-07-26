@@ -5,6 +5,7 @@
 #include "./src/svfit/SVfitStandaloneLikelihood.h"
 #include "./src/svfit/SVfitStandaloneMarkovChainIntegrator.h"
 #include "./src/svfit/svFitStandaloneAuxFunctions.h"
+#include "./src/Particle.h"
 
 #include <TMath.h>
 

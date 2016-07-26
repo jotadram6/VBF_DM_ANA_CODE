@@ -124,6 +124,9 @@ string Histogramer::extractHistname(string group, string histo) {
   return histo;
 }
 
+void Histogramer::setupSVFit(string group, string name,  double bins, double min, double max) {
+  data["Fill" + group]->Add_Hist(name, group + "SVFit_Mass", bins, min, max, NFolders);
+}
 
 
 void Histogramer::read_cuts(string filename) {

@@ -4,7 +4,7 @@ NVertices   100   0.  100.
 
 //------------------------------------------------//
 
-FillGen 1
+FillGen 0
 
 NGenTau            20   0.       20.
 NGenHadTau         20   0.       20.
@@ -55,7 +55,7 @@ TauJet2Charge               10  -5.       5.
 
 //------------------------------------------------//
 
-FillMuon1 1
+FillMuon1 0
 
 NMuon1                   20   0.      20.
 Muon1Energy            2000   0.    5000.
@@ -66,7 +66,7 @@ FirstLeadingMuon1Eta    144  -7.2     +7.2
 Muon1Phi                 36  -3.15    +3.15
 Muon1MetMt              100   0      500
 
-FillMuon2 1
+FillMuon2 0
 
 NMuon2                   20   0.      20.
 Muon2Energy            2000   0.    5000.
@@ -79,7 +79,7 @@ Muon2MetMt              100   0      500
 
 //------------------------------------------------//
 
-FillJet1 1
+FillJet1 0
 
 NJet1         20   0.    20.
 Jet1Energy   200   0.   500.
@@ -87,7 +87,7 @@ Jet1Pt       200   0.   500.
 Jet1Eta      100  -5.0   +5.0
 Jet1Phi      144  -6.3   +6.3
 
-FillJet2 1
+FillJet2 0
 
 NJet2         20   0.    20.
 Jet2Energy   200   0.   500.
@@ -95,7 +95,7 @@ Jet2Pt       200   0.   500.
 Jet2Eta      100  -5.0   +5.0
 Jet2Phi      144  -6.3   +6.3
 
-FillBJet 1
+FillBJet 0
 
 NBJet         20   0.     20.
 BJetEnergy   200   0.    500.
@@ -103,7 +103,7 @@ BJetPt       200   0.    500.
 BJetEta       72  -3.6    +3.6
 BJetPhi       36  -3.15   +3.15
 
-FillCentralJet 1
+FillCentralJet 0
 
 NCentralJet      20   0.    20.
 CentralJetPt    200   0.   500.
@@ -148,7 +148,7 @@ DeltaEtaVsDeltaPhiLeadSubl   200   0      10.   72   0    +3.15
 
 //------------------------------------------------//
 
-FillDiJet 1
+FillDiJet 0
 
 DiJetDeltaR           200   0    10.
 DiJetDeltaEta         200   0    10.
@@ -166,7 +166,7 @@ LeadDiJetDeltaEta     200   0    10.
 
 //------------------------------------------------//
 
-FillDiMuon 1
+FillDiMuon 0
 
 DiMuon_Muon1DiJetDeltaPhi       72     0       +3.15
 DiMuon_Muon2DiJetDeltaPhi       72     0       +3.15 
@@ -211,8 +211,8 @@ DiTau_Tau2MetDeltaPhi            72     0    +3.15
 DiTauPZeta                      200  -100   100
 DiTauPZetaVis                   100     0   100
 DiTauZeta1D                     150  -300   300
-DiTauNotReconstructableMass     600     0  1500
-DiTauReconstructableMass        600     0  1500
+DiTauNotReconstructableMass     600     0  2500
+DiTauReconstructableMass        600     0  2500
 DiTauDiJetReconstructableMass   100     0  5000
 Tau1MetDeltaPhiVsDiTauCosDphi    72     0    +3.15  220    -1.1   1.1 
 DiTauZeta2D                     100     0   100     200  -100   100
@@ -220,7 +220,7 @@ Tau1PtVsTau2Pt                  100     0   500     100     0   500
 
 //------------------------------------------------//
 
-FillMuon1Tau1 1
+FillMuon1Tau1 0
 
 Muon1Tau1_Tau1DiJetDeltaPhi           72     0       +3.15
 Muon1Tau1_Muon1DiJetDeltaPhi          72     0       +3.15
@@ -245,7 +245,7 @@ Muon1PtVsTau1Pt                      100     0      500      100     0     500
 Muon1Tau1Zeta2D                      100     0      100      200  -100     100
 Muon1MetDeltaPhiVsMuon1Tau1CosDphi    72     0       +3.15   220    -1.1     1.1
 
-FillMuon1Tau2 1
+FillMuon1Tau2 0
 
 Muon1Tau2_Tau2DiJetDeltaPhi           72     0       +3.15
 Muon1Tau2_Muon1DiJetDeltaPhi          72     0       +3.15
@@ -270,7 +270,7 @@ Muon1PtVsTau2Pt                      100     0      500      100     0     500
 Muon1Tau2Zeta2D                      100     0      100      200  -100     100
 Muon1MetDeltaPhiVsMuon1Tau2CosDphi    72     0       +3.15   220    -1.1     1.1
 
-FillMuon2Tau1 1
+FillMuon2Tau1 0
 
 Muon2Tau1_Tau1DiJetDeltaPhi           72     0       +3.15
 Muon2Tau1_Muon2DiJetDeltaPhi          72     0       +3.15
@@ -296,7 +296,7 @@ Muon2Tau1Zeta2D                      100     0      100      200  -100     100
 Muon2MetDeltaPhiVsMuon2Tau1CosDphi    72     0       +3.15   220    -1.1     1.1
 
 
-FillMuon2Tau2 1
+FillMuon2Tau2 0
 
 Muon2Tau2_Tau2DiJetDeltaPhi           72     0       +3.15
 Muon2Tau2_Muon2DiJetDeltaPhi          72     0       +3.15

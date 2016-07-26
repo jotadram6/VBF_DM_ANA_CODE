@@ -25,7 +25,7 @@ EtaCut 2.5
 PtCut 20.0 9999.9
 
 DoDiscrByLeadTrack false
-LeadTrackThreshold 3.0
+LaaaeadTrackThreshold 3.0
 
   #####List of Isolation#####
   ##
@@ -48,9 +48,9 @@ LeadTrackThreshold 3.0
   ## byMediumPileupWeightedIsolation3Hits
   ## byTightPileupWeightedIsolation3Hits
 
-DoDiscrByIsolation 0
+DoDiscrByIsolation true
 DiscrByMinIsolation ZERO
-DiscrByMaxIsolation byLooseIsolationMVA3newDMwLT
+DiscrByMaxIsolation byTightIsolationMVArun2v1DBnewDMwLT
 DiscrByProngType 1or2or3hps
 
   #####List of Electron Discriminators#####
@@ -105,9 +105,10 @@ PtCut 20.0 9999.9
 DoDiscrByLeadTrack 0
 LeadTrackThreshold 5.0
 
-DoDiscrByIsolation 0
+DoDiscrByIsolation true
 DiscrByMinIsolation ZERO
-DiscrByMaxIsolation byTightCombinedIsolationDeltaBetaCorr3Hits
+DiscrByMaxIsolation byTightIsolationMVArun2v1DBnewDMwLT
+///DiscrByMaxIsolation byTightIsolationMVA3newDMwLT
 DiscrByProngType 1or2or3hps
 
 DoDiscrAgainstElectron 0

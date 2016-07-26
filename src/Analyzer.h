@@ -53,7 +53,6 @@ class Analyzer {
   void writeout();
   int nentries;
   void fill_histogram();
-  void runSVFit(string, string);
 
  private:
   void fill_Folder(string, int);
@@ -73,10 +72,10 @@ class Analyzer {
 
   void getGoodTauNu();  
   void getGoodGen(int, int, CUTS, const PartStats&);
-  void getGoodRecoLeptons(Lepton&, CUTS, CUTS, const PartStats&);
+  void getGoodRecoLeptons(const Lepton&, const CUTS, const CUTS, const PartStats&);
   void getGoodRecoJets(CUTS, const PartStats&);
 
-  void getGoodMetTopologyLepton(Lepton&, CUTS,CUTS, const PartStats&);
+  void getGoodMetTopologyLepton(const Lepton&, CUTS,CUTS, const PartStats&);
   void getGoodLeptonCombos(Lepton&, Lepton&, CUTS,CUTS,CUTS, const PartStats&);
   void getGoodDiJets(const PartStats&);
 
@@ -84,12 +83,13 @@ class Analyzer {
   bool passTriggerCuts(string);
   int find_trigger(vector<string>&, string);
 
-  void SVFit(Lepton&, Lepton&, CUTS, svFitStandalone::kDecayType, svFitStandalone::kDecayType);
+  void SVFit(Lepton&, Lepton&, CUTS, svFitStandalone::kDecayType, svFitStandalone::kDecayType, string, int, double);
+  pair<svFitStandalone::kDecayType, svFitStandalone::kDecayType> getTypePair(CUTS ePos);
 
   double calculateLeptonMetMt(const TLorentzVector&);
   double diParticleMass(const TLorentzVector&, const TLorentzVector&, string);
   bool passDiParticleApprox(const TLorentzVector&, const TLorentzVector&, string);
-  bool isZdecay(const TLorentzVector&, Lepton&);
+  bool isZdecay(const TLorentzVector&, const Lepton&);
 
   bool isOverlaping(const TLorentzVector&, Lepton&, CUTS, double);
   bool passProng(string, int);
@@ -137,8 +137,7 @@ class Analyzer {
   double Met_px = 0;
   double Met_py = 0;
   double Met_pz = 0;
-  vector<double> MetCov = {0,0,0,0};
-
+  TMatrixD MetCov;
 
   double pu_weight, wgt;
 
@@ -159,7 +158,7 @@ class Analyzer {
     {"NMuon2Tau1Combinations", CUTS::eMuon2Tau1}, {"NMuon2Tau2Combinations", CUTS::eMuon2Tau2},
     {"NElectron1Tau1Combinations", CUTS::eElec1Tau1}, {"NElectron1Tau2Combinations", CUTS::eElec1Tau2},
     {"NElectron2Tau1Combinations", CUTS::eElec2Tau1}, {"NElectron2Tau2Combinations", CUTS::eElec2Tau2},
-    {"NSusyCombinations", CUTS::eSusyCom} };
+    {"NSusyCombinations", CUTS::eSusyCom}, {"METCut", CUTS::eMET} };
 
 
 };

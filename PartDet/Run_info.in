@@ -2,11 +2,11 @@
                 Run
 ####################################
 
-CalculatePUSystematics 1
+CalculatePUSystematics false
 DataHistos PUdata_new_2p11ifb.root
 MCHistos PUsim_new.root
 
-isData 0
+isData true
 
 ///------Triggers-----///
 
@@ -24,9 +24,18 @@ Trigger2SecondRequirement HLT_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v
 
 TreatMuonsAsNeutrinos 0
 
-///-----MHT cuts------///
+///-----MET cuts------///
+
+DiscrByMet true
+RecoMetCut 30.0 10000.0
+
+DiscrByMHT false
+MhtCut 50.0
+DiscrByHT false
+HtCut 30.0
 
 JetPtForMhtAndHt 30.0        
 JetEtaForMhtAndHt 5.0        
 ApplyJetLooseIDforMhtAndHt false
+
 

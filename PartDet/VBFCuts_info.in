@@ -14,14 +14,6 @@ DeltaPhiCut 1.3. 10000.0
 
 DiscrByOSEta 0
 
-DiscrByMet 0
-RecoMetCut 80.0 10000.0
-
-DiscrByMHT false
-MhtCut 50.0
-DiscrByHT false
-HtCut 30.0
-
 DiscrByR1 0
 R1Cut 0.85 999.0
 DiscrByR2 false  

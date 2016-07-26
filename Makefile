@@ -13,10 +13,10 @@ ROOTCFLAGS = $(shell root-config --cflags)
 ROOTLIBS = $(shell root-config --libs)
 
 CXX = g++
-CXXFLAGS += -Wall -O2 $(ROOTCFLAGS) -I./
+CXXFLAGS += -Wall -O2 $(ROOTCFLAGS) -I./ -g
 
 LD = g++
-LDFLAGS += -Wall -O2 $(ROOTLIBS) -lGenVector
+LDFLAGS += -Wall -O2 $(ROOTLIBS) -lGenVector -g
 
 SOFLAGS = -shared
 LIBS =
@@ -35,10 +35,10 @@ SVFITOBJ = $(SVFITSRC:$(SVFITDIR)/%.cc=$(OBJDIR)/%.o)
 #------------------------------------------------------------------------------
 
 all: $(OBJECTS) $(SVFITOBJ)
-	$(LD) $(LDFLAGS) -o $(EXE) $(OBJECTS) $(SVFITOBJ) $(LIBS) -g
+	$(LD) $(LDFLAGS) -o $(EXE) $(OBJECTS) $(SVFITOBJ) $(LIBS) 
 
 Analyzer: $(OBJECTS)
-	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS) -g
+	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS) 
 
 obj/main.o: src/main.cc
 	$(CXX) $(CXXFLAGS) -c $< -o $@ 
