@@ -101,6 +101,40 @@ In this example, there is a cut on Tau1, DiTaus, and a VBF cut.  The folders cre
 
 The order of the cuts can also be rearranged if one wants to see cut flow in a different way.
 
+### Histogram Management
+
+All of the Histograms are stored in PartDet/Hist_info.in.  On each line, the details of the histogram are:
+```
+<NAME>  <BINS>  <MIN>  <MAX>   // OR
+<NAME 2D>  <XBINS> <XMIN>  <XMAX>  <YBINS>  <YMIN>  <YMAX>
+```
+Since the histogram information is read at the beginning of each run, the binning and domain of the histogram can be changed to fit the analysis.  
+
+As with all of the info files, the file supports C and python style line commenting (// and #).  This means, to remove a specific histogram, simply comment it out
+
+Many of the histograms can be grouped together, so to facilitate the removal process, blocks of similar histograms are grouped under a heading that starts with the keywork "Fill."  To remove the block, set the Fill heading to 0 or false.  Since the heading won't be seen by the program, the calculates done by the block won't be done either, so marginal speed gains will be made by program (less 100th of total time, so not signicant)
+
+### New Histograms
+
+Adding a new histogram is fairly easy since the program is dynamic enough to hold most changes.  Two main things need to be done.
+
+1. The histogram and information needs to be put into PartDet/Hist_info.in.  This includes name, bins, min, max as well as which heading the histogram will be stored under.  This can follow the template of the other histograms, so this is relatively easy
+2. The histogram needs to be filled with the right values.  The filling of the histograms is done in the method ```fillFolder```.  In this method, there are several if blocks for the different headings.  Go to the appropriate heading (or make one if a new one was made in the Hist_info.in file), and write the following command to write to the histogram:
+```
+ histo.addVal(<value>, group,max, <Short Name>, wgt);
+```
+group, max, wgt are all values that are specified in the fillFolder function that don't need to be changed.  The value is the value calculated to go into the histogram adn the <Short Name> is the name giving to the histogram to identify it.  
+
+The convention for the short name is to remove the words after "Fill" in the group heading and then change the remaining particle names into the word Part. E.g. 
+
+- if the histogram is Muon1Pt in the group FillMuon1, the short name would be Pt
+- if the histogram is DiMuonDeltaPhi in the group FillDiMuon, the short name is DeltaPhi
+- if the histogram is DiMuon_Muon1MetPhi in the group Fill DiMuon, the short name is Part1MetPhi
+
+The reason for the short name is to generalize the filling process across all similar groups so filling the histograms for Pt for all the different leptons and jets is uniform.
+
+After those two steps, the histogram should fill up properly.
+
 ### SVFit
 
 SVFit is an algorithm used heavily in the Higgs groups for reconstructing decays (especailly H -> tau tau).  It works by using a stochastic method for finding the most probable neutrino(s) for the decayed particle.  By finding the most probable neutrino(s), it can reconstruct the mass closer to the real value.  
