@@ -1,3 +1,10 @@
+# Table of Contents
+1. [Setting Up](#setting-up)
+2. [Changes](#changes)
+3. [FAQ](#faq)
+4. [File Specific Information](#file-specific-information)
+
+
 # Setting Up
 
 If you are setting up the Analyzer, click on the link for respective version
@@ -7,12 +14,16 @@ If you are setting up the Analyzer, click on the link for respective version
 
 # Changes
 
+## Version 1: Initial version, same as old BSM3G code
+
+## Version 2: _COMING SOON_ Make MET its own cut and add SVFit
+MET cuts are now in the file PartDet/Run_info.in.  SVFit cuts are not necessary for it to run.
 
 
 # FAQ
 
 - Q: [The program crashes with a SegFault](https://github.com/dteague/Analyzer#a-segfault)
-- Q: [The program crashes with SegFault and Error in <TTree::SetBranchStatus>](https://github.com/dteague/Analyzer#segfault-with-tbranch-error)
+- Q: [The program crashes with SegFault and Error in TTree::SetBranchStatus](https://github.com/dteague/Analyzer#segfault-with-tbranch-error)
 - Q: [How do I set up folders?](https://github.com/dteague/Analyzer#folders)
 - Q: [How do I control which histograms make it into my root file?](https://github.com/dteague/Analyzer#histogram-management)
 - Q: [How do I add a new histogram?](https://github.com/dteague/Analyzer#new-histograms)
