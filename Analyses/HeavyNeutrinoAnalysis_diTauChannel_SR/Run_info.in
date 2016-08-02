@@ -9,6 +9,12 @@ Trigger1SecondRequirement    HLT_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v
 Trigger2FirstRequirement     HLT_DoubleMediumIsoPFTau35_Trk1_eta2p1_Reg_v
 Trigger2SecondRequirement    HLT_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v
 CalculatePUSystematics        0
-DataHistos                   PUdata_new_2p11ifb.root
-MCHistos                     PUsim_new.root
+DataHistos                   PU2016data_6p2ifb.root
+MCHistos                     PU2016MC.root
 isData                        1
+DiscrByMet                      1        
+RecoMetCut                   50.0  10000.0
+DiscrByMHT                      0        
+MhtCut                       30.0        
+DiscrByHT                       0        
+HtCut                        30.0        

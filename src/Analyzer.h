@@ -66,7 +66,7 @@ class Analyzer {
   void smearLepton(Lepton&, CUTS, const PartStats&);
   void smearJet(const PartStats&);
 
-  bool JetMatchesLepton(Lepton&, const TLorentzVector&, double, CUTS);
+  bool JetMatchesLepton(const Lepton&, const TLorentzVector&, double, CUTS);
   TLorentzVector matchLeptonToGen(const TLorentzVector&, const PartStats&, CUTS);
   TLorentzVector matchTauToGen(const TLorentzVector&, double);
 
@@ -83,7 +83,7 @@ class Analyzer {
   bool passTriggerCuts(string);
   int find_trigger(vector<string>&, string);
 
-  void SVFit(Lepton&, Lepton&, CUTS, svFitStandalone::kDecayType, svFitStandalone::kDecayType, string, int, double);
+  void SVFit(const Lepton&, const Lepton&, CUTS, svFitStandalone::kDecayType, svFitStandalone::kDecayType, string, int, double);
   pair<svFitStandalone::kDecayType, svFitStandalone::kDecayType> getTypePair(CUTS ePos);
 
   double calculateLeptonMetMt(const TLorentzVector&);

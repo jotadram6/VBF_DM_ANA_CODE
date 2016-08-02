@@ -434,11 +434,11 @@ void Analyzer::smearJet(const PartStats& stats) {
 
 /////checks if jet is close to a lepton and the lepton is a gen particle, then the jet is a lepton object, so
 //this jet isn't smeared
-bool Analyzer::JetMatchesLepton(Lepton& lepton, const TLorentzVector& jetV, double partDeltaR, CUTS eGenPos) {
+bool Analyzer::JetMatchesLepton(const Lepton& lepton, const TLorentzVector& jetV, double partDeltaR, CUTS eGenPos) {
   TLorentzVector tempV;
   for(int j = 0; j < (int)lepton.pt->size(); j++) {
     tempV.SetPtEtaPhiE(lepton.pt->at(j), lepton.eta->at(j), lepton.phi->at(j), lepton.energy->at(j));
-    if(jetV.DeltaR(tempV) < partDeltaR && matchLeptonToGen(tempV, lepton.pstats["Smear"], eGenPos) != TLorentzVector(0,0,0,0)) return true;
+    if(jetV.DeltaR(tempV) < partDeltaR && matchLeptonToGen(tempV, lepton.pstats.at("Smear"), eGenPos) != TLorentzVector(0,0,0,0)) return true;
   }
   return false;
 }
@@ -1038,7 +1038,7 @@ double Analyzer::absnormPhi(double phi) {
   return abs(normPhi(phi));
 }
 
-void Analyzer::SVFit(Lepton& lep1, Lepton& lep2, CUTS ePos, svFitStandalone::kDecayType l1Type, svFitStandalone::kDecayType l2Type, string group, int max, double wgt) {
+void Analyzer::SVFit(const Lepton& lep1, const Lepton& lep2, CUTS ePos, svFitStandalone::kDecayType l1Type, svFitStandalone::kDecayType l2Type, string group, int max, double wgt) {
 
 
   TLorentzVector part1, part2;
@@ -1055,7 +1055,7 @@ void Analyzer::SVFit(Lepton& lep1, Lepton& lep2, CUTS ePos, svFitStandalone::kDe
     leptons.push_back(svFitStandalone::MeasuredTauLepton(l1Type,part1.Pt(), part1.Eta(), part1.Phi(), part1.M()));
     leptons.push_back(svFitStandalone::MeasuredTauLepton(l2Type,part2.Pt(), part2.Eta(), part2.Phi(), part2.M()));
     SVfitStandaloneAlgorithm algo(leptons, theMETVector.Px(), theMETVector.Py(), MetCov , 0);
-    algo.maxObjFunctionCalls(5000);
+    //    algo.maxObjFunctionCalls(5);
     algo.integrateMarkovChain();
     
     if ( algo.isValidSolution() ) {

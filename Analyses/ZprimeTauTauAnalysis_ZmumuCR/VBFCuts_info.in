@@ -9,12 +9,6 @@ DeltaEtaCut                   4.2  10000.0
 DiscrByDeltaPhi                 0        
 DeltaPhiCut                   4.2  10000.0
 DiscrByOSEta                    0        
-DiscrByMet                      0        
-RecoMetCut                   30.0  10000.0
-DiscrByMHT                      0        
-MhtCut                       30.0        
-DiscrByHT                       0        
-HtCut                        30.0        
 DiscrByR1                       0        
 R1Cut                        0.85   999.0
 DiscrByR2                       0        

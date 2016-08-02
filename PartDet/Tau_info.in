@@ -60,8 +60,8 @@ DiscrByProngType 1or2or3hps
   ##  againstElectronMVAMediumMVA5
   ##  againstElectronMVATightMVA5
 
-DoDiscrAgainstElectron false
-DiscrAgainstElectron againstElectronMVALooseMVA5
+DoDiscrAgainstElectron true
+DiscrAgainstElectron againstElectronMVALooseMVA6
 SelectTausThatAreElectrons false
 
   #####List of Electron Discriminators#####
@@ -69,7 +69,7 @@ SelectTausThatAreElectrons false
   ## againstMuonLoose3
   ## againstMuonTight3
 
-DoDiscrAgainstMuon false
+DoDiscrAgainstMuon true
 DiscrAgainstMuon againstMuonTight3
 SelectTausThatAreMuons false
 
