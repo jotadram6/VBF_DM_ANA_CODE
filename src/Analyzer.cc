@@ -907,7 +907,7 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
 
       //////////abs on the difference????
       ///////////////////
-      if(stats.bmap.at("DiscrByCosDphi_DeltaPtAndMet")) {
+      if(stats.bmap.find("DeltaPtAndMet") != stats.bmap.end() && stats.bmap.at("DiscrByCosDphi_DeltaPtAndMet")) {
       	double DPhi = absnormPhi(atan2(part1.Py() + part2.Py(), part1.Px() + part2.Px()) - theMETVector.Phi());
       	if( cos(DPhi) < stats.pmap.at("CosDphi_DeltaPtMetCut").first || cos(DPhi) > stats.pmap.at("CosDphi_DeltaPtMetCut").second) continue;
       }
