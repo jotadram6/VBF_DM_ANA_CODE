@@ -24,6 +24,7 @@ MET cuts are now in the file PartDet/Run_info.in.  SVFit cuts are not necessary 
 
 - Q: [The program crashes with a SegFault](https://github.com/dteague/Analyzer#a-segfault)
 - Q: [The program crashes with SegFault and Error in TTree::SetBranchStatus](https://github.com/dteague/Analyzer#segfault-with-tbranch-error)
+- Q: [Why isn't my MET cut working?](#met-cut)
 - Q: [How do I set up folders?](https://github.com/dteague/Analyzer#folders)
 - Q: [How do I control which histograms make it into my root file?](https://github.com/dteague/Analyzer#histogram-management)
 - Q: [How do I add a new histogram?](https://github.com/dteague/Analyzer#new-histograms)
@@ -95,6 +96,15 @@ The error is being thrown by ROOT because some of the Branches haven't been set 
 ```
 cat NOTES
 ```
+### Met Cut
+
+The MET has been changed how it's implimented in the old code.  To make sure your MET is working properly, make sure you MET cut information is in the file ```PartDet/Run_info.in```.  The python script ```moveMET.py``` should do this for you if you have any doubts.  
+
+You must also tell the program to cut on the MET if required.  This is implimented in much the same was the multiplicity cuts in the file ```PartDet/Cuts.in```.  Simply put 
+```
+METCut          1   -1
+``` 
+in the Cuts.in file to make sure the file removes events that don't pass MET cuts (or MHT and HT cuts for that matter).  Because of the change, the MET cut can be put in any order in relation to the other cuts so you can see how MET effects cut flow efficiency
 
 ### Folders
 
