@@ -1128,12 +1128,13 @@ void Analyzer::fill_Folder(string group, int max) {
     }
     histo.addVal(goodParts[ival(CUTS::eGMuon)].size(), group,max, "NMuon", wgt);
 
+          
 
-
-  } else if(group == "FillTauJet1" || group == "FillTauJet2" || group == "FillMuon1" || group == "FillMuon2" || group == "FillJet1" || group == "FillJet2" || group == "FillBJet" || group == "FillCentralJet") {
+  } else if(group == "FillTauJet1" || group == "FillTauJet2" || group == "FillMuon1" || group == "FillMuon2" || group == "FillJet1" || group == "FillJet2" || group == "FillBJet" || group == "FillCentralJet" || group == "FillElectron1" || group == "FillElectron2") {
     Particle* part;
     if(group == "FillTauJet1" || group == "FillTauJet2") part=_Tau;
     else if(group == "FillMuon1" || group == "FillMuon2") part=_Muon;
+    else if(group == "FillElectron1" || group == "FillElectron2") part=_Electron; 
     else part = _Jet;
     CUTS ePos = fill_num[group];
 
@@ -1149,9 +1150,12 @@ void Analyzer::fill_Folder(string group, int max) {
       } else if(dynamic_cast<Muon*>(part) != NULL) {
 	histo.addVal(calculateLeptonMetMt(_Muon->smearP.at(*it)), group,max, "MetMt", wgt);  
       }
+        else if(dynamic_cast<Electron*>(part) != NULL) {
+          histo.addVal(calculateLeptonMetMt(_Electron->smearP.at(*it)), group,max, "MetMt", wgt); 
+      }
     }
     
-    if((ePos == CUTS::eRMuon1 || ePos == CUTS::eRMuon2 || ePos == CUTS::eRTau1 || ePos == CUTS::eRTau2) && goodParts[ival(ePos)].size() > 0) {
+    if((ePos == CUTS::eRMuon1 || ePos == CUTS::eRMuon2 || ePos == CUTS::eRTau1 || ePos == CUTS::eRTau2 || ePos == CUTS::eRElec1 || ePos == CUTS::eRElec2 ) && goodParts[ival(ePos)].size() > 0) {
       double leadpt = 0;
       double leadeta = 0;
       for(vec_iter it=goodParts[ival(ePos)].begin(); it!=goodParts[ival(ePos)].end(); it++) {
