@@ -4,7 +4,7 @@ NVertices   100   0.  100.
 
 //------------------------------------------------//
 
-FillGen 0
+FillGen 1
 
 NGenTau            20   0.       20.
 NGenHadTau         20   0.       20.
@@ -55,7 +55,31 @@ TauJet2Charge               10  -5.       5.
 
 //------------------------------------------------//
 
-FillMuon1 0
+FillElectron1 1
+
+NElectron1                   20   0.      20.
+Electron1Energy            2000   0.    5000.
+Electron1Pt                2000   0.    5000.
+Electron1Eta                 72  -3.6     +3.6
+FirstLeadingElectron1Pt     400   0.    1000.
+FirstLeadingElectron1Eta    144  -7.2     +7.2
+Electron1Phi                 36  -3.15    +3.15
+Electron1MetMt              100   0      500
+
+FillElectron2 1
+
+NElectron2                   20   0.      20.
+Electron2Energy            2000   0.    5000.
+Electron2Pt                2000   0.    5000.
+Electron2Eta                 72  -3.6     +3.6
+FirstLeadingElectron2Pt     400   0.    1000.
+FirstLeadingElectron2Eta    144  -7.2     +7.2
+Electron2Phi                 36  -3.15    +3.15
+Electron2MetMt              100   0      500
+
+//------------------------------------------------//
+
+FillMuon1 1
 
 NMuon1                   20   0.      20.
 Muon1Energy            2000   0.    5000.
@@ -66,7 +90,7 @@ FirstLeadingMuon1Eta    144  -7.2     +7.2
 Muon1Phi                 36  -3.15    +3.15
 Muon1MetMt              100   0      500
 
-FillMuon2 0
+FillMuon2 1
 
 NMuon2                   20   0.      20.
 Muon2Energy            2000   0.    5000.
@@ -79,7 +103,7 @@ Muon2MetMt              100   0      500
 
 //------------------------------------------------//
 
-FillJet1 0
+FillJet1 1
 
 NJet1         20   0.    20.
 Jet1Energy   200   0.   500.
@@ -87,7 +111,7 @@ Jet1Pt       200   0.   500.
 Jet1Eta      100  -5.0   +5.0
 Jet1Phi      144  -6.3   +6.3
 
-FillJet2 0
+FillJet2 1
 
 NJet2         20   0.    20.
 Jet2Energy   200   0.   500.
@@ -95,7 +119,7 @@ Jet2Pt       200   0.   500.
 Jet2Eta      100  -5.0   +5.0
 Jet2Phi      144  -6.3   +6.3
 
-FillBJet 0
+FillBJet 1
 
 NBJet         20   0.     20.
 BJetEnergy   200   0.    500.
@@ -103,7 +127,7 @@ BJetPt       200   0.    500.
 BJetEta       72  -3.6    +3.6
 BJetPhi       36  -3.15   +3.15
 
-FillCentralJet 0
+FillCentralJet 1
 
 NCentralJet      20   0.    20.
 CentralJetPt    200   0.   500.
@@ -148,7 +172,7 @@ DeltaEtaVsDeltaPhiLeadSubl   200   0      10.   72   0    +3.15
 
 //------------------------------------------------//
 
-FillDiJet 0
+FillDiJet 1
 
 DiJetDeltaR           200   0    10.
 DiJetDeltaEta         200   0    10.
@@ -166,7 +190,7 @@ LeadDiJetDeltaEta     200   0    10.
 
 //------------------------------------------------//
 
-FillDiMuon 0
+FillDiMuon 1
 
 DiMuon_Muon1DiJetDeltaPhi       72     0       +3.15
 DiMuon_Muon2DiJetDeltaPhi       72     0       +3.15 
@@ -220,7 +244,7 @@ Tau1PtVsTau2Pt                  100     0   500     100     0   500
 
 //------------------------------------------------//
 
-FillMuon1Tau1 0
+FillMuon1Tau1 1
 
 Muon1Tau1_Tau1DiJetDeltaPhi           72     0       +3.15
 Muon1Tau1_Muon1DiJetDeltaPhi          72     0       +3.15
@@ -245,7 +269,7 @@ Muon1PtVsTau1Pt                      100     0      500      100     0     500
 Muon1Tau1Zeta2D                      100     0      100      200  -100     100
 Muon1MetDeltaPhiVsMuon1Tau1CosDphi    72     0       +3.15   220    -1.1     1.1
 
-FillMuon1Tau2 0
+FillMuon1Tau2 1
 
 Muon1Tau2_Tau2DiJetDeltaPhi           72     0       +3.15
 Muon1Tau2_Muon1DiJetDeltaPhi          72     0       +3.15
@@ -270,7 +294,7 @@ Muon1PtVsTau2Pt                      100     0      500      100     0     500
 Muon1Tau2Zeta2D                      100     0      100      200  -100     100
 Muon1MetDeltaPhiVsMuon1Tau2CosDphi    72     0       +3.15   220    -1.1     1.1
 
-FillMuon2Tau1 0
+FillMuon2Tau1 1
 
 Muon2Tau1_Tau1DiJetDeltaPhi           72     0       +3.15
 Muon2Tau1_Muon2DiJetDeltaPhi          72     0       +3.15
@@ -296,7 +320,7 @@ Muon2Tau1Zeta2D                      100     0      100      200  -100     100
 Muon2MetDeltaPhiVsMuon2Tau1CosDphi    72     0       +3.15   220    -1.1     1.1
 
 
-FillMuon2Tau2 0
+FillMuon2Tau2 1
 
 Muon2Tau2_Tau2DiJetDeltaPhi           72     0       +3.15
 Muon2Tau2_Muon2DiJetDeltaPhi          72     0       +3.15

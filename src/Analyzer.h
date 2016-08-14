@@ -141,8 +141,7 @@ class Analyzer {
   TMatrixD MetCov;
 
   double pu_weight, wgt;
-
-  unordered_map<string, CUTS> fill_num = { {"FillVertices", CUTS::eRVertex}, {"FillTauJet1", CUTS::eRTau1}, {"FillTauJet2", CUTS::eRTau2}, {"FillMuon1", CUTS::eRMuon1}, {"FillMuon2", CUTS::eRMuon2}, {"FillJet1", CUTS::eRJet1}, {"FillJet2", CUTS::eRJet2}, {"FillBJet", CUTS::eRBJet}, {"FillCentralJet", CUTS::eRCenJet}, {"FillSusyCuts", CUTS::eSusyCom}, {"FillDiMuon", CUTS::eDiMuon}, {"FillDiTau", CUTS::eDiTau}, {"FillMuon1Tau1", CUTS::eMuon1Tau1}, {"FillMuon1Tau2", CUTS::eMuon1Tau2}, {"FillMuon2Tau1", CUTS::eMuon2Tau1}, {"FillMuon2Tau2", CUTS::eMuon2Tau2} };
+  unordered_map<string, CUTS> fill_num = { {"FillVertices", CUTS::eRVertex}, {"FillTauJet1", CUTS::eRTau1}, {"FillTauJet2", CUTS::eRTau2}, {"FillElectron1", CUTS::eRElec1}, {"FillElectron2", CUTS::eRElec2}, {"FillMuon1", CUTS::eRMuon1}, {"FillMuon2", CUTS::eRMuon2}, {"FillJet1", CUTS::eRJet1}, {"FillJet2", CUTS::eRJet2}, {"FillBJet", CUTS::eRBJet}, {"FillCentralJet", CUTS::eRCenJet}, {"FillSusyCuts", CUTS::eSusyCom}, {"FillDiMuon", CUTS::eDiMuon}, {"FillDiTau", CUTS::eDiTau}, {"FillMuon1Tau1", CUTS::eMuon1Tau1}, {"FillMuon1Tau2", CUTS::eMuon1Tau2}, {"FillMuon2Tau1", CUTS::eMuon2Tau1}, {"FillMuon2Tau2", CUTS::eMuon2Tau2} };
   
   std::unordered_map<string, CUTS> cut_num = { {"NGenTau", CUTS::eGTau}, {"NGenTop", CUTS::eGTop}, {"NGenElectron", CUTS::eGElec}, \
     {"NGenMuon", CUTS::eGMuon}, {"NGenZ", CUTS::eGZ}, {"NGenW", CUTS::eGW}, {"NGenHiggs", CUTS::eGHiggs}, \
