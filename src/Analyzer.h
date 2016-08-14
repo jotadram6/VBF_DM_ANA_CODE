@@ -141,7 +141,7 @@ class Analyzer {
   TMatrixD MetCov;
 
   double pu_weight, wgt;
-  unordered_map<string, CUTS> fill_num = { {"FillVertices", CUTS::eRVertex}, {"FillTauJet1", CUTS::eRTau1}, {"FillTauJet2", CUTS::eRTau2}, {"FillElectron1", CUTS::eRElec1}, {"FillElectron2", CUTS::eRElec2}, {"FillMuon1", CUTS::eRMuon1}, {"FillMuon2", CUTS::eRMuon2}, {"FillJet1", CUTS::eRJet1}, {"FillJet2", CUTS::eRJet2}, {"FillBJet", CUTS::eRBJet}, {"FillCentralJet", CUTS::eRCenJet}, {"FillSusyCuts", CUTS::eSusyCom}, {"FillDiMuon", CUTS::eDiMuon}, {"FillDiTau", CUTS::eDiTau}, {"FillMuon1Tau1", CUTS::eMuon1Tau1}, {"FillMuon1Tau2", CUTS::eMuon1Tau2}, {"FillMuon2Tau1", CUTS::eMuon2Tau1}, {"FillMuon2Tau2", CUTS::eMuon2Tau2} };
+  unordered_map<string, CUTS> fill_num = { {"FillVertices", CUTS::eRVertex}, {"FillTauJet1", CUTS::eRTau1}, {"FillTauJet2", CUTS::eRTau2}, {"FillElectron1", CUTS::eRElec1}, {"FillElectron2", CUTS::eRElec2}, {"FillMuon1", CUTS::eRMuon1}, {"FillMuon2", CUTS::eRMuon2}, {"FillJet1", CUTS::eRJet1}, {"FillJet2", CUTS::eRJet2}, {"FillBJet", CUTS::eRBJet}, {"FillCentralJet", CUTS::eRCenJet}, {"FillSusyCuts", CUTS::eSusyCom}, {"FillDiMuon", CUTS::eDiMuon}, {"FillDiTau", CUTS::eDiTau}, {"FillMuon1Tau1", CUTS::eMuon1Tau1}, {"FillMuon1Tau2", CUTS::eMuon1Tau2}, {"FillMuon2Tau1", CUTS::eMuon2Tau1}, {"FillMuon2Tau2", CUTS::eMuon2Tau2}, {"FillElectron1Tau1", CUTS::eElec1Tau1}, {"FillElectron1Tau2", CUTS::eElec1Tau2}, {"FillElectron2Tau1", CUTS::eElec2Tau1}, {"FillElectron2Tau2", CUTS::eElec2Tau2}, {"FillMuon1Electron1", CUTS::eMuon1Elec1}, {"FillMuon1Electron2", CUTS::eMuon1Elec2}, {"FillMuon2Electron1", CUTS::eMuon2Elec1}, {"FillMuon2Electron2", CUTS::eMuon2Elec2} };
   
   std::unordered_map<string, CUTS> cut_num = { {"NGenTau", CUTS::eGTau}, {"NGenTop", CUTS::eGTop}, {"NGenElectron", CUTS::eGElec}, \
     {"NGenMuon", CUTS::eGMuon}, {"NGenZ", CUTS::eGZ}, {"NGenW", CUTS::eGW}, {"NGenHiggs", CUTS::eGHiggs}, \
@@ -158,6 +158,8 @@ class Analyzer {
     {"NMuon2Tau1Combinations", CUTS::eMuon2Tau1}, {"NMuon2Tau2Combinations", CUTS::eMuon2Tau2},
     {"NElectron1Tau1Combinations", CUTS::eElec1Tau1}, {"NElectron1Tau2Combinations", CUTS::eElec1Tau2},
     {"NElectron2Tau1Combinations", CUTS::eElec2Tau1}, {"NElectron2Tau2Combinations", CUTS::eElec2Tau2},
+    {"NMuon1Electron1Combinations", CUTS::eMuon1Elec1}, {"NMuon1Electron2Combinations", CUTS::eMuon1Elec2},
+    {"NMuon2Electron1Combinations", CUTS::eMuon2Elec1}, {"NMuon2Electron2Combinations", CUTS::eMuon2Elec2},
     {"NSusyCombinations", CUTS::eSusyCom}, {"METCut", CUTS::eMET} };
 
 

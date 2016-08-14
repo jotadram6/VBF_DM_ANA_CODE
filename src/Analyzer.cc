@@ -156,12 +156,18 @@ void Analyzer::preprocess(int event) {
   /////lepton lepton topology cuts
   getGoodLeptonCombos(*_Electron, *_Tau, CUTS::eRElec1,CUTS::eRTau1, CUTS::eElec1Tau1, distats["Electron1Tau1"]);
   getGoodLeptonCombos(*_Electron, *_Tau, CUTS::eRElec2, CUTS::eRTau1, CUTS::eElec2Tau1, distats["Electron2Tau1"]);
-  getGoodLeptonCombos(*_Muon, *_Tau, CUTS::eRMuon1, CUTS::eRTau1, CUTS::eMuon1Tau1, distats["Muon1Tau1"]);
-  getGoodLeptonCombos(*_Muon, *_Tau, CUTS::eRMuon2, CUTS::eRTau1, CUTS::eMuon2Tau1, distats["Muon2Tau1"]);
   getGoodLeptonCombos(*_Electron, *_Tau, CUTS::eRElec1, CUTS::eRTau2, CUTS::eElec1Tau2, distats["Electron1Tau2"]);
   getGoodLeptonCombos(*_Electron, *_Tau, CUTS::eRElec2, CUTS::eRTau2, CUTS::eElec2Tau2, distats["Electron2Tau2"]);
+
+  getGoodLeptonCombos(*_Muon, *_Tau, CUTS::eRMuon1, CUTS::eRTau1, CUTS::eMuon1Tau1, distats["Muon1Tau1"]);
   getGoodLeptonCombos(*_Muon, *_Tau, CUTS::eRMuon1, CUTS::eRTau2, CUTS::eMuon1Tau2, distats["Muon1Tau2"]);
+  getGoodLeptonCombos(*_Muon, *_Tau, CUTS::eRMuon2, CUTS::eRTau1, CUTS::eMuon2Tau1, distats["Muon2Tau1"]);
   getGoodLeptonCombos(*_Muon, *_Tau, CUTS::eRMuon2, CUTS::eRTau2, CUTS::eMuon2Tau2, distats["Muon2Tau2"]);
+
+  getGoodLeptonCombos(*_Muon, *_Electron, CUTS::eRMuon1, CUTS::eRElec1, CUTS::eMuon1Elec1, distats["Muon1Electron1"]);
+  getGoodLeptonCombos(*_Muon, *_Electron, CUTS::eRMuon1, CUTS::eRElec2, CUTS::eMuon1Elec2, distats["Muon1Electron2"]);
+  getGoodLeptonCombos(*_Muon, *_Electron, CUTS::eRMuon2, CUTS::eRElec1, CUTS::eMuon2Elec1, distats["Muon2Electron1"]);
+  getGoodLeptonCombos(*_Muon, *_Electron, CUTS::eRMuon2, CUTS::eRElec2, CUTS::eMuon2Elec2, distats["Muon2Electron2"]);
 
   ////DIlepton topology cuts
   getGoodLeptonCombos(*_Tau, *_Tau, CUTS::eRTau1, CUTS::eRTau2, CUTS::eDiTau, distats["DiTau"]);
@@ -312,6 +318,7 @@ void Analyzer::setupGeneral(TTree* BOOM, string infile) {
 
   read_info(FILESPACE + "ElectronTau_info.in");
   read_info(FILESPACE + "MuonTau_info.in");
+  read_info(FILESPACE + "MuonElectron_info.in");
   read_info(FILESPACE + "DiParticle_info.in");
   read_info(FILESPACE + "VBFCuts_info.in");
   read_info(FILESPACE + "Run_info.in");
@@ -1277,7 +1284,7 @@ void Analyzer::fill_Folder(string group, int max) {
 
 
     ////diparticle stuff
-  } else if(group == "FillDiMuon" || group == "FillDiTau" || group == "FillMuon1Tau1" || group == "FillMuon1Tau2" || group == "FillMuon2Tau1" || group == "FillMuon2Tau2") {  ///mumu/mutau/tautau
+  } else if(group == "FillDiMuon" || group == "FillDiTau" || group == "FillMuon1Tau1" || group == "FillMuon1Tau2" || group == "FillMuon2Tau1" || group == "FillMuon2Tau2"  || group == "FillElectron1Tau1" || group == "FillElectron1Tau2" || group == "FillElectron2Tau1" || group == "FillElectron2Tau2" || group == "FillMuon1Electron1" || group == "FillMuon1Electron2" || group == "FillMuon2Electron1" || group == "FillMuon2Electron2") {  ///mumu/mutau/tautau
     Lepton* lep1 = NULL;
     Lepton* lep2 = NULL;
     CUTS ePos = fill_num[group];
@@ -1287,6 +1294,9 @@ void Analyzer::fill_Folder(string group, int max) {
       lep1 = _Muon; lep2 = _Tau;
     } else if(ePos == CUTS::eElec1Tau1 || ePos == CUTS::eElec1Tau2 || ePos == CUTS::eElec2Tau1 || ePos == CUTS::eElec2Tau2) {
       lep1 = _Electron; lep2 = _Tau;
+    } else if(ePos == CUTS::eMuon1Elec1 || ePos == CUTS::eMuon1Elec2 || ePos == CUTS::eMuon2Elec1 || ePos == CUTS::eMuon2Elec2) {
+      lep1 = _Muon; lep2 = _Electron;
+
     } else if(ePos == CUTS::eDiMuon) {
       lep1 = _Muon; lep2 = _Muon;
     } else if(ePos == CUTS::eDiTau) { lep1 = _Tau; lep2 = _Tau; 
