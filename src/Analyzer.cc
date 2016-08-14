@@ -288,6 +288,7 @@ void Analyzer::setupGeneral(TTree* BOOM, string infile) {
   BOOM->SetBranchStatus("Trigger_names", 1);
   BOOM->SetBranchStatus("nTruePUInteractions", 1);
   BOOM->SetBranchStatus("bestVertices", 1);
+  BOOM->SetBranchStatus("weightevt", 1);
   BOOM->SetBranchStatus("Met_type1PF_px", 1);
   BOOM->SetBranchStatus("Met_type1PF_py", 1);
   BOOM->SetBranchStatus("Met_type1PF_pz", 1);
@@ -300,6 +301,7 @@ void Analyzer::setupGeneral(TTree* BOOM, string infile) {
   BOOM->SetBranchAddress("Trigger_names", &Trigger_names);
   BOOM->SetBranchAddress("nTruePUInteractions", &nTruePU);
   BOOM->SetBranchAddress("bestVertices", &bestVertices);
+  BOOM->SetBranchAddress("weightevt", &gen_weight);
   BOOM->SetBranchAddress("Met_type1PF_px", &Met_px);
   BOOM->SetBranchAddress("Met_type1PF_py", &Met_py);
   BOOM->SetBranchAddress("Met_type1PF_pz", &Met_pz);
@@ -1071,9 +1073,11 @@ void Analyzer::SVFit(const Lepton& lep1, const Lepton& lep2, CUTS ePos, svFitSta
 
 ////Grabs a list of the groups of histograms to be filled and asked Fill_folder to fill up the histograms
 void Analyzer::fill_histogram() {
+  if(distats["Run"].bmap["ApplyGenWeight"] && gen_weight == 0.0) return;
   fillCuts();
   vector<string> groups = *histo.get_groups();
   wgt = pu_weight;
+  if(distats["Run"].bmap["ApplyGenWeight"]) wgt *= (gen_weight > 0) ? 1.0 : -1.0;
 
   for(vector<string>::iterator it = groups.begin(); it!=groups.end(); it++) {
     fill_Folder(*it, maxCut);

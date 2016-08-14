@@ -134,6 +134,7 @@ class Analyzer {
   vector<string>* Trigger_names = 0;
   float nTruePU = 0;
   int bestVertices = 0;
+  double gen_weight = 0;
   double Met_px = 0;
   double Met_py = 0;
   double Met_pz = 0;
