@@ -39,6 +39,7 @@ Analyzer::Analyzer(string infile, string outfile) : hPUmc(new TH1F("hPUmc", "hPU
   isData = distats["Run"].bmap.at("isData");
   CalculatePUSystematics = distats["Run"].bmap.at("CalculatePUSystematics");
   histo = Histogramer(1, FILESPACE+"Hist_entries.in", FILESPACE+"Cuts.in", outfile, isData);
+  setCutNeeds();
   for(unordered_map<string,PartStats>::iterator it = distats.begin(); it != distats.end(); it++) {
     if(it->second.bmap["MassBySVFit"]) {
       histo.setupSVFit(it->first, it->second.smap["SVHistname"], it->second.dmap["SVbins"], it->second.dmap["SVmin"], it->second.dmap["SVmax"]);
@@ -126,8 +127,8 @@ void Analyzer::preprocess(int event) {
 
   //////Triggers and Vertices
   goodParts[ival(CUTS::eRVertex)].resize(bestVertices);
-  if(passTriggerCuts(*(trigPlace[0]), *(trigName[0])) ) goodParts[ival(CUTS::eRTrig1)].resize(1);
-  if(passTriggerCuts(*(trigPlace[1]), *(trigName[1])) ) goodParts[ival(CUTS::eRTrig2)].resize(1);
+  TriggerCuts(*(trigPlace[0]), *(trigName[0]), CUTS::eRTrig1);
+  TriggerCuts(*(trigPlace[1]), *(trigName[1]), CUTS::eRTrig2);
 
   // // SET NUMBER OF RECO PARTICLES
   // // MUST BE IN ORDER: Muon/Electron, Tau, Jet
@@ -387,6 +388,17 @@ void Analyzer::read_info(string filename) {
   info_file.close();
 }
 
+void Analyzer::setCutNeeds() {
+  vector<string>* cuts = histo.get_order();
+  vector<string>* fillgroups = histo.get_groups();
+  for(vector<string>::iterator it = cuts->begin(); it != cuts->end(); ++it) {
+    if(cut_num.find(*it) != cut_num.end()) need_cut[cut_num.at(*it)] = true;
+  }
+  cout << endl;
+  for(vector<string>::iterator it = fillgroups->begin(); it != fillgroups->end(); ++it) {
+    if(fill_num.find(*it) != fill_num.end()) need_cut[fill_num.at(*it)] = true;
+  }
+}
 
 
 ///Smears lepton only if specified and not a data file.  Otherwise, just filles up lorentz vectors
@@ -719,8 +731,8 @@ bool Analyzer::passedLooseJetID(int nobj) {
 
 
 ///sees if the event passed one of the two cuts provided
-bool Analyzer::passTriggerCuts(vector<int>& prevTrig, const vector<string>& trigvec) {
-
+void Analyzer::TriggerCuts(vector<int>& prevTrig, const vector<string>& trigvec, CUTS ePos) {
+  if(! need_cut[ePos]) return;
   for(int i = 0; i < (int)trigvec.size(); i++) {
     if(prevTrig[i] >= (int)Trigger_names->size() || trigvec.at(i) != Trigger_names->at(prevTrig.at(i)) ) {
       for(int j = 0; j < (int)Trigger_names->size(); j++) {
@@ -730,14 +742,17 @@ bool Analyzer::passTriggerCuts(vector<int>& prevTrig, const vector<string>& trig
 	}
       }
     }
-    if(prevTrig.at(i) < (int)Trigger_names->size() && Trigger_decision->at(prevTrig.at(i)) == 1) return true;
+    if(prevTrig.at(i) < (int)Trigger_names->size() && Trigger_decision->at(prevTrig.at(i)) == 1) {
+      goodParts[ival(ePos)].push_back(0);
+      return;
+    }
   }
-  return false;
 }
 
 
 ////VBF specific cuts dealing with the leading jets.
 void Analyzer::VBFTopologyCut() {
+  if(! need_cut[CUTS::eSusyCom]) return;
   PartStats stats = distats["VBFSUSY"];
   TLorentzVector ljet1 = _Jet->smearP.at(goodParts[ival(CUTS::eR1stJet)].at(0));
   TLorentzVector ljet2 = _Jet->smearP.at(goodParts[ival(CUTS::eR2ndJet)].at(0));
@@ -796,7 +811,7 @@ void Analyzer::VBFTopologyCut() {
 
 
 void Analyzer::getGoodMetTopologyLepton(const Lepton& lep, CUTS eReco, CUTS ePos, const PartStats& stats) {
-
+  if(! need_cut[ePos]) return;
   for(vec_iter it=goodParts[ival(eReco)].begin(); it != goodParts[ival(eReco)].end(); it++) {
     if ((ePos != CUTS::eTTau1 && ePos != CUTS::eTTau2) && stats.bmap.at("DiscrIfIsZdecay")) { 
       if(isZdecay(lep.smearP.at(*it), lep)) continue;
@@ -889,6 +904,7 @@ bool Analyzer::passDiParticleApprox(const TLorentzVector& Tobj1, const TLorentzV
 /////abs for values
 ///Find the number of lepton combos that pass the dilepton cuts
 void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS ePos2, CUTS ePosFin, const PartStats& stats) {
+  if(! need_cut[ePosFin]) return;
   bool sameParticle = (&lep1 == &lep2);
   TLorentzVector part1, part2;
 
@@ -949,6 +965,7 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
 
 /////Same as gooddilepton, just jet specific
 void Analyzer::getGoodDiJets(const PartStats& stats) {
+  if(! need_cut[CUTS::eDiJet]) return;
   // ----Separation cut between jets (remove overlaps)
   for(vec_iter ij2=goodParts[ival(CUTS::eRJet2)].begin(); ij2 != goodParts[ival(CUTS::eRJet2)].end(); ij2++) {
     for(vec_iter ij1=goodParts[ival(CUTS::eRJet1)].begin(); ij1 != goodParts[ival(CUTS::eRJet1)].end() && (*ij1) < (*ij2); ij1++) {
@@ -1290,7 +1307,7 @@ void Analyzer::fill_Folder(string group, int max) {
 
 
     ////diparticle stuff
-  } else if(group == "FillDiMuon" || group == "FillDiTau" || group == "FillMuon1Tau1" || group == "FillMuon1Tau2" || group == "FillMuon2Tau1" || group == "FillMuon2Tau2"  || group == "FillElectron1Tau1" || group == "FillElectron1Tau2" || group == "FillElectron2Tau1" || group == "FillElectron2Tau2" || group == "FillMuon1Electron1" || group == "FillMuon1Electron2" || group == "FillMuon2Electron1" || group == "FillMuon2Electron2") {  ///mumu/mutau/tautau
+  } else if(group == "FillDiMuon" || group == "FillDiTau" || group == "FillMuon1Tau1" || group == "FillMuon1Tau2" || group == "FillMuon2Tau1" || group == "FillMuon2Tau2"  || group == "FillElectron1Tau1" || group == "FillElectron1Tau2" || group == "FillElectron2Tau1" || group == "FillElectron2Tau2" || group == "FillMuon1Electron1" || group == "FillMuon1Electron2" || group == "FillMuon2Electron1" || group == "FillMuon2Electron2") { 
     Lepton* lep1 = NULL;
     Lepton* lep2 = NULL;
     CUTS ePos = fill_num[group];

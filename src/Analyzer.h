@@ -64,6 +64,7 @@ class Analyzer {
   void initializePileupInfo(string, string);  
   void read_info(string);
   void setupGeneral(TTree*, string);
+  void setCutNeeds();
 
   void smearLepton(Lepton&, CUTS, const PartStats&);
   void smearJet(const PartStats&);
@@ -82,7 +83,7 @@ class Analyzer {
   void getGoodDiJets(const PartStats&);
 
   void VBFTopologyCut();
-  bool passTriggerCuts(vector<int>&, const vector<string>&);
+  void TriggerCuts(vector<int>&, const vector<string>&, CUTS);
 
   void SVFit(const Lepton&, const Lepton&, CUTS, svFitStandalone::kDecayType, svFitStandalone::kDecayType, string, int, double);
   pair<svFitStandalone::kDecayType, svFitStandalone::kDecayType> getTypePair(CUTS ePos);
@@ -134,7 +135,7 @@ class Analyzer {
   int leadIndex, maxCut;
   bool isData, CalculatePUSystematics;
 
-\  vector<double>* Trigger_decision = 0;
+  vector<double>* Trigger_decision = 0;
   vector<string>* Trigger_names = 0;
   float nTruePU = 0;
   int bestVertices = 0;
@@ -145,6 +146,8 @@ class Analyzer {
   TMatrixD MetCov;
 
   double pu_weight, wgt;
+  unordered_map<CUTS, bool, EnumHash> need_cut;
+
   unordered_map<string, CUTS> fill_num = { {"FillVertices", CUTS::eRVertex}, {"FillTauJet1", CUTS::eRTau1}, {"FillTauJet2", CUTS::eRTau2}, {"FillElectron1", CUTS::eRElec1}, {"FillElectron2", CUTS::eRElec2}, {"FillMuon1", CUTS::eRMuon1}, {"FillMuon2", CUTS::eRMuon2}, {"FillJet1", CUTS::eRJet1}, {"FillJet2", CUTS::eRJet2}, {"FillBJet", CUTS::eRBJet}, {"FillCentralJet", CUTS::eRCenJet}, {"FillSusyCuts", CUTS::eSusyCom}, {"FillDiMuon", CUTS::eDiMuon}, {"FillDiTau", CUTS::eDiTau}, {"FillMuon1Tau1", CUTS::eMuon1Tau1}, {"FillMuon1Tau2", CUTS::eMuon1Tau2}, {"FillMuon2Tau1", CUTS::eMuon2Tau1}, {"FillMuon2Tau2", CUTS::eMuon2Tau2}, {"FillElectron1Tau1", CUTS::eElec1Tau1}, {"FillElectron1Tau2", CUTS::eElec1Tau2}, {"FillElectron2Tau1", CUTS::eElec2Tau1}, {"FillElectron2Tau2", CUTS::eElec2Tau2}, {"FillMuon1Electron1", CUTS::eMuon1Elec1}, {"FillMuon1Electron2", CUTS::eMuon1Elec2}, {"FillMuon2Electron1", CUTS::eMuon2Elec1}, {"FillMuon2Electron2", CUTS::eMuon2Elec2} };
   
   std::unordered_map<string, CUTS> cut_num = { {"NGenTau", CUTS::eGTau}, {"NGenTop", CUTS::eGTop}, {"NGenElectron", CUTS::eGElec}, \
