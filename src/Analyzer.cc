@@ -1380,6 +1380,8 @@ pair<svFitStandalone::kDecayType, svFitStandalone::kDecayType> Analyzer::getType
     return make_pair(kTauToElecDecay, kTauToHadDecay);
   else if(ePos == CUTS::eMuon1Tau1 || ePos == CUTS::eMuon1Tau2 || ePos == CUTS::eMuon2Tau1 || ePos == CUTS::eMuon2Tau2)
     return make_pair(kTauToMuDecay, kTauToHadDecay);
+  else if(ePos == CUTS::eMuon1Elec1 || ePos == CUTS::eMuon1Elec2 || ePos == CUTS::eMuon2Elec1 || ePos == CUTS::eMuon2Elec2)
+    return make_pair(kTauToMuDecay, kTauToElecDecay);
   else if(ePos == CUTS::eDiTau)
     return make_pair(kTauToHadDecay, kTauToHadDecay);
   else if(ePos == CUTS::eDiMuon)
