@@ -75,6 +75,10 @@ Analyzer::~Analyzer() {
   delete _Jet;
   if(!isData) delete _Gen;
   
+  for(int i=0; i < nTrigReq; i++) {
+    delete trigPlace[i];
+    delete trigName[i];
+  }
 }
 
 

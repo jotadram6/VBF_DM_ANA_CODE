@@ -134,7 +134,7 @@ class Analyzer {
   int leadIndex, maxCut;
   bool isData, CalculatePUSystematics;
 
-  vector<double>* Trigger_decision = 0;
+\  vector<double>* Trigger_decision = 0;
   vector<string>* Trigger_names = 0;
   float nTruePU = 0;
   int bestVertices = 0;
