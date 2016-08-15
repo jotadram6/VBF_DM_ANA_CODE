@@ -186,9 +186,7 @@ void Histogramer::fill_histogram() {
   for(vector<string>::iterator it = data_order.begin(); it != data_order.end(); ++it) {
     data[*it]->write_histogram(outfile, folders);
   }
-  cout << "done" << endl;
   outfile->Close();
-  cout << "closed" << endl;
 }  
 
 

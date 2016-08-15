@@ -265,7 +265,11 @@ void Analyzer::updateMet() {
       deltaMEx += _Muon->smearP.at(*it).Px();
       deltaMEy += _Muon->smearP.at(*it).Py();
     }
+  } else if(goodParts(distats["Run"].smap[""] == "HIGH" || distats["Run"].smap[""] == "LOW" || distats["Run"].smap[""] == "RAND")) {
+    
+
   }
+
   ///---MHT and HT calculations----////
   int i=0;
   for(vector<TLorentzVector>::iterator it=_Jet->smearP.begin(); it!=_Jet->smearP.end(); it++, i++) {
