@@ -41,6 +41,8 @@
 //#define const
 using namespace std;
 
+static const int nTrigReq = 2;
+
 class Analyzer {
 
  public:
@@ -80,8 +82,7 @@ class Analyzer {
   void getGoodDiJets(const PartStats&);
 
   void VBFTopologyCut();
-  bool passTriggerCuts(string);
-  int find_trigger(vector<string>&, string);
+  bool passTriggerCuts(vector<int>&, const vector<string>&);
 
   void SVFit(const Lepton&, const Lepton&, CUTS, svFitStandalone::kDecayType, svFitStandalone::kDecayType, string, int, double);
   pair<svFitStandalone::kDecayType, svFitStandalone::kDecayType> getTypePair(CUTS ePos);
@@ -117,7 +118,10 @@ class Analyzer {
   Histogramer histo;
 
   unordered_map<string, PartStats> distats;
-  unordered_map<string, pair<int,int> > prevTrig;
+
+  vector<int>* trigPlace[nTrigReq];
+  vector<string>* trigName[nTrigReq];
+
   PartStats genStat;
   unordered_map<string, double> genMap;
   std::array<std::vector<int>, static_cast<int>(CUTS::enumSize)> goodParts;
@@ -164,5 +168,6 @@ class Analyzer {
 
 
 };
+
 
 #endif

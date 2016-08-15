@@ -27,6 +27,13 @@ Analyzer::Analyzer(string infile, string outfile) : hPUmc(new TH1F("hPUmc", "hPU
   MetCov[1][0] = 0;
   MetCov[1][1] = 0;
 
+  for(int i=0; i < nTrigReq; i++) {
+    vector<int>* tmpi = new vector<int>();
+    vector<string>* tmps = new vector<string>();
+    trigPlace[i] = tmpi;
+    trigName[i] = tmps;
+  }
+
   setupGeneral(BOOM,infile);
 
   isData = distats["Run"].bmap.at("isData");
@@ -38,9 +45,6 @@ Analyzer::Analyzer(string infile, string outfile) : hPUmc(new TH1F("hPUmc", "hPU
     }
   }
 
-
-  prevTrig["Trigger1"] = make_pair(0,0);
-  prevTrig["Trigger2"] = make_pair(0,0);
   initializePileupInfo(distats["Run"].smap.at("MCHistos"), distats["Run"].smap.at("DataHistos"));
 
   //////need to initialize histo and get values for cut arrays
@@ -118,8 +122,8 @@ void Analyzer::preprocess(int event) {
 
   //////Triggers and Vertices
   goodParts[ival(CUTS::eRVertex)].resize(bestVertices);
-  if(passTriggerCuts("Trigger1")) goodParts[ival(CUTS::eRTrig1)].resize(1);
-  if(passTriggerCuts("Trigger2")) goodParts[ival(CUTS::eRTrig2)].resize(1);
+  if(passTriggerCuts(*(trigPlace[0]), *(trigName[0])) ) goodParts[ival(CUTS::eRTrig1)].resize(1);
+  if(passTriggerCuts(*(trigPlace[1]), *(trigName[1])) ) goodParts[ival(CUTS::eRTrig2)].resize(1);
 
   // // SET NUMBER OF RECO PARTICLES
   // // MUST BE IN ORDER: Muon/Electron, Tau, Jet
@@ -354,6 +358,13 @@ void Analyzer::read_info(string filename) {
       cout << "error in " << filename << "; no groups specified for data" << endl;
       exit(1);
     } else if(stemp.size() == 2) {
+      if(stemp.at(0).find("Trigger") != string::npos) {
+	int ntrig = (stemp.at(0).find("1") != string::npos) ? 0 : 1;
+	trigName[ntrig]->push_back(stemp.at(1));
+	trigPlace[ntrig]->push_back(0);
+	continue;
+      }
+	
       char* p;
       strtod(stemp[1].c_str(), &p);
       if(stemp[1] == "1" || stemp[1] == "true") distats[group].bmap[stemp[0]]=true;
@@ -704,31 +715,22 @@ bool Analyzer::passedLooseJetID(int nobj) {
 
 
 ///sees if the event passed one of the two cuts provided
-bool Analyzer::passTriggerCuts(string TriggerN) {
-  
-  if(prevTrig[TriggerN].first >= (int)Trigger_names->size() ||
-     distats["Run"].smap[TriggerN+"FirstRequirement"] != Trigger_names->at(prevTrig[TriggerN].first)) {
+bool Analyzer::passTriggerCuts(vector<int>& prevTrig, const vector<string>& trigvec) {
 
-    prevTrig[TriggerN].first = find_trigger(*Trigger_names, distats["Run"].smap.at(TriggerN+"FirstRequirement"));
+  for(int i = 0; i < (int)trigvec.size(); i++) {
+    if(prevTrig[i] >= (int)Trigger_names->size() || trigvec.at(i) != Trigger_names->at(prevTrig.at(i)) ) {
+      for(int j = 0; j < (int)Trigger_names->size(); j++) {
+	if(Trigger_names->at(j).find(trigvec.at(i)) != string::npos) {
+	  prevTrig.at(i) = j;
+	  break;
+	}
+      }
+    }
+    if(prevTrig.at(i) < (int)Trigger_names->size() && Trigger_decision->at(prevTrig.at(i)) == 1) return true;
   }
-  if(prevTrig[TriggerN].second >= (int)Trigger_names->size() ||
-     distats["Run"].smap[TriggerN+"SecondRequirement"] != Trigger_names->at(prevTrig[TriggerN].second)) {
-
-    prevTrig[TriggerN].second = find_trigger(*Trigger_names, distats["Run"].smap.at(TriggerN+"SecondRequirement"));
-  }     
-  if( (prevTrig[TriggerN].first < (int)Trigger_names->size() && Trigger_decision->at(prevTrig[TriggerN].first) == 1) || 
-	(prevTrig[TriggerN].second < (int)Trigger_names->size() && Trigger_decision->at(prevTrig[TriggerN].second) == 1) ) return true;
-
   return false;
 }
 
-int Analyzer::find_trigger(vector<string>& vNames, string findName) {
-  int i = 0;
-  for(; i < (int)vNames.size(); i++) {
-    if(vNames.at(i).find(findName) != string::npos) return i;
-  }
-  return i;
-}
 
 ////VBF specific cuts dealing with the leading jets.
 void Analyzer::VBFTopologyCut() {

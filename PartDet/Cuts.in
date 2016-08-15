@@ -17,7 +17,7 @@ NRecoJet1	      0   -1
 NRecoJet2	      0   -1
 NRecoCentralJet	      0   -1
 NRecoBJet	      0   -1
-NRecoTriggers1	      0   -1           ///only 0 or 1
+NRecoTriggers1	      1   -1           ///only 0 or 1
 NRecoTriggers2	      0   -1           ///only 0 or 1
 NRecoFirstLeadingJet  0   -1     ///only 0 or 1
 NRecoSecondLeadingJet 0   -1    ///only 0 or 1
