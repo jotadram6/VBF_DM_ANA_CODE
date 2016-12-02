@@ -1,5 +1,5 @@
 obj/*o
-[^PU]*root
+*.root
 *txt
 TODO
 *~
@@ -12,3 +12,7 @@ Particle
 work_svfit
 PartDet/*.in
 *.C
+Plotter_10102016
+Analyze_Grid
+Plotter
+Analyses

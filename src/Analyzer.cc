@@ -289,6 +289,12 @@ void Analyzer::updateMet() {
     if(theMETVector.Pt() < distats["Run"].pmap.at("RecoMetCut").first) return;
     if(theMETVector.Pt() > distats["Run"].pmap.at("RecoMetCut").second) return;
   }
+  /*
+  TLorentzVector ljet2 = _Jet->smearP.at(goodParts[ival(CUTS::eR2ndJet)].at(0));
+  if(distats["Run"].bmap.at("DiscrByDeltaPhiJ2Met")) {
+    if(absnormPhi(ljet2.Phi() - theMETVector.Phi()) < distats["Run"].dmap.at("DeltaPhiJ2MetCut")) return;
+    }*/
+
   if(distats["Run"].bmap.at("DiscrByMHT") && sqrt(pow(sumpxForMht,2) + pow(sumpyForMht,2)) < distats["Run"].dmap.at("MhtCut")) return;
 
   if(distats["Run"].bmap.at("DiscrByHT") && sumptForHt < distats["Run"].dmap.at("HtCut")) return; 
@@ -785,6 +791,10 @@ void Analyzer::VBFTopologyCut() {
   double dphi2 = normPhi(ljet2.Phi() - theMETVector.Phi());
   double r1, r2, alpha;
   
+  /*  if(stats.bmap.at("DiscrByDeltaPhiJ2Met")) {
+    if(absnormPhi(ljet2.Phi() - theMETVector.Phi()) < stats.dmap.at("DeltaPhiJ2MetCut")) return;
+    }*/
+
   if(stats.bmap.at("DiscrByR1")) {
     r1 = sqrt( pow(dphi1,2.0) + pow((TMath::Pi() - dphi2),2.0) );
     if(r1 < stats.pmap.at("R1Cut").first || r1 > stats.pmap.at("R1Cut").second) return;
@@ -876,6 +886,15 @@ double Analyzer::diParticleMass(const TLorentzVector& Tobj1, const TLorentzVecto
     double py = Tobj1.Py() + Tobj2.Py() + theMETVector.Py();
     double pz = Tobj1.Pz() + Tobj2.Pz();
     double e  = Tobj1.Energy() + Tobj2.Energy() + theMETVector.Energy();///TMath::Sqrt(pow(theMETVector.Px(),2) + pow(theMETVector.Py(),2));
+    The_LorentzVect.SetPxPyPzE(px, py, pz, e);
+    return The_LorentzVect.M();
+  }
+
+  if(howCalc == "InvariantMass") {
+    double px = Tobj1.Px() + Tobj2.Px();
+    double py = Tobj1.Py() + Tobj2.Py();
+    double pz = Tobj1.Pz() + Tobj2.Pz();
+    double e  = Tobj1.Energy() + Tobj2.Energy();
     The_LorentzVect.SetPxPyPzE(px, py, pz, e);
     return The_LorentzVect.M();
   }
@@ -1216,6 +1235,8 @@ void Analyzer::fill_Folder(string group, int max) {
       TLorentzVector DiJet = _Jet->smearP.at(goodParts[ival(CUTS::eR1stJet)].at(0)) + _Jet->smearP.at(goodParts[ival(CUTS::eR2ndJet)].at(0));
       histo.addVal(absnormPhi(theMETVector.Phi() - DiJet.Phi()), group,max, "MetDiJetDeltaPhi", wgt);
     }
+    /*    TLorentzVector jet2 = _Jet->smearP.at(goodParts[ival(CUTS::eR2ndJet)].at(0));
+	  histo.addVal(absnormPhi(jet2.Phi() - theMETVector.Phi()), group,max, "DeltaPhiJ2Met", wgt);*/
     
   } else if(group == "FillLeadingJet" && goodParts[ival(CUTS::eSusyCom)].size() == 0) {
     double eta1 = -100, eta2 = -100;
