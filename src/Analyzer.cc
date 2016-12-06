@@ -149,7 +149,7 @@ void Analyzer::preprocess(int event) {
   getGoodRecoJets(CUTS::eR2ndJet, _Jet->pstats["SecondLeadingJet"]);
 
   ////Updates Met and does MET cut
-  updateMet();
+  //updateMet();
 
   /////  SET NUMBER OF RECO MET TOPOLOGY PARTICLES
   getGoodMetTopologyLepton(*_Electron, CUTS::eRElec1, CUTS::eTElec1, _Electron->pstats["Elec1"]);
@@ -158,6 +158,9 @@ void Analyzer::preprocess(int event) {
   getGoodMetTopologyLepton(*_Muon, CUTS::eRMuon2, CUTS::eTMuon2, _Muon->pstats["Muon2"]);
   getGoodMetTopologyLepton(*_Tau, CUTS::eRTau1, CUTS::eTTau1, _Tau->pstats["Tau1"]);
   getGoodMetTopologyLepton(*_Tau, CUTS::eRTau2, CUTS::eTTau2, _Tau->pstats["Tau2"]);
+
+  ////Updates Met and does MET cut
+  updateMet();
 
   ///VBF Susy cut on leadin jets
   if(goodParts[ival(CUTS::eR1stJet)].at(0) != -1 && goodParts[ival(CUTS::eR2ndJet)].at(0) != -1) VBFTopologyCut();
